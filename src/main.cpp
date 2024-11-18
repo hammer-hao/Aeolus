@@ -3,12 +3,15 @@
 // Copyright (c) 2021-2024 Alexander Kurbatov
 
 #include "Bot.h"
+#include "Aeolus.h"
 
 #include <sc2api/sc2_coordinator.h>
 #include <sc2api/sc2_gametypes.h>
 #include <sc2utils/sc2_arg_parser.h>
+#include <sc2renderer/sc2_renderer.h>
 
 #include <iostream>
+#include "constants.h"
 
 #ifdef BUILD_FOR_LADDER
 namespace
@@ -102,17 +105,24 @@ int main(int argc, char* argv[])
     // coordinator.SetFullScreen(true);
 
     // NOTE: Uncomment to play at normal speed.
-    // coordinator.SetRealtime(true);
+    coordinator.SetRealtime(true);
 
-    Bot bot;
+    // Create an Aeodus bot instance
+    Aeolus::AeolusBot aeolus_bot;
+
+    sc2::FeatureLayerSettings settings(Aeolus::constants::CAMERA_WIDTH, Aeolus::constants::FEATURE_LAYER_SIZE, Aeolus::constants::FEATURE_LAYER_SIZE,
+        Aeolus::constants::FEATURE_LAYER_SIZE, Aeolus::constants::FEATURE_LAYER_SIZE);
+
+    coordinator.SetFeatureLayers(settings);
+
     coordinator.SetParticipants(
         {
-            CreateParticipant(sc2::Race::Random, &bot, "BlankBot"),
+            CreateParticipant(sc2::Race::Protoss, &aeolus_bot, "Aeolus"),
             CreateComputer(
                 sc2::Race::Random,
-                sc2::Difficulty::CheatInsane,
-                sc2::AIBuild::Rush,
-                "CheatInsane"
+                sc2::Difficulty::Easy,
+                sc2::AIBuild::Macro,
+                "BOYNEXTDOOR"
                 )
         });
 

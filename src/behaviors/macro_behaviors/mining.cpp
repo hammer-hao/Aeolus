@@ -1,0 +1,93 @@
+#include <iostream>
+#include <unordered_map>
+#include <sc2api/sc2_common.h>
+#include <sc2api/sc2_unit.h>
+#include <sc2api/sc2_interfaces.h>
+#include <sc2api/sc2_action.h>
+
+#include "../../managers/manager_mediator.h"
+#include "../../constants.h"
+
+#include "mining.h"
+#include "../../utils/position_utils.h"
+#include "../../utils/unit_utils.h"
+#include "../../utils/game_utils.h"
+#include "../../Aeolus.h"
+
+namespace Aeolus
+{
+	void Mining::execute(AeolusBot& aeolusbot)
+	{
+		
+		// std::cout << "<<< Mining Behavior: Executing... >>>" << std::endl;
+		::sc2::Units workers = ManagerMediator::getInstance().GetUnitsFromRole(aeolusbot, constants::UnitRole::GATHERING);
+		std::unordered_map<const ::sc2::Unit*, const ::sc2::Unit*> worker_to_patch = ManagerMediator::getInstance().GetWorkersToPatch(aeolusbot);
+
+		m_patch_map = ManagerMediator::getInstance().GetMineralGatheringPoints(aeolusbot);
+
+		m_town_halls = utils::GetOwnedTownHalls(aeolusbot.Observation());
+
+		for (const auto worker : workers)
+		{
+			auto it = worker_to_patch.find(worker);
+			if (it != worker_to_patch.end())
+			{
+				::sc2::Point2D start_location_2d = utils::ConvertTo2D(aeolusbot.Observation()->GetStartLocation());
+				//aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, start_location_2d);
+				//aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, m_patch_map[worker_to_patch[worker]]);
+
+				DoMiningBoost(worker_to_patch[worker], worker, m_patch_map, aeolusbot);
+			}
+		}
+	}
+
+	void Mining::DoMiningBoost(
+		const ::sc2::Unit* patch,
+		const ::sc2::Unit* worker,
+		const std::unordered_map<const ::sc2::Unit*, ::sc2::Point2D> patch_target_map,
+		AeolusBot& aeolusbot)
+	{
+		/*
+		Perform the trick so that worker does not decelerate.
+
+        This avoids worker deceleration when mining by issuing a Move command near a
+        mineral patch/townhall and then issuing a Gather or Return command once the
+        worker is close enough to immediately perform the action instead of issuing a
+        Gather command and letting the SC2 engine manage the worker.
+		
+		*/
+
+		::sc2::Point2D mineral_move_position = m_patch_map[patch];
+		::sc2::Point2D worker_position = utils::ConvertTo2D(worker->pos);
+		const ::sc2::Unit* closest_town_hall = utils::GetClosestUnitTo(utils::ConvertTo2D(worker->pos), m_town_halls);
+
+		if ((utils::IsWorkerCarryingResource(worker) || utils::HasAbilityQueued(worker, ::sc2::ABILITY_ID::HARVEST_RETURN)) && worker->orders.size() < 2)
+		{
+			::sc2::Point2D target_position = utils::GetPositionTowards(
+				utils::ConvertTo2D(closest_town_hall->pos),
+				worker_position,
+				constants::TOWNHALL_DISTANCE_FACTOR * constants::TOWNHALL_RADIUS
+			);
+
+			if ((constants::MINING_BOOST_MIN_RADIUS < ::sc2::DistanceSquared2D(worker_position, target_position))
+				&& (::sc2::DistanceSquared2D(worker_position, target_position)  < constants::MINING_BOOST_MAX_RADIUS))
+			{
+				std::cout << "returning..." << std::endl;
+				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::MOVE_MOVE, target_position);
+				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, closest_town_hall, true);
+			}
+		}
+		else if (!utils::HasAbilityQueued(worker, ::sc2::ABILITY_ID::HARVEST_RETURN) && worker->orders.size() < 2)
+		{
+			if ((constants::MINING_BOOST_MIN_RADIUS < ::sc2::DistanceSquared2D(worker_position, mineral_move_position))
+				&& (::sc2::DistanceSquared2D(worker_position, mineral_move_position) < constants::MINING_BOOST_MAX_RADIUS))
+				// worker is idle
+			{
+				std::cout << ::sc2::DistanceSquared2D(worker_position, mineral_move_position) << std::endl;
+				std::cout << "harvesting..." << std::endl;
+				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::MOVE_MOVE, mineral_move_position);
+				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, patch, true);
+			}
+		}
+	}
+}
