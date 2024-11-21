@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include "Aeolus.h"  // Include the header file
+#include "managers/hub.h"
 
 #include "managers/manager_mediator.h"
 #include "behavior_executor.h"
@@ -37,12 +38,20 @@ namespace Aeolus
         ::sc2::renderer::Initialize("Feature Layers", 50, 50, 2 * constants::DRAW_SIZE, 2 * constants::DRAW_SIZE);
 
         // Initialize resources, strategies, etc.
-        ManagerMediator::getInstance().Populate();
+        Hub manager_hub = Hub(*this);
+        // ManagerMediator::getInstance().Populate(*this);
 
         // register the expansion locations here
         m_expansion_locations = ::sc2::search::CalculateExpansionLocations(Observation(), Query());
 
         ManagerMediator::getInstance().CalculateMineralGatheringPoints(*this, m_expansion_locations);
+
+        ::sc2::Units destructables = ManagerMediator::getInstance().GetAllDestructables(*this);
+
+        std::stringstream debugMessage;
+        debugMessage << "Got Destructables: " << destructables.size();
+        Actions()->SendChat(debugMessage.str());
+
     }
 
     // Game end logic

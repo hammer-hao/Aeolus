@@ -217,7 +217,9 @@ namespace Aeolus
 		// Calculate targets for Move commands towards mineral fields when speed mining.
 		float mining_radius{ constants::MINING_RADIUS };
 
-		::sc2::Units mineral_fields{ GetAllMineralPatches(aeolusbot) };
+		// ::sc2::Units mineral_fields{ GetAllMineralPatches(aeolusbot) };
+
+		::sc2::Units mineral_fields{ ManagerMediator::getInstance().GetAllMineralPatches(aeolusbot) };
 
 		for (auto& mineral_field : mineral_fields)
 		{

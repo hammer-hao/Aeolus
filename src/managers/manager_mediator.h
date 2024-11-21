@@ -147,7 +147,28 @@ namespace Aeolus
 			);
 		}
 
+		::sc2::Units GetAllDestructables(AeolusBot& aeolusbot)
+		{
+			std::cout << "trying to send getall desrtuctables to neutralunitmanager" << std::endl;
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::NEUTRAL_UNIT_MANAGER,
+				constants::ManagerRequestType::GET_ALL_DESTRUCTABLES,
+				0
+			);
+		}
+
+		::sc2::Units GetAllMineralPatches(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::NEUTRAL_UNIT_MANAGER,
+				constants::ManagerRequestType::GET_ALL_MINERAL_PATCHES,
+				0
+			);
+		}
+
 		// populate the managers! 
-		void Populate();
+		// void Populate(AeolusBot&);
 	};
 }

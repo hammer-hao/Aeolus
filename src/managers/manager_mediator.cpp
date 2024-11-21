@@ -1,6 +1,7 @@
 #include "manager_mediator.h"
 #include "resource_manager.h"
 #include "unit_role_manager.h"
+#include "path_manager.h"
 
 
 #include <iostream>
@@ -23,11 +24,16 @@ namespace Aeolus
         managers.clear();
     }
 
-    void ManagerMediator::Populate()
+
+    /*
+     void ManagerMediator::Populate(AeolusBot& aeolusbot)
     {
         std::vector<std::unique_ptr<Manager>> managers;
         managers.push_back(std::make_unique<UnitRoleManager>());
         managers.push_back(std::make_unique<ResourceManager>());
+        managers.push_back(std::make_unique<PathManager>(aeolusbot));
         AddManagers(managers);
-    }
+    }   
+    */
+
 }
