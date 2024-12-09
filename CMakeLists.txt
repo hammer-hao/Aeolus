@@ -17,9 +17,7 @@ elseif (WSL2_CROSS_COMPILE)
                         WSL2_CROSS_COMPILE=ON for WSL only")
 endif ()
 
-project(BlankBot)
-
-include(FetchContent)
+project(Aeolus)
 
 option(BUILD_FOR_LADDER "Create build for the AIArena ladder" OFF)
 
@@ -42,6 +40,12 @@ list(APPEND CMAKE_MODULE_PATH thirdparty/cmake)
 
 # cpp-sc2 dependency
 include(cpp_sc2)
+
+# eigen
+include(eigen)
+
+#sdl
+include(sdl2)
 
 # bot sources
 add_subdirectory(src)

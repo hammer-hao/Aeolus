@@ -9,6 +9,8 @@ set(BUILD_API_TESTS OFF CACHE INTERNAL "" FORCE)
 # Dont build sc2renderer in the sc2api submodule.
 set(BUILD_SC2_RENDERER OFF CACHE INTERNAL "" FORCE)
 
+include(FetchContent)
+
 FetchContent_Declare(
     cpp_sc2
     GIT_REPOSITORY https://github.com/cpp-sc2/cpp-sc2.git
