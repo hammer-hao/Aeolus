@@ -11,6 +11,6 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(sdl2)
 
-# Expose SDL2 include directory and libraries for the parent scope
-set(SDL2_INCLUDE_DIR ${sdl2_SOURCE_DIR}/include PARENT_SCOPE)
-set(SDL2_LIBRARIES SDL2::SDL2 SDL2::SDL2main PARENT_SCOPE)
+# Set global variables
+set(SDL2_INCLUDE_DIR ${sdl2_SOURCE_DIR}/include CACHE INTERNAL "SDL2 include directory")
+set(SDL2_LIBRARIES SDL2::SDL2 SDL2::SDL2main CACHE INTERNAL "SDL2 libraries")

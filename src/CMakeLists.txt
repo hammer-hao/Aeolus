@@ -33,6 +33,7 @@ target_link_libraries(Aeolus PRIVATE eigen)
 if (NOT SDL2_INCLUDE_DIR)
     message(FATAL_ERROR "SDL2 fetch failed: SDL2_INCLUDE_DIR not set.")
 endif ()
+
 target_include_directories(Aeolus PUBLIC ${SDL2_INCLUDE_DIR})
 target_link_libraries(Aeolus PRIVATE ${SDL2_LIBRARIES})
 
