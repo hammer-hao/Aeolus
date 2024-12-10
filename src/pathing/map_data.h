@@ -1,25 +1,19 @@
 #pragma once
 
 #include "grid.h"
-#include "../Aeolus.h"
 #include <sc2api/sc2_map_info.h>
 #include <sc2api/sc2_interfaces.h>
 
 #include <Eigen/Dense>
+#include <map>
 
 namespace Aeolus
 {
-
+	class AeolusBot;
 	class MapData
 	{
 	public:
-		MapData(AeolusBot& aeolusbot)
-			: m_bot(aeolusbot), m_observation(aeolusbot.Observation()),
-			m_pathing_grid(m_observation->GetGameInfo().pathing_grid),
-			m_placing_grid(m_observation->GetGameInfo().placement_grid),
-			m_terrain_map(m_observation->GetGameInfo().terrain_height)
-		{
-		}
+		MapData(AeolusBot& aeolusbot);
 
 		Grid GetAStarGrid(double default_weight = 1, bool include_destructables = true);
 
@@ -27,6 +21,8 @@ namespace Aeolus
 		{
 			_setDefaultGrids();
 		}
+
+		::sc2::ImageData getDefaultGridData();
 
 	private:
 		AeolusBot& m_bot;
@@ -36,6 +32,9 @@ namespace Aeolus
 		Grid m_terrain_map;
 		Grid m_default_grid;
 		Grid m_default_grid_cleaned;
+
+		std::map<::sc2::Point2D, const ::sc2::Unit*> m_destructables_included;
+		std::map<::sc2::Point2D, const ::sc2::Unit*> m_minerals_included;
 
 		void _setDefaultGrids();
 		Grid _addNonPathablesGround(Grid base_grid, bool include_destructables = true);

@@ -75,6 +75,24 @@ namespace Aeolus
 
         Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> GetGrid();
 
+        void SetValue(int x, int y, double value);
+
+        void SetBlockValue(int x_start, int y_start, int width, int height, int val); // Set the value of a block in grid
+
+        double Grid::GetValue(int x, int y);
+
+        int GetWidth()
+        {
+            return m_width;
+        }
+
+        int GetHeight()
+        {
+            return m_height;
+        }
+
+        void FlipValues();
+
 	private:
 		int m_width;
 		int m_height;
