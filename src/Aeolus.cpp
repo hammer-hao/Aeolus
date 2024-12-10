@@ -38,7 +38,7 @@ namespace Aeolus
         ::sc2::renderer::Initialize("Feature Layers", 50, 50, 2 * constants::DRAW_SIZE, 2 * constants::DRAW_SIZE);
 
         // Initialize resources, strategies, etc.
-        Hub manager_hub = Hub(*this);
+        manager_hub_ = Hub(*this);
         // ManagerMediator::getInstance().Populate(*this);
 
         // register the expansion locations here
@@ -52,6 +52,7 @@ namespace Aeolus
         debugMessage << "Got Destructables: " << destructables.size();
         Actions()->SendChat(debugMessage.str());
 
+        ::sc2::ImageData default_grid = ManagerMediator::getInstance().GetDefaultGridData(*this);
     }
 
     // Game end logic
@@ -67,7 +68,10 @@ namespace Aeolus
         //uint32_t game_loop = observation->GetGameLoop();
         BeforeStep();
 
-        const sc2::ImageData& pathing_grid = Observation()->GetGameInfo().pathing_grid;
+        // const sc2::ImageData& pathing_grid = Observation()->GetGameInfo().pathing_grid;
+
+        ::sc2::ImageData pathing_grid = ManagerMediator::getInstance().GetDefaultGridData(*this);
+
         utils::DrawPathingGrid(pathing_grid);
 
         sc2::renderer::Render();
@@ -159,6 +163,7 @@ namespace Aeolus
 
         // Logit to execute before each step begins
         PrepareUnits();
+        manager_hub_.UpdateManagers(Observation()->GetGameLoop());
     }
 
     // Custom AfterStep logic

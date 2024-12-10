@@ -2,6 +2,7 @@
 
 #include <sc2api/sc2_common.h>
 #include "Bot.h"  // Include the base Bot class
+#include "managers/hub.h"
 #include "behavior_executor.h"
 
 namespace Aeolus
@@ -24,6 +25,7 @@ namespace Aeolus
         // Executor for the bot's registered behaviors
         // Aeolus::BehaviorExecutor behavior_executor{};
 
+        Hub manager_hub_;
 
         // Override Bot's methods to implement your custom behavior
         void OnGameStart() final override;

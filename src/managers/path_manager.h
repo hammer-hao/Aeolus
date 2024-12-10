@@ -2,6 +2,7 @@
 
 #include "manager.h"
 #include "../pathing/map_data.h"
+#include "../pathing/grid.h"
 
 namespace Aeolus
 {
@@ -21,12 +22,17 @@ namespace Aeolus
 		std::any ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args) override;
 
 		// Implement the update method.
-		void update(int iteration) override {
-			std::cout << "Updating PathManager at iteration: " << iteration << std::endl;
-			m_mapdata.update();
-		}
+		void update(int iteration) override;
+
+		void AddUnitInfluence(::sc2::Unit* enemy);
 
 	private:
 		MapData m_mapdata;
+
+		Grid m_ground_grid;
+
+		void _addUnitInfluence(::sc2::Unit* unit);
+
+		::sc2::ImageData _getDefaultGridData();
 	};
 }
