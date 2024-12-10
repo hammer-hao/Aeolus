@@ -59,7 +59,7 @@ namespace Aeolus
 			}
 
 			for (const auto& order : unit->orders) {
-				if (order.ability_id == static_cast<int>(ability)) {
+				if (order.ability_id == ability) {
 					return true;
 				}
 			}
