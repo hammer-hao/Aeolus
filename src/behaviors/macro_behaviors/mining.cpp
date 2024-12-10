@@ -72,7 +72,7 @@ namespace Aeolus
 			if ((constants::MINING_BOOST_MIN_RADIUS < ::sc2::DistanceSquared2D(worker_position, target_position))
 				&& (::sc2::DistanceSquared2D(worker_position, target_position)  < constants::MINING_BOOST_MAX_RADIUS))
 			{
-				std::cout << "returning..." << std::endl;
+				// std::cout << "returning..." << std::endl;
 				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::MOVE_MOVE, target_position);
 				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, closest_town_hall, true);
 			}
@@ -83,8 +83,8 @@ namespace Aeolus
 				&& (::sc2::DistanceSquared2D(worker_position, mineral_move_position) < constants::MINING_BOOST_MAX_RADIUS))
 				// worker is idle
 			{
-				std::cout << ::sc2::DistanceSquared2D(worker_position, mineral_move_position) << std::endl;
-				std::cout << "harvesting..." << std::endl;
+				// std::cout << ::sc2::DistanceSquared2D(worker_position, mineral_move_position) << std::endl;
+				// std::cout << "harvesting..." << std::endl;
 				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::MOVE_MOVE, mineral_move_position);
 				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, patch, true);
 			}
