@@ -44,7 +44,7 @@ include(cpp_sc2)
 # eigen
 include(eigen)
 
-#sdl
+# sdl
 include(sdl2)
 
 # bot sources
