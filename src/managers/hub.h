@@ -9,6 +9,8 @@
 #include "path_manager.h"
 #include "resource_manager.h"
 #include "neutral_unit_manager.h"
+#include "unit_filter_manager.h"
+#include "unit_property_manager.h"
 
 namespace Aeolus
 {
@@ -18,6 +20,8 @@ namespace Aeolus
 		// main class for the population and update of 
 		// individual managers
 	public:
+		Hub() = default;
+
 		Hub(AeolusBot& aeolusbot)
 		{
 
@@ -28,37 +32,43 @@ namespace Aeolus
 			managers.push_back(std::make_unique<ResourceManager>());
 			managers.push_back(std::make_unique<NeutralUnitManager>(aeolusbot));
 			managers.push_back(std::make_unique<PathManager>(aeolusbot));
+			managers.push_back(std::make_unique<UnitFilterManager>(aeolusbot));
+			managers.push_back(std::make_unique<UnitPropertyManager>(aeolusbot));
 
 			// Store raw pointers before transferring ownership
 			m_unit_role_manager_ref = static_cast<UnitRoleManager*>(managers[0].get());
 			m_resource_manager_ref = static_cast<ResourceManager*>(managers[1].get());
 			m_neutral_unit_manager_ref = static_cast<NeutralUnitManager*>(managers[2].get());
 			m_path_manager_ref = static_cast<PathManager*>(managers[3].get());
+			m_unit_filter_manager_ref = static_cast<UnitFilterManager*>(managers[4].get());
+			m_unit_property_manager_ref = static_cast<UnitPropertyManager*>(managers[5].get());
 
 			m_managers.push_back(m_unit_role_manager_ref);
 			m_managers.push_back(m_resource_manager_ref);
 			m_managers.push_back(m_neutral_unit_manager_ref);
 			m_managers.push_back(m_path_manager_ref);
+			m_managers.push_back(m_unit_filter_manager_ref);
+			m_managers.push_back(m_unit_property_manager_ref);
 
 			ManagerMediator::getInstance().AddManagers(managers);
 
 			_initializeManagers();
 		}
 
-		void UpdateManagers()
+		void UpdateManagers(int iter)
 		{
 			for (Manager* manager : m_managers)
 			{
 				if (manager)
 				{
-					manager->update(0);
+					manager->update(iter);
 				}
 			}
 		}
 
 		void _initializeManagers()
 		{
-			UpdateManagers();
+			UpdateManagers(0);
 		}
 
 	private:
@@ -69,5 +79,7 @@ namespace Aeolus
 		ResourceManager* m_resource_manager_ref;
 		PathManager* m_path_manager_ref;
 		NeutralUnitManager* m_neutral_unit_manager_ref;
+		UnitFilterManager* m_unit_filter_manager_ref;
+		UnitPropertyManager* m_unit_property_manager_ref;
 	};
 }

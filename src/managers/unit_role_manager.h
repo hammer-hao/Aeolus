@@ -26,7 +26,7 @@ namespace Aeolus {
 
 		// Implement the update method.
 		void update(int iteration) override {
-			std::cout << "Updating UnitRoleManager at iteration: " << iteration << std::endl;
+			// std::cout << "Updating UnitRoleManager at iteration: " << iteration << std::endl;
 		}
 
 	private:

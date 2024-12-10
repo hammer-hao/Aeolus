@@ -9,7 +9,6 @@ namespace Aeolus
 {
 	std::any NeutralUnitManager::ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args)
 	{
-		std::cout << "NeutralUnitManager: recieved request" << std::endl;
 		switch (request)
 		{
 		case constants::ManagerRequestType::GET_ALL_MINERAL_PATCHES:

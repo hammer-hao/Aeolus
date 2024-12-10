@@ -13,7 +13,7 @@ namespace Aeolus
 	{
 
 	public:
-		NeutralUnitManager(AeolusBot& aeolusbot)
+		NeutralUnitManager(AeolusBot& aeolusbot): m_bot(aeolusbot)
 		{
 			std::cout << "Neutral Unit manager initialization" << std::endl;
 
@@ -41,13 +41,20 @@ namespace Aeolus
 
 		// Implement the update method.
 		void update(int iteration) override {
-			std::cout << "Updating UnitRoleManager at iteration: " << iteration << std::endl;
+			// std::cout << "Updating UnitRoleManager at iteration: " << iteration << std::endl;
+			if (iteration % 8 == 1)
+			{
+				// std::cout << "Updating neutral Units" << std::endl;
+				m_neutral_units = _GetNeutralUnits(m_bot);
+			}
 		}
 
 	private:
 		std::map<std::string_view, ::sc2::Units> m_neutral_units;
 
 		std::map<std::string_view, ::sc2::Units> _GetNeutralUnits(AeolusBot& aeolusbot);
+
+		AeolusBot& m_bot;
 	};
 }
 

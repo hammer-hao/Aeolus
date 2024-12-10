@@ -5,6 +5,7 @@
 #include <map>
 
 #include <sc2api/sc2_unit.h>
+#include <sc2api/sc2_map_info.h>
 
 #include "../constants.h"
 #include "manager.h"
@@ -168,7 +169,40 @@ namespace Aeolus
 			);
 		}
 
+		::sc2::Units GetAllVespeneGeysers(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::NEUTRAL_UNIT_MANAGER,
+				constants::ManagerRequestType::GET_ALL_VESPENE_GEYSERS,
+				0
+			);
+		}
+
+		::sc2::Units GetAllStructures(AeolusBot& aeolusbot, ::sc2::Unit::Alliance alliance)
+		{
+			return ManagerRequest<::sc2::Units, ::sc2::Unit::Alliance>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_ALL_STRUCTURES,
+				alliance
+			);
+		}
+
+		::sc2::ImageData GetDefaultGridData(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::ImageData, int>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::GET_DEFAULT_GRID_DATA,
+				0
+			);
+		}
+
+
+
 		// populate the managers! 
 		// void Populate(AeolusBot&);
 	};
 }
+
