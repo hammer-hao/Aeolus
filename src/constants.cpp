@@ -12,6 +12,8 @@ namespace Aeolus {
 			case ManagerName::RESOURCE_MANAGER: return "class Aeolus::ResourceManager";
 			case ManagerName::PATH_MANAGER: return "class Aeolus::PathManager";
 			case ManagerName::NEUTRAL_UNIT_MANAGER: return "class Aeolus::NeutralUnitManager";
+			case ManagerName::UNIT_FILTER_MANAGER: return "class Aeolus::UnitFilterManager";
+			case ManagerName::UNIT_PROPERTY_MANAGER: return "class Aeolus::UnitPropertyManager";
 			default: throw std::invalid_argument("Unknown Manager Name");
 			}
 		}
