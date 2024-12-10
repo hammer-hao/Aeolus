@@ -18,7 +18,7 @@ namespace Aeolus
 	public:
 		std::any ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args) override;
 
-		sc2::Units ResourceManager::GetAllMineralPatches(AeolusBot& aeolusbot);
+		sc2::Units ResourceManager::_getAllMineralPatches(AeolusBot& aeolusbot);
 
 		void AssignWorkerToPatch(const ::sc2::Unit* worker, const ::sc2::Unit* patch);
 
@@ -28,7 +28,7 @@ namespace Aeolus
 
 		// Implement the update method.
 		void update(int iteration) override {
-			std::cout << "Updating UnitRoleManager at iteration: " << iteration << std::endl;
+			// std::cout << "Updating UnitRoleManager at iteration: " << iteration << std::endl;
 		}
 
 	private:

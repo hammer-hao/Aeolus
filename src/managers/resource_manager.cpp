@@ -17,10 +17,6 @@ namespace Aeolus
 
 		switch (request)
 		{
-		case constants::ManagerRequestType::GET_ALL_MINERAL_PATCHES:
-		{
-			return GetAllMineralPatches(aeolusbot);
-		}
 		case constants::ManagerRequestType::ASSIGN_WORKER_TO_PATCH:
 		{
 			auto params = std::any_cast<std::tuple<const ::sc2::Unit*, const::sc2::Unit*>>(args);
@@ -69,27 +65,11 @@ namespace Aeolus
 	}
 
 
-	sc2::Units ResourceManager::GetAllMineralPatches(AeolusBot& aeolusbot) {
-		
-		// Retrieve all visible units
-		const sc2::Units all_units = aeolusbot.Observation()->GetUnits(sc2::Unit::Alliance::Neutral);
+	sc2::Units ResourceManager::_getAllMineralPatches(AeolusBot& aeolusbot) {
 
-		// Filter for mineral fields
-		sc2::Units mineral_patches;
-		for (const auto& unit : all_units) {
-			if (unit->unit_type == sc2::UNIT_TYPEID::NEUTRAL_MINERALFIELD ||
-				unit->unit_type == sc2::UNIT_TYPEID::NEUTRAL_MINERALFIELD450 ||
-				unit->unit_type == sc2::UNIT_TYPEID::NEUTRAL_MINERALFIELD750 ||
-				unit->unit_type == sc2::UNIT_TYPEID::NEUTRAL_LABMINERALFIELD ||
-				unit->unit_type == sc2::UNIT_TYPEID::NEUTRAL_LABMINERALFIELD750 ||
-				unit->unit_type == sc2::UNIT_TYPEID::NEUTRAL_PURIFIERMINERALFIELD ||
-				unit->unit_type == sc2::UNIT_TYPEID::NEUTRAL_PURIFIERMINERALFIELD750 ||
-				unit->unit_type == sc2::UNIT_TYPEID::NEUTRAL_RICHMINERALFIELD ||
-				unit->unit_type == sc2::UNIT_TYPEID::NEUTRAL_RICHMINERALFIELD750) {
-				mineral_patches.push_back(unit);
-			}
-		}
+		::sc2::Units mineral_patches{ ManagerMediator::getInstance().GetAllMineralPatches(aeolusbot) };
 		m_all_minerals = mineral_patches;
+
 		return mineral_patches;
 	}
 
@@ -143,28 +123,6 @@ namespace Aeolus
 
 			const ::sc2::Unit* mineral_patch{ sorted_minerals[i] };
 
-
-			/*
-			// Filter workers that have not been assigned yet, put them into leftover_workers
-			::sc2::Units leftover_workers;
-			std::copy_if
-			(
-				workers.begin(), workers.end(),
-				std::back_inserter(leftover_workers),
-				[&assigned_workers](const ::sc2::Unit* worker)
-				{
-					// if the worker's tag is not in assigned list, we know it is free to be assigned
-					return assigned_workers.find(worker->tag) == assigned_workers.end();
-				}
-			);
-			
-			::sc2::Units sorted_unassigned_workers = utils::SortByDistanceTo
-			(
-				leftover_workers,
-				utils::ConvertTo2D(mineral_patch->pos)
-			);
-			*/
-
 			// Determine how many workers to assign to this mineral patch
 			size_t take = (i < 4) ? 2 : 1;  // First 3 mineral patches get 2 workers, rest get 1
 			// now take = 2 if this mineral patch is close, take = 1 if not
@@ -217,9 +175,7 @@ namespace Aeolus
 		// Calculate targets for Move commands towards mineral fields when speed mining.
 		float mining_radius{ constants::MINING_RADIUS };
 
-		// ::sc2::Units mineral_fields{ GetAllMineralPatches(aeolusbot) };
-
-		::sc2::Units mineral_fields{ ManagerMediator::getInstance().GetAllMineralPatches(aeolusbot) };
+		::sc2::Units mineral_fields{ _getAllMineralPatches(aeolusbot) };
 
 		for (auto& mineral_field : mineral_fields)
 		{
