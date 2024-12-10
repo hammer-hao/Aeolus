@@ -11,7 +11,7 @@ namespace Aeolus
 	namespace utils
 	{
 		void DrawPathingGrid(
-			::sc2::ImageData pathing_grid,
+			const ::sc2::ImageData& pathing_grid,
 			int offset_x = 0,
 			int offset_y = 0
 		);
