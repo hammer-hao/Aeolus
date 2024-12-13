@@ -1,4 +1,4 @@
-# blank-bot
+# Aeolus
 
 [![Build](https://github.com/cpp-sc2/blank-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/cpp-sc2/blank-bot/actions/workflows/ci.yml)
 
@@ -7,8 +7,10 @@ Starter bot for StarCraft II with integrated cpp-sc2.
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
 
-- [blank-bot](#blank-bot)
-    - [Support](#support)
+- [Aeolus](#Aeolus)
+    - [About Aeolus](#about-aeolus)
+        - [Key Features](#key-features)
+        - [Acknowledgements](#acknowledgements)
     - [Build instructions](#build-instructions)
         - [Windows](#windows)
         - [macOS](#macos)
@@ -24,10 +26,35 @@ Starter bot for StarCraft II with integrated cpp-sc2.
     - [License](#license)
 
 <!-- markdown-toc end -->
+## About Aeolus
 
-## Support
+**Aeolus** is a modern StarCraft II bot framework written in C++, inspired by the modular and scalable design principles of [ares-sc2](https://github.com/AresSC2/ares-sc2). Named after the Greek keeper of the winds, Aeolus is built to dominate the dynamic environment of StarCraft II with swift decision-making, strategic precision, and efficient resource management.
 
-Feel free to post questions on the unofficial StarCraft II AI Discord server. [Invite Link](https://discordapp.com/invite/Emm5Ztz)
+### Key Features
+
+- **Behavior-Driven Architecture**  
+  Aeolus employs a behavior executor system to handle core bot actions such as mining, unit production, and combat. This modular approach simplifies development and encourages clean, reusable code.
+
+- **Optimized Resource Management**  
+  Includes a state-of-the-art mineral mining optimization system, assigning workers perfectly at the start to ensure maximum resource collection efficiency.
+
+- **Advanced Unit Handling**  
+  Implements algorithms for unit prioritization, distance sorting, and effective micro-management during combat.
+
+- **Manager Pattern Design**  
+  Core functionalities are structured around a manager pattern, with every manager implementing the `ProcessRequest` interface for consistent, scalable logic.
+
+- **Utility Toolkit**  
+  A comprehensive set of utility functions for common tasks like sorting units by distance, pathfinding, and filtering.
+
+### Acknowledgements
+
+Aeolus draws inspiration from [ares-sc2](https://github.com/davechurchill/ares-sc2), an excellent framework by Dave Churchill. Special thanks to the ares-sc2 project for setting the bar for StarCraft II bot development and serving as a foundation for learning and innovation.
+
+---
+
+Aeolus is designed for developers who want to build high-performance StarCraft II bots, whether to compete, experiment with AI, or simply learn the intricacies of bot programming. With its focus on clean architecture and strategic flexibility, Aeolus is your gateway to StarCraft II automation.
+
 
 ## Build instructions
 
@@ -51,13 +78,13 @@ For building for Windows under WSL2, see [WSL2 Support](#wsl2-support).
 1. Get the project.
 
    ```bat
-   git clone git@github.com:cpp-sc2/blank-bot.git
+   git clone git@github.com:hammer-hao/aeolus.git
    ```
 
 1. Enter the working directory.
 
    ```bat
-   cd blank-bot
+   cd aeolus
    ```
 
 1. Create Visual Studio project files in the directory "build".
@@ -70,13 +97,13 @@ For building for Windows under WSL2, see [WSL2 Support](#wsl2-support).
 1. Build the project using Visual Studio.
 
    ```bat
-   start build\BlankBot.sln
+   start build\Aeolus.sln
    ```
 
 1. Launch the bot with the specified path to a SC2 map, e.g:
 
    ```bat
-   build\bin\Debug\BlankBot.exe Ladder2019Season3/AcropolisLE.SC2Map
+   build\bin\Debug\Aeolus.exe Ladder2019Season3/AcropolisLE.SC2Map
    ```
 
 ### macOS
@@ -90,7 +117,7 @@ For building for Windows under WSL2, see [WSL2 Support](#wsl2-support).
 1. Clone the project.
 
    ```bash
-   git clone git@github.com:cpp-sc2/blank-bot.git && cd blank-bot
+   git clone git@github.com:hammer-hao/aeolus.git && cd Aeolus
    ```
 
 1. Generate CMake build tree.
@@ -108,7 +135,7 @@ For building for Windows under WSL2, see [WSL2 Support](#wsl2-support).
 1. Launch the bot with the specified absolute path to a SC2 map, e.g.:
 
    ```bash
-   ./build/bin/BlankBot "/home/alkurbatov/Ladder2019Season3/AcropolisLE.SC2Map"
+   ./build/bin/Aeolus "/home/alkurbatov/Ladder2019Season3/AcropolisLE.SC2Map"
    ```
 
 ### Linux
@@ -122,7 +149,7 @@ For building for Windows under WSL2, see [WSL2 Support](#wsl2-support).
 1. Get the project.
 
    ```bash
-   git clone git@github.com:cpp-sc2/blank-bot.git && cd blank-bot
+   git clone git@github.com:hammer-hao/aeolus.git && cd aeolus
    ```
 
 1. Generate CMake build tree.
@@ -140,7 +167,7 @@ For building for Windows under WSL2, see [WSL2 Support](#wsl2-support).
 1. Launch the bot with the specified absolute path to a SC2 map, e.g.:
 
    ```bash
-   ./build/bin/BlankBot "/home/alkurbatov/Ladder2019Season3/AcropolisLE.SC2Map"
+   ./build/bin/Aeolus "/home/alkurbatov/Ladder2019Season3/AcropolisLE.SC2Map"
    ```
 
 ## Additional options
@@ -171,7 +198,7 @@ cmake -B build -DBUILD_FOR_LADDER=ON -DSC2_VERSION=4.10.0
 
 ## Managing CMake dependencies
 
-`BlankBot` uses the CMake `FetchContent` module to manage and collect dependencies. To use a version of `cpp-sc2` outside of the pinned commit, modify the `GIT_REPOSITORY` and/or the `GIT_TAG` in `cmake/cpp_sc2.cmake`:
+`Aeolus` uses the CMake `FetchContent` module to manage and collect dependencies including `cpp-sc2`, `eigen`, and `SDL2`. You can also use your own versions of these dependencies. For example, to use a version of `cpp-sc2` outside of the pinned commit, modify the `GIT_REPOSITORY` and/or the `GIT_TAG` in `cmake/cpp_sc2.cmake`:
 ```
 ...
 FetchContent_Declare(
@@ -204,6 +231,5 @@ cmake --build build --parallel $(nproc --ignore=1)
 ```
 
 ## License
-Copyright (c) 2021-2024 Alexander Kurbatov
 
 Licensed under the [MIT license](LICENSE).
