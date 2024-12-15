@@ -14,28 +14,11 @@ on:
 
 env:
   BUILD_TYPE: Release
-  BUILD_DIR: ${{github.workspace}}/build
+  BUILD_DIR: ${{ github.workspace }}/build
 
 jobs:
-  basic_build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Configure
-        run: cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-
-      - name: Build
-        run: cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}} --parallel 2
-
   ladder_build:
-    runs-on: ubuntu-20.04
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v3
@@ -43,7 +26,18 @@ jobs:
           submodules: recursive
 
       - name: Configure
-        run: cmake -B ${{env.BUILD_DIR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_FOR_LADDER=ON -DSC2_VERSION=4.10.0
+        run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DBUILD_FOR_LADDER=ON
 
       - name: Build
-        run: cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}} --parallel 2
+        run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} --parallel 2
+
+      - name: Archive Executable
+        run: |
+          mkdir -p artifacts
+          copy "${{ env.BUILD_DIR }}\bin\Release\Aeolus.exe" "artifacts\Aeolus.exe"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Aeolus
+          path: artifacts/Aeolus.exe
