@@ -134,6 +134,7 @@ namespace Aeolus
 	::sc2::ImageData MapData::getDefaultGridData()
 	{
 		// return utils::To8BPPImageData(m_default_grid, 1);
-		return utils::To8BPPImageData(GetAStarGrid(), 1);
+		Grid grid = GetAStarGrid();
+		return utils::To8BPPImageData(grid, 1);
 	}
 }
