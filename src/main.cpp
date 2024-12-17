@@ -90,10 +90,6 @@ int main(int argc, char* argv[])
     sc2::Coordinator coordinator;
     Aeolus::AeolusBot aeolus_bot;
 
-    // Set feature layers before connecting
-    sc2::FeatureLayerSettings settings;
-    coordinator.SetFeatureLayers(settings);
-
     size_t num_agents = 2;
     coordinator.SetParticipants({ CreateParticipant(sc2::Race::Protoss, &aeolus_bot, "Aeolus") });
 
