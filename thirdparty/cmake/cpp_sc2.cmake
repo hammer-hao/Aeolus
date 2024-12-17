@@ -14,7 +14,7 @@ include(FetchContent)
 FetchContent_Declare(
     cpp_sc2
     GIT_REPOSITORY https://github.com/cpp-sc2/cpp-sc2.git
-    GIT_TAG 5bc693e61945f99354fda448b83694421d3e3023
+    GIT_TAG 8bc55a936417107d9200ebd80ed7c565633bbb9e
 )
 FetchContent_MakeAvailable(cpp_sc2)
 
