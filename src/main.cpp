@@ -63,10 +63,10 @@ int main(int argc, char* argv[])
     ParseArguments(argc, argv, &options);
 
     sc2::Coordinator coordinator;
-    Bot bot;
+    Aeolus::AeolusBot aeolus_bot;
 
     size_t num_agents = 2;
-    coordinator.SetParticipants({ CreateParticipant(sc2::Race::Random, &bot, "BlankBot") });
+    coordinator.SetParticipants({ CreateParticipant(sc2::Race::Protoss, &aeolus_bot, "Aeolus") });
 
     std::cout << "Connecting to port " << options.GamePort << std::endl;
     coordinator.Connect(options.GamePort);
