@@ -40,19 +40,44 @@ void ParseArguments(int argc, char* argv[], Options* options_)
 
     arg_parser.Parse(argc, argv);
 
+    // GamePort
     std::string GamePortStr;
-    if (arg_parser.Get("GamePort", GamePortStr))
+    if (arg_parser.Get("GamePort", GamePortStr)) {
         options_->GamePort = atoi(GamePortStr.c_str());
+        std::cout << "GamePort: " << options_->GamePort << std::endl;
+    }
+    else {
+        std::cout << "GamePort not provided or invalid. Using default value: " << options_->GamePort << std::endl;
+    }
 
+    // StartPort
     std::string StartPortStr;
-    if (arg_parser.Get("StartPort", StartPortStr))
+    if (arg_parser.Get("StartPort", StartPortStr)) {
         options_->StartPort = atoi(StartPortStr.c_str());
+        std::cout << "StartPort: " << options_->StartPort << std::endl;
+    }
+    else {
+        std::cout << "StartPort not provided or invalid. Using default value: " << options_->StartPort << std::endl;
+    }
 
+    // OpponentId
     std::string OpponentId;
-    if (arg_parser.Get("OpponentId", OpponentId))
+    if (arg_parser.Get("OpponentId", OpponentId)) {
         options_->OpponentId = OpponentId;
+        std::cout << "OpponentId: " << options_->OpponentId << std::endl;
+    }
+    else {
+        std::cout << "OpponentId not provided. Defaulting to empty string." << std::endl;
+    }
 
-    arg_parser.Get("LadderServer", options_->ServerAddress);
+    // LadderServer
+    if (arg_parser.Get("LadderServer", options_->ServerAddress)) {
+        std::cout << "LadderServer: " << options_->ServerAddress << std::endl;
+    }
+    else {
+        std::cout << "LadderServer not provided. Defaulting to empty string." << std::endl;
+    }
+
 }
 
 }  // namespace
@@ -65,11 +90,20 @@ int main(int argc, char* argv[])
     sc2::Coordinator coordinator;
     Aeolus::AeolusBot aeolus_bot;
 
+    // Set feature layers before connecting
+    sc2::FeatureLayerSettings settings;
+    coordinator.SetFeatureLayers(settings);
+
     size_t num_agents = 2;
     coordinator.SetParticipants({ CreateParticipant(sc2::Race::Protoss, &aeolus_bot, "Aeolus") });
 
     std::cout << "Connecting to port " << options.GamePort << std::endl;
-    coordinator.Connect(options.GamePort);
+
+    std::cout << "Connecting to SC2 Client..." << std::endl;
+    bool success = coordinator.Connect(options.GamePort);
+    if (!success) {
+        std::cerr << "Connection to SC2 failed!" << std::endl;
+    }
     coordinator.SetupPorts(num_agents, options.StartPort, false);
 
     // NB (alkurbatov): Increase speed of steps processing.
