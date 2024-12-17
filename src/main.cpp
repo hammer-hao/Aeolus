@@ -100,10 +100,7 @@ int main(int argc, char* argv[])
     std::cout << "Connecting to port " << options.GamePort << std::endl;
 
     std::cout << "Connecting to SC2 Client..." << std::endl;
-    bool success = coordinator.Connect(options.GamePort);
-    if (!success) {
-        std::cerr << "Connection to SC2 failed!" << std::endl;
-    }
+    coordinator.Connect(options.GamePort);
     coordinator.SetupPorts(num_agents, options.StartPort, false);
 
     // NB (alkurbatov): Increase speed of steps processing.
