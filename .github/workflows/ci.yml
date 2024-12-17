@@ -18,12 +18,17 @@ env:
 
 jobs:
   ladder_build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ libprotobuf-dev protobuf-compiler libsdl2-dev
 
       - name: Configure
         run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DBUILD_FOR_LADDER=ON -DBUILD_WITH_RENDERER=OFF -DSC2_VERSION="4.10.0"
@@ -34,10 +39,10 @@ jobs:
       - name: Archive Executable
         run: |
           mkdir -p artifacts
-          copy "${{ env.BUILD_DIR }}\bin\Release\Aeolus.exe" "artifacts\Aeolus.exe"
+          cp "${{ env.BUILD_DIR }}/bin/Aeolus" artifacts/Aeolus
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
           name: Aeolus
-          path: artifacts/Aeolus.exe
+          path: artifacts/Aeolus
