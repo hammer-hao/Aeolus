@@ -101,13 +101,18 @@ int main(int argc, char* argv[])
 
     std::cout << "Connecting to SC2 Client..." << std::endl;
     coordinator.Connect(options.GamePort);
+    std::cout << "Connected to SC2 Client! " << std::endl;
+
+    std::cout << "Setting up ports... " << std::endl;
     coordinator.SetupPorts(num_agents, options.StartPort, false);
+    std::cout << "Port setup completed! " << std::endl;
 
     // NB (alkurbatov): Increase speed of steps processing.
     // Disables ability to control your bot during game.
     // Recommended for competitions.
     coordinator.SetRawAffectsSelection(true);
 
+    std::cout << "Joining game..." << std::endl;
     coordinator.JoinGame();
     coordinator.SetTimeoutMS(10000);
     std::cout << "Successfully joined game" << std::endl;
