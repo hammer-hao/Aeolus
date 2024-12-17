@@ -44,8 +44,14 @@ include(cpp_sc2)
 # eigen
 include(eigen)
 
-# sdl
-include(sdl2)
+option(BUILD_WITH_RENDERER ON)
+
+if (BUILD_FOR_LADDER)
+    option(BUILD_WITH_RENDERER OFF)
+elseif (BUILD_WITH_RENDERER)
+    # sdl
+    include(sdl2)
+endif ()
 
 # bot sources
 add_subdirectory(src)

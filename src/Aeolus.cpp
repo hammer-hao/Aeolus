@@ -5,7 +5,6 @@
 #include <sc2api/sc2_interfaces.h>
 #include <sc2api/sc2_action.h>
 #include <sc2lib/sc2_search.h>
-#include <sc2renderer/sc2_renderer.h>
 
 #include <iostream>
 
@@ -15,7 +14,14 @@
 #include "managers/manager_mediator.h"
 #include "behavior_executor.h"
 #include "behaviors/macro_behaviors/mining.h"
+
+#ifdef BUILD_WITH_RENDERER
+
 #include "utils/feature_layer_utils.h"
+#include <sc2renderer/sc2_renderer.h>
+
+#endif // BUILD_WITH_RENDERER
+
 
 namespace Aeolus
 {
@@ -35,7 +41,9 @@ namespace Aeolus
         std::cout << "Aeolus: Game started!" << std::endl;
 
         //initialize feature layer
+        #ifdef BUILD_WITH_RENDERER
         ::sc2::renderer::Initialize("Feature Layers", 50, 50, 2 * constants::DRAW_SIZE, 2 * constants::DRAW_SIZE);
+        #endif
 
         // Initialize resources, strategies, etc.
         manager_hub_ = Hub(*this);
@@ -68,13 +76,15 @@ namespace Aeolus
         //uint32_t game_loop = observation->GetGameLoop();
         BeforeStep();
 
-        // const sc2::ImageData& pathing_grid = Observation()->GetGameInfo().pathing_grid;
-
+        #ifdef BUILD_WITH_RENDERER
+        
         ::sc2::ImageData pathing_grid = ManagerMediator::getInstance().GetDefaultGridData(*this);
 
         utils::DrawPathingGrid(pathing_grid);
 
         sc2::renderer::Render();
+        
+        #endif
 
         // std::cout << "Aeolus: Taking a step..." << std::endl;
         Macro();

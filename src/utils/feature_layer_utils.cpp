@@ -1,3 +1,5 @@
+#ifdef BUILD_WITH_RENDERER
+
 #include "feature_layer_utils.h"
 #include <sc2renderer/sc2_renderer.h>
 
@@ -26,3 +28,5 @@ namespace Aeolus
 		}
 	}
 }
+
+#endif

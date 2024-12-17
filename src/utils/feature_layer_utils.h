@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef BUILD_WITH_RENDERER
+
 #include "sc2api/sc2_api.h"
 #include <sc2renderer/sc2_renderer.h>
 #include "sc2utils/sc2_manage_process.h"
@@ -17,3 +19,5 @@ namespace Aeolus
 		);
 	}
 }
+
+#endif // 

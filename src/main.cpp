@@ -8,7 +8,6 @@
 #include <sc2api/sc2_coordinator.h>
 #include <sc2api/sc2_gametypes.h>
 #include <sc2utils/sc2_arg_parser.h>
-#include <sc2renderer/sc2_renderer.h>
 
 #include <iostream>
 #include "constants.h"
@@ -89,6 +88,8 @@ int main(int argc, char* argv[])
 }
 
 #else
+
+#include <sc2renderer/sc2_renderer.h>
 
 int main(int argc, char* argv[])
 {

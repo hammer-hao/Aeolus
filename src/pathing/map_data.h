@@ -6,9 +6,11 @@
 
 #include <Eigen/Dense>
 #include <map>
+#include <tuple>
 
 namespace Aeolus
 {
+
 	class AeolusBot;
 	class MapData
 	{
@@ -33,8 +35,8 @@ namespace Aeolus
 		Grid m_default_grid;
 		Grid m_default_grid_cleaned;
 
-		std::map<::sc2::Point2D, const ::sc2::Unit*> m_destructables_included;
-		std::map<::sc2::Point2D, const ::sc2::Unit*> m_minerals_included;
+		std::map<std::tuple<float, float>, const ::sc2::Unit*> m_destructables_included;
+		std::map<std::tuple<float, float>, const ::sc2::Unit*> m_minerals_included;
 
 		void _setDefaultGrids();
 		Grid _addNonPathablesGround(Grid base_grid, bool include_destructables = true);

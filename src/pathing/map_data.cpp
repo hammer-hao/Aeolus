@@ -4,6 +4,7 @@
 #include "../utils/unit_utils.h"
 #include "../Aeolus.h"
 #include "../managers/manager_mediator.h"
+#include <tuple>
 
 namespace Aeolus
 {
@@ -27,14 +28,16 @@ namespace Aeolus
 		for (auto& destructable : destructables)
 		{
 			// cleaning all destructable rocks
-			m_destructables_included[utils::ConvertTo2D(destructable->pos)] = destructable;
+			::sc2::Point2D destructable_pos = ::sc2::Point2D(destructable->pos);
+			m_destructables_included[std::make_tuple(destructable_pos.x, destructable_pos.y)] = destructable;
 			utils::SetDestructableStatus(m_default_grid, destructable, pathable);
 		}
 
 		for (auto& mineral : ManagerMediator::getInstance().GetAllMineralPatches(m_bot))
 		{
 			// cleaning all mineral fields
-			m_minerals_included[utils::ConvertTo2D(mineral->pos)] = mineral;
+			::sc2::Point2D mineral_pos = ::sc2::Point2D(mineral->pos);
+			m_minerals_included[std::make_tuple(mineral_pos.x, mineral_pos.y)] = mineral;
 			int x_1 = static_cast<int>(mineral->pos.x);
 			int x_2 = x_1 - 1;
 			int y = static_cast<int>(mineral->pos.y);
@@ -97,19 +100,20 @@ namespace Aeolus
 			std::stringstream debugMessage;
 			debugMessage << "Detected Mineral change!";
 			m_bot.Actions()->SendChat(debugMessage.str());
-			std::set<::sc2::Point2D> current_minerals;
+			std::set<std::tuple<float, float>> current_minerals;
 			for (auto& mineral : ManagerMediator::getInstance().GetAllMineralPatches(m_bot))
 			{
-				current_minerals.insert(utils::ConvertTo2D(mineral->pos));
+				::sc2::Point2D mineral_pos = ::sc2::Point2D(mineral->pos);
+				current_minerals.insert(std::make_tuple(mineral_pos.x, mineral_pos.y));
 			}
 			auto it = m_minerals_included.begin();
 			while (it != m_minerals_included.end())
 			{
 				if (current_minerals.find(it->first) == current_minerals.end())
 				{
-					int x_1 = static_cast<int>(it->first.x);
+					int x_1 = static_cast<int>(std::get<0>(it->first));
 					int x_2 = x_1 - 1;
-					int y = static_cast<int>(it->first.y);
+					int y = static_cast<int>(std::get<1>(it->first));
 
 					base_grid.SetValue(x_1, y, pathable);
 					base_grid.SetValue(x_2, y, pathable);
