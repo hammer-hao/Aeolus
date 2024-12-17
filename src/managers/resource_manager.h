@@ -18,7 +18,7 @@ namespace Aeolus
 	public:
 		std::any ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args) override;
 
-		sc2::Units ResourceManager::_getAllMineralPatches(AeolusBot& aeolusbot);
+		sc2::Units _getAllMineralPatches(AeolusBot& aeolusbot);
 
 		void AssignWorkerToPatch(const ::sc2::Unit* worker, const ::sc2::Unit* patch);
 

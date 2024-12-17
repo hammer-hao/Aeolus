@@ -79,7 +79,7 @@ namespace Aeolus
 
         void SetBlockValue(int x_start, int y_start, int width, int height, int val); // Set the value of a block in grid
 
-        double Grid::GetValue(int x, int y);
+        double GetValue(int x, int y);
 
         int GetWidth()
         {
