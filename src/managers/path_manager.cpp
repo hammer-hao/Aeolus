@@ -7,7 +7,6 @@ namespace Aeolus
 {
 	void PathManager::update(int iteration)
 	{
-		std::cout << "Updating PathManager at iteration: " << iteration << std::endl;
 		if (iteration == 0) m_mapdata.update();
 
 	}
