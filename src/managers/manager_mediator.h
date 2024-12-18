@@ -150,7 +150,7 @@ namespace Aeolus
 
 		::sc2::Units GetAllDestructables(AeolusBot& aeolusbot)
 		{
-			std::cout << "trying to send getall desrtuctables to neutralunitmanager" << std::endl;
+			std::cout << "trying to send get all desrtuctables to neutralunitmanager" << std::endl;
 			return ManagerRequest<::sc2::Units, int>(
 				aeolusbot,
 				constants::ManagerName::NEUTRAL_UNIT_MANAGER,

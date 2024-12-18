@@ -21,6 +21,8 @@ namespace Aeolus
 		m_default_grid = Grid(m_pathing_grid.GetGrid().cwiseMax(m_placing_grid.GetGrid()));
 		// m_default_grid.FlipValues();
 
+		std::cout << "Mapdata: Getting all destructables" << std::endl;
+
 		::sc2::Units destructables = ManagerMediator::getInstance().GetAllDestructables(m_bot);
 
 		int pathable = 1, non_pathable = 0;

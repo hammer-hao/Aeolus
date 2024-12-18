@@ -8,6 +8,7 @@ namespace Aeolus
 	UnitPropertyManager::UnitPropertyManager(AeolusBot& aeolusbot) :
 		m_bot(aeolusbot)
 	{
+		std::cout << "Neutral Property manager initialization" << std::endl;
 	}
 
 	void UnitPropertyManager::update(int iteration)

@@ -10,7 +10,10 @@ namespace Aeolus
 	class UnitFilterManager : public Manager
 	{
 	public:
-		UnitFilterManager(AeolusBot& aeolusbot) {}
+		UnitFilterManager(AeolusBot& aeolusbot) 
+		{
+			std::cout << "Unit filter manager initialization" << std::endl;
+		}
 
 		std::any ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args) override;
 
