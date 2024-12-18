@@ -22,6 +22,11 @@ namespace Aeolus
 			std::cout << "Neutral Unit manager initialization complete" << std::endl;
 		}
 
+		std::string_view GetName() const override {
+			static const std::string name = "NeutralUnitManager";
+			return name;
+		}
+
 		std::any ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args) override;
 
 		::sc2::Units GetAllMineralPatches()

@@ -18,7 +18,7 @@ namespace Aeolus
     {
         for (auto& manager : managers)
         {
-            std::string manager_name{ typeid(*manager).name() };
+            std::string manager_name{ manager->GetName()};
             std::cout << "Manager mediator initialization: added " << manager_name << " to manager mediator " << std::endl;
             m_managers[manager_name] = std::move(manager);
         }

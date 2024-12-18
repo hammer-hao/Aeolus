@@ -14,6 +14,8 @@ namespace Aeolus
 	public:
 
 		Manager() = default;
+
+		virtual std::string_view GetName() const = 0;
 		
 		virtual void initialise()
 		{

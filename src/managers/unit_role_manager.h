@@ -12,6 +12,11 @@ namespace Aeolus {
 	public:
 		std::any ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args) override;
 
+		std::string_view GetName() const override {
+			static const std::string name = "UnitRoleManager";
+			return name;
+		}
+
 		// member function to assign a role to a unit
 		void AssignRole(const ::sc2::Unit* unit, constants::UnitRole unitrole);
 

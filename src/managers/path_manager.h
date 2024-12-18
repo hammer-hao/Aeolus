@@ -19,6 +19,11 @@ namespace Aeolus
 			std::cout << "Path manager initialization at address: " << this << std::endl;
 		}
 
+		std::string_view GetName() const override {
+			static const std::string name = "PathManager";
+			return name;
+		}
+
 		std::any ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args) override;
 
 		// Implement the update method.

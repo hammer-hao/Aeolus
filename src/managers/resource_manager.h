@@ -16,6 +16,11 @@ namespace Aeolus
 	class ResourceManager : public Manager
 	{
 	public:
+		std::string_view GetName() const override {
+			static const std::string name = "ResourceManager";
+			return name;
+		}
+
 		std::any ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args) override;
 
 		sc2::Units _getAllMineralPatches(AeolusBot& aeolusbot);

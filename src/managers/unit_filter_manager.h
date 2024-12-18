@@ -15,6 +15,11 @@ namespace Aeolus
 			std::cout << "Unit filter manager initialization" << std::endl;
 		}
 
+		std::string_view GetName() const override {
+			static const std::string name = "UnitFilterManager";
+			return name;
+		}
+
 		std::any ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args) override;
 
 		// Implement the update method.

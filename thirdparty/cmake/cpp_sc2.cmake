@@ -13,8 +13,8 @@ include(FetchContent)
 
 FetchContent_Declare(
     cpp_sc2
-    GIT_REPOSITORY https://github.com/cpp-sc2/cpp-sc2.git
-    GIT_TAG f4e8761ee6346c95aa0253d458df241631a4e778
+    GIT_REPOSITORY https://github.com/hammer-hao/cpp-sc2.git
+    GIT_TAG 9a46a03a08870221e20cc808fea866195ad14d6c
 )
 FetchContent_MakeAvailable(cpp_sc2)
 

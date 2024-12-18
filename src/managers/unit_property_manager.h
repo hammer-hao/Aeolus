@@ -15,6 +15,11 @@ namespace Aeolus
 	public:
 		UnitPropertyManager(AeolusBot& aeolusbot);
 
+		std::string_view GetName() const override {
+			static const std::string name = "UnitPropertyManager";
+			return name;
+		}
+
 		std::any ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args) override;
 
 		void update(int iteration) override;
