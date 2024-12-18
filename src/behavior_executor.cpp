@@ -23,13 +23,18 @@ namespace Aeolus
 	{
 		behaviors.push_back(std::move(behavior));
 	}
-	void BehaviorExecutor::ExecuteBehaviors(AeolusBot& aeolusbot)
-	{
-		// std::cout << "Aeolus: Executing all behaviors!!" << std::endl;
-		for (const auto& behavior : behaviors)
-		{
-			behavior->execute(aeolusbot);
+	void BehaviorExecutor::ExecuteBehaviors(AeolusBot& bot) {
+		if (behaviors.empty()) {
+			std::cout << "Behavior executor: No behaviors to execute." << std::endl;
+			return;
 		}
-		behaviors.clear();
+
+		for (const auto& behavior : behaviors) {
+			if (!behavior) {
+				std::cerr << "Behavior executor: Encountered a null behavior!" << std::endl;
+				continue;
+			}
+			behavior->execute(bot); // Ensure this call does not throw exceptions.
+		}
 	}
 }

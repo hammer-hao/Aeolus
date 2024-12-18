@@ -104,7 +104,8 @@ namespace Aeolus
 		std::cout << "*** Initial worker assignment in process... ***" << std::endl;
 		// assigned workers keeps a list of workers already assigned to mineral patch
 		std::set<::sc2::Tag> assigned_workers;
-
+		
+		#ifdef BUILD_WITH_RENDERER
 		auto* debug = aeolusbot.Debug();
 
 		// Assuming sorted_minerals is a vector of mineral patch pointers
@@ -115,6 +116,7 @@ namespace Aeolus
 
 		debug->DebugSphereOut(aeolusbot.Observation()->GetStartLocation(), 3.0, sc2::Colors::Red);
 		debug->SendDebug();
+		#endif
 
 		// Send all the debug commands at once
 
