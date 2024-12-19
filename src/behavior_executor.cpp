@@ -34,7 +34,23 @@ namespace Aeolus
 				std::cerr << "Behavior executor: Encountered a null behavior!" << std::endl;
 				continue;
 			}
-			behavior->execute(bot); // Ensure this call does not throw exceptions.
+			try {
+				behavior->execute(bot);
+			}
+			catch (const std::exception& e) {
+				std::cerr << "Behavior executor: Exception during behavior execution: " << e.what() << std::endl;
+			}
+			catch (...) {
+				std::cerr << "Behavior executor: Unknown exception during behavior execution!" << std::endl;
+			}
+
+			// Cleanup all behaviors after execution
+			for (auto& behavior : behaviors) {
+				behavior.reset(); // Explicitly destroy each behavior
+			}
+
+			behaviors.clear(); // Clear the list of unique_ptrs
+
 		}
 	}
 }
