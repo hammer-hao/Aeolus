@@ -41,7 +41,7 @@ namespace Aeolus
 		void DoMiningBoost(
 			const ::sc2::Unit* patch, 
 			const ::sc2::Unit* worker,
-			const std::unordered_map<const ::sc2::Unit*, ::sc2::Point2D> patch_target_map,
+			const std::unordered_map<const ::sc2::Unit*, ::sc2::Point2D>& patch_target_map,
 			AeolusBot& aeolusbot
 			);
 

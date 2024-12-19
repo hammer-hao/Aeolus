@@ -19,7 +19,7 @@ namespace Aeolus
 	void Mining::execute(AeolusBot& aeolusbot)
 	{
 		
-		// std::cout << "<<< Mining Behavior: Executing... >>>" << std::endl;
+		std::cout << "<<< Mining Behavior: Executing... >>>" << std::endl;
 		::sc2::Units workers = ManagerMediator::getInstance().GetUnitsFromRole(aeolusbot, constants::UnitRole::GATHERING);
 		std::unordered_map<const ::sc2::Unit*, const ::sc2::Unit*> worker_to_patch = ManagerMediator::getInstance().GetWorkersToPatch(aeolusbot);
 
@@ -44,7 +44,7 @@ namespace Aeolus
 	void Mining::DoMiningBoost(
 		const ::sc2::Unit* patch,
 		const ::sc2::Unit* worker,
-		const std::unordered_map<const ::sc2::Unit*, ::sc2::Point2D> patch_target_map,
+		const std::unordered_map<const ::sc2::Unit*, ::sc2::Point2D>& patch_target_map,
 		AeolusBot& aeolusbot)
 	{
 		/*
@@ -56,6 +56,7 @@ namespace Aeolus
         Gather command and letting the SC2 engine manage the worker.
 		
 		*/
+		std::cout << "Doing mining boost..." << std::endl;
 
 		::sc2::Point2D mineral_move_position = m_patch_map[patch];
 		::sc2::Point2D worker_position = utils::ConvertTo2D(worker->pos);
@@ -68,6 +69,10 @@ namespace Aeolus
 				worker_position,
 				constants::TOWNHALL_DISTANCE_FACTOR * constants::TOWNHALL_RADIUS
 			);
+
+			for (const auto& order : worker->orders) {
+				std::cout << "Order: " << static_cast<int>(order.ability_id) << std::endl;
+			}
 
 			if ((constants::MINING_BOOST_MIN_RADIUS < ::sc2::DistanceSquared2D(worker_position, target_position))
 				&& (::sc2::DistanceSquared2D(worker_position, target_position)  < constants::MINING_BOOST_MAX_RADIUS))
@@ -83,11 +88,18 @@ namespace Aeolus
 				&& (::sc2::DistanceSquared2D(worker_position, mineral_move_position) < constants::MINING_BOOST_MAX_RADIUS))
 				// worker is idle
 			{
+				for (const auto& order : worker->orders) {
+					std::cout << "Order: " << static_cast<int>(order.ability_id) << std::endl;
+				}
 				// std::cout << ::sc2::DistanceSquared2D(worker_position, mineral_move_position) << std::endl;
 				// std::cout << "harvesting..." << std::endl;
 				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::MOVE_MOVE, mineral_move_position);
 				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, patch, true);
 			}
+		}
+
+		for (const auto& order : worker->orders) {
+			std::cout << "New order: " << static_cast<int>(order.ability_id) << std::endl;
 		}
 	}
 }
