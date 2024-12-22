@@ -18,7 +18,6 @@ source_group("Header Files\\behaviors\\macro_behaviors" FILES behaviors/macro_be
 source_group("Source Files\\Managers" FILES 
     managers/hub.cpp
     managers/manager_mediator.cpp
-    managers/neutral_unit_manager.cpp
     managers/path_manager.cpp
     managers/resource_manager.cpp
     managers/unit_filter_manager.cpp
@@ -29,7 +28,6 @@ source_group("Header Files\\Managers" FILES
     managers/hub.h
     managers/manager.h
     managers/manager_mediator.h
-    managers/neutral_unit_manager.h
     managers/path_manager.h
     managers/resource_manager.h
     managers/unit_filter_manager.h
@@ -68,7 +66,6 @@ set(bot_sources
     behaviors/macro_behaviors/mining.cpp
     managers/hub.cpp
     managers/manager_mediator.cpp
-    managers/neutral_unit_manager.cpp
     managers/path_manager.cpp
     managers/resource_manager.cpp
     managers/unit_filter_manager.cpp
@@ -92,7 +89,6 @@ set(bot_headers
     managers/hub.h
     managers/manager.h
     managers/manager_mediator.h
-    managers/neutral_unit_manager.h
     managers/path_manager.h
     managers/resource_manager.h
     managers/unit_filter_manager.h
