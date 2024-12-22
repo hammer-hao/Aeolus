@@ -14,7 +14,7 @@ namespace Aeolus
 	public:
 		// constructor will take AeolusBot object reference
 		PathManager(AeolusBot& aeolusbot)
-			: m_mapdata(aeolusbot) 
+			: m_mapdata(aeolusbot), m_bot(aeolusbot)
 		{
 			std::cout << "Path manager initialization at address: " << this << std::endl;
 		}
@@ -36,7 +36,11 @@ namespace Aeolus
 
 		Grid m_ground_grid;
 
+		Grid m_cached_ground_grid;
+
 		void _addUnitInfluence(::sc2::Unit* unit);
+
+		AeolusBot& m_bot;
 
 		::sc2::ImageData _getDefaultGridData();
 	};
