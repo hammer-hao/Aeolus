@@ -199,7 +199,44 @@ namespace Aeolus
 			);
 		}
 
+		// UnitPropertyManager
 
+		bool CanAttackGround(AeolusBot& aeolusbot, ::sc2::Unit* unit)
+		{
+			return ManagerRequest<bool, ::sc2::Unit*>(
+				aeolusbot,
+				constants::ManagerName::UNIT_PROPERTY_MANAGER,
+				constants::ManagerRequestType::CAN_ATTACK_GROUND,
+				unit
+			);
+		}
+		bool CanAttackAir(AeolusBot& aeolusbot, ::sc2::Unit* unit)
+		{
+			return ManagerRequest<bool, ::sc2::Unit*>(
+				aeolusbot,
+				constants::ManagerName::UNIT_PROPERTY_MANAGER,
+				constants::ManagerRequestType::CAN_ATTACK_AIR,
+				unit
+			);
+		}
+		double GroundRange(AeolusBot& aeolusbot, ::sc2::Unit* unit)
+		{
+			return ManagerRequest<double, ::sc2::Unit*>(
+				aeolusbot,
+				constants::ManagerName::UNIT_PROPERTY_MANAGER,
+				constants::ManagerRequestType::GROUND_RANGE,
+				unit
+			);
+		}
+		double AirRange(AeolusBot& aeolusbot, ::sc2::Unit* unit)
+		{
+			return ManagerRequest<double, ::sc2::Unit*>(
+				aeolusbot,
+				constants::ManagerName::UNIT_PROPERTY_MANAGER,
+				constants::ManagerRequestType::AIR_RANGE,
+				unit
+			);
+		}
 
 		// populate the managers! 
 		// void Populate(AeolusBot&);

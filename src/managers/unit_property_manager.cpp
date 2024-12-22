@@ -30,6 +30,35 @@ namespace Aeolus
 
 	std::any UnitPropertyManager::ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args)
 	{
+		switch (request)
+		{
+		case constants::ManagerRequestType::CAN_ATTACK_GROUND:
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Unit*>>(args);
+			::sc2::Unit* unit = std::get<0>(params);
+			return CanAttackGround(unit);
+		}
+		case constants::ManagerRequestType::CAN_ATTACK_AIR:
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Unit*>>(args);
+			::sc2::Unit* unit = std::get<0>(params);
+			return CanAttackAir(unit);
+		}
+		case constants::ManagerRequestType::GROUND_RANGE:
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Unit*>>(args);
+			::sc2::Unit* unit = std::get<0>(params);
+			return GroundRange(unit);
+		}
+		case constants::ManagerRequestType::AIR_RANGE:
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Unit*>>(args);
+			::sc2::Unit* unit = std::get<0>(params);
+			return AirRange(unit);
+		}
+		default:
+			std::cout << "UnitPropertyMnager: Unknown request type!" << std::endl;
+		}
 		return 0;
 	}
 
@@ -98,6 +127,9 @@ namespace Aeolus
 	{
 		uint64_t unit_id = unit->unit_type;
 
+		auto it = m_ground_range_cache.find(unit_id);
+		if (it != m_ground_range_cache.end()) return m_ground_range_cache[unit_id];
+
 		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ORACLE) return 4;
 		if (unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_BATTLECRUISER) return 6;
 		if (CanAttackGround(unit))
@@ -120,6 +152,9 @@ namespace Aeolus
 	double UnitPropertyManager::AirRange(::sc2::Unit* unit)
 	{
 		uint64_t unit_id = unit->unit_type;
+
+		auto it = m_air_range_cache.find(unit_id);
+		if (it != m_air_range_cache.end()) return m_air_range_cache[unit_id];
 
 		if (unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_BATTLECRUISER) return 6;
 

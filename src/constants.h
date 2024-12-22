@@ -33,7 +33,13 @@ namespace Aeolus {
 			GET_ALL_VESPENE_GEYSERS,
 			GET_ALL_DESTRUCTABLES,
 			GET_ALL_STRUCTURES,
-			GET_DEFAULT_GRID_DATA
+			GET_DEFAULT_GRID_DATA,
+
+			// UnitPropertyManager
+			CAN_ATTACK_GROUND,
+			CAN_ATTACK_AIR,
+			GROUND_RANGE,
+			AIR_RANGE
 		};
 
 		enum class UnitRole
