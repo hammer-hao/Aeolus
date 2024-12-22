@@ -71,7 +71,7 @@ namespace Aeolus
 	Grid MapData::_addNonPathablesGround(Grid base_grid, bool include_destructables)
 	{
 		int pathable = 1, non_pathable = 0;
-		::sc2::Units structures = ManagerMediator::getInstance().GetAllStructures(m_bot, ::sc2::Unit::Alliance::Self);
+		::sc2::Units structures = ManagerMediator::getInstance().GetAllStructures(m_bot);
 		for (auto& structure : structures)
 		{
 			int size;

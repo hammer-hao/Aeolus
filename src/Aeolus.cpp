@@ -72,13 +72,13 @@ namespace Aeolus
     // Called every game step
     void AeolusBot::OnStep() {
 
-        std::cout << "Aeolus: Taking a step... " << std::endl;
+        // std::cout << "Aeolus: Taking a step... " << std::endl;
 
         // Example: Get game loop information
         //uint32_t game_loop = observation->GetGameLoop();
         BeforeStep();
 
-        std::cout << "Aeolus: before step logic executed! " << std::endl;
+        // std::cout << "Aeolus: before step logic executed! " << std::endl;
 
         #ifdef BUILD_WITH_RENDERER
         
@@ -184,7 +184,7 @@ namespace Aeolus
     void AeolusBot::AfterStep() {
         // Logic to execute after each step completes
         // TODO: Imprement behavior executioner!
-        std::cout << "Aeolus: calling behavior executor to execute behaviors... " << std::endl;
+        // std::cout << "Aeolus: calling behavior executor to execute behaviors... " << std::endl;
         BehaviorExecutor::GetInstance().ExecuteBehaviors(*this);
     }
 

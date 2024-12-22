@@ -43,5 +43,7 @@ namespace Aeolus
 		AeolusBot& m_bot;
 
 		::sc2::ImageData _getDefaultGridData();
+
+		void _reset_grids(); // reset all grids to cached versions
 	};
 }

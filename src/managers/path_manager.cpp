@@ -14,7 +14,12 @@ namespace Aeolus
 			m_ground_grid = m_mapdata.GetAStarGrid();
 			m_cached_ground_grid = m_ground_grid;
 		}
+		else if (iteration > 0)
+		{
+			//_reset_grids(); // clean the grids before populating
 
+			// ::sc2::Units enemy_units = m_bot.Observation()->GetUnits(::sc2::Unit::Alliance::Enemy, filter=);
+		}
 	}
 
 	std::any PathManager::ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args)
@@ -76,6 +81,11 @@ namespace Aeolus
 			// units with air attack only (no attack vs ground)
 			// TODO: if unit is flying, get ground to air grid and air to air grid 
 		}
+	}
+
+	void PathManager::_reset_grids()
+	{
+		m_ground_grid = m_cached_ground_grid;
 	}
 
 	::sc2::ImageData PathManager::_getDefaultGridData()

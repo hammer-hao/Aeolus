@@ -249,6 +249,13 @@ namespace Aeolus {
 			::sc2::UNIT_TYPEID::TERRAN_PLANETARYFORTRESS
 		};
 
+		const std::set<::sc2::UnitTypeID> WORKER_TYPES
+		{
+			::sc2::UNIT_TYPEID::TERRAN_SCV,
+			::sc2::UNIT_TYPEID::PROTOSS_PROBE,
+			::sc2::UNIT_TYPEID::ZERG_DRONE
+		};
+
 		const std::set<::sc2::UnitTypeID> BUILDINGS = []
 		{
 			std::set<::sc2::UnitTypeID> BUILDINGS_;

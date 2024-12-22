@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sc2api/sc2_unit.h>
+#include <sc2api/sc2_data.h>
 #include "manager.h"
 #include "vector"
 #include "string"

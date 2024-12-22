@@ -150,7 +150,7 @@ namespace Aeolus
 
 		::sc2::Units GetAllDestructables(AeolusBot& aeolusbot)
 		{
-			std::cout << "trying to send get all desrtuctables to neutralunitmanager" << std::endl;
+			std::cout << "trying to send get all destructables to neutralunitmanager" << std::endl;
 			return ManagerRequest<::sc2::Units, int>(
 				aeolusbot,
 				constants::ManagerName::NEUTRAL_UNIT_MANAGER,
@@ -179,13 +179,13 @@ namespace Aeolus
 			);
 		}
 
-		::sc2::Units GetAllStructures(AeolusBot& aeolusbot, ::sc2::Unit::Alliance alliance)
+		::sc2::Units GetAllStructures(AeolusBot& aeolusbot)
 		{
-			return ManagerRequest<::sc2::Units, ::sc2::Unit::Alliance>(
+			return ManagerRequest<::sc2::Units, int>(
 				aeolusbot,
 				constants::ManagerName::UNIT_FILTER_MANAGER,
 				constants::ManagerRequestType::GET_ALL_STRUCTURES,
-				alliance
+				0
 			);
 		}
 
