@@ -35,6 +35,9 @@ namespace Aeolus {
 			GET_ALL_STRUCTURES,
 			GET_DEFAULT_GRID_DATA,
 
+			// UnitFilterManager
+			GET_OWN_WORKERS,
+
 			// UnitPropertyManager
 			CAN_ATTACK_GROUND,
 			CAN_ATTACK_AIR,

@@ -14,6 +14,22 @@ namespace Aeolus
 		{	
 			return m_all_structures;
 		}
+		case (constants::ManagerRequestType::GET_OWN_WORKERS):
+		{
+			return m_own_workers;
+		}
+		case (constants::ManagerRequestType::GET_ALL_MINERAL_PATCHES):
+		{
+			return m_mineral_fields;
+		}
+		case (constants::ManagerRequestType::GET_ALL_VESPENE_GEYSERS):
+		{
+			return m_vespene_geysers;
+		}
+		case (constants::ManagerRequestType::GET_ALL_DESTRUCTABLES):
+		{
+			return m_destructables;
+		}
 		default:
 			return 0;
 		}

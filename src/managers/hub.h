@@ -30,7 +30,7 @@ namespace Aeolus
 			std::vector<std::unique_ptr<Manager>> managers;
 			managers.push_back(std::make_unique<UnitFilterManager>(aeolusbot));
 			managers.push_back(std::make_unique<UnitRoleManager>());
-			managers.push_back(std::make_unique<ResourceManager>());
+			managers.push_back(std::make_unique<ResourceManager>(aeolusbot));
 			managers.push_back(std::make_unique<NeutralUnitManager>(aeolusbot));
 			managers.push_back(std::make_unique<PathManager>(aeolusbot));
 			managers.push_back(std::make_unique<UnitPropertyManager>(aeolusbot));

@@ -148,13 +148,25 @@ namespace Aeolus
 			);
 		}
 
+		// UnitFilterManager
+
 		::sc2::Units GetAllDestructables(AeolusBot& aeolusbot)
 		{
-			std::cout << "trying to send get all destructables to neutralunitmanager" << std::endl;
+			std::cout << "trying to send get all destructables to unitfiltermanager" << std::endl;
 			return ManagerRequest<::sc2::Units, int>(
 				aeolusbot,
-				constants::ManagerName::NEUTRAL_UNIT_MANAGER,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
 				constants::ManagerRequestType::GET_ALL_DESTRUCTABLES,
+				0
+			);
+		}
+
+		::sc2::Units GetOwnWorkers(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_OWN_WORKERS,
 				0
 			);
 		}
@@ -163,7 +175,7 @@ namespace Aeolus
 		{
 			return ManagerRequest<::sc2::Units, int>(
 				aeolusbot,
-				constants::ManagerName::NEUTRAL_UNIT_MANAGER,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
 				constants::ManagerRequestType::GET_ALL_MINERAL_PATCHES,
 				0
 			);
@@ -173,7 +185,7 @@ namespace Aeolus
 		{
 			return ManagerRequest<::sc2::Units, int>(
 				aeolusbot,
-				constants::ManagerName::NEUTRAL_UNIT_MANAGER,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
 				constants::ManagerRequestType::GET_ALL_VESPENE_GEYSERS,
 				0
 			);

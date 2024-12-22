@@ -9,6 +9,7 @@
 // Forward declaration to avoid circular dependency
 namespace Aeolus {
 	class ManagerMediator;  // Forward declaration
+	class AeolusBot;
 }
 
 namespace Aeolus
@@ -16,6 +17,10 @@ namespace Aeolus
 	class ResourceManager : public Manager
 	{
 	public:
+		ResourceManager(AeolusBot& aeolusbot) : m_bot(aeolusbot)
+		{
+		}
+
 		std::string_view GetName() const override {
 			static const std::string name = "ResourceManager";
 			return name;
@@ -29,7 +34,7 @@ namespace Aeolus
 
 		void ClearAssignment(const ::sc2::Unit* worker);
 
-		void AssignInitialWorkers(AeolusBot& aeolusbot);
+		void AssignInitialWorkers();
 
 		// Implement the update method.
 		void update(int iteration) override {
@@ -51,6 +56,7 @@ namespace Aeolus
 		void CalculateMineralGatheringPoints(
 			AeolusBot& aeolusbot, 
 			std::vector<::sc2::Point3D> expansion_locations);
-		
+
+		AeolusBot& m_bot;
 	};
 }

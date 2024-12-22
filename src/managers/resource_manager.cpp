@@ -51,7 +51,7 @@ namespace Aeolus
 			if (!m_initial_workers_assigned)
 			{
 				std::cout << "*** Initial worker assignment in process... ***" << std::endl;
-				AssignInitialWorkers(aeolusbot);
+				AssignInitialWorkers();
 				return 0;
 				m_initial_workers_assigned = true;
 			}
@@ -94,10 +94,10 @@ namespace Aeolus
 		}
 	}
 
-	void ResourceManager::AssignInitialWorkers(AeolusBot& aeolusbot)
+	void ResourceManager::AssignInitialWorkers()
 	{
-		::sc2::Point2D start_location_2d = utils::ConvertTo2D(aeolusbot.Observation()->GetStartLocation());
-		::sc2::Units workers = ManagerMediator::getInstance().GetUnitsFromRole(aeolusbot, constants::UnitRole::GATHERING);
+		::sc2::Point2D start_location_2d = utils::ConvertTo2D(m_bot.Observation()->GetStartLocation());
+		::sc2::Units workers = ManagerMediator::getInstance().GetOwnWorkers(m_bot);
 		// std::cout << "*** Initial worker assignment in process... ***" << std::endl;
 		::sc2::Units sorted_minerals = utils::SortByDistanceTo(m_all_minerals, start_location_2d);
 
@@ -106,7 +106,7 @@ namespace Aeolus
 		std::set<::sc2::Tag> assigned_workers;
 		
 		#ifdef BUILD_WITH_RENDERER
-		auto* debug = aeolusbot.Debug();
+		auto* debug = m_bot.Debug();
 
 		// Assuming sorted_minerals is a vector of mineral patch pointers
 		for (size_t i = 0; i < sorted_minerals.size(); ++i) {
@@ -114,7 +114,7 @@ namespace Aeolus
 			debug->DebugTextOut("Mineral " + std::to_string(i), sorted_minerals[i]->pos, sc2::Colors::Yellow);
 		}
 
-		debug->DebugSphereOut(aeolusbot.Observation()->GetStartLocation(), 3.0, sc2::Colors::Red);
+		debug->DebugSphereOut(m_bot.Observation()->GetStartLocation(), 3.0, sc2::Colors::Red);
 		debug->SendDebug();
 		#endif
 
