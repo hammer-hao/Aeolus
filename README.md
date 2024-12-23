@@ -10,6 +10,7 @@ Starter bot for StarCraft II with integrated cpp-sc2.
 - [Aeolus](#Aeolus)
     - [About Aeolus](#about-aeolus)
         - [Key Features](#key-features)
+        - [Dependencies](#dependencies)
         - [Acknowledgements](#acknowledgements)
     - [Build instructions](#build-instructions)
         - [Windows](#windows)
@@ -46,6 +47,13 @@ Starter bot for StarCraft II with integrated cpp-sc2.
 
 - **Utility Toolkit**  
   A comprehensive set of utility functions for common tasks like sorting units by distance, pathfinding, and filtering.
+
+### Dependencies
+This project uses the following third-party library:
+
+- **[nanoflann](https://github.com/jlblancoc/nanoflann)**:  
+  A lightweight C++ library for KDTree-based nearest neighbor search.  
+  Licensed under the BSD 2-Clause License. See the `thirdparty/nanoflann/LICENSE.txt` file for details.
 
 ### Acknowledgements
 
