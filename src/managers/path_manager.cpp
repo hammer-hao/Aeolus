@@ -49,8 +49,10 @@ namespace Aeolus
 		}
 		case (constants::ManagerRequestType::IS_GROUND_POSITION_SAFE):
 		{
+			std::cout << "Unpacking arguments" << std::endl;
 			auto params = std::any_cast<std::tuple<::sc2::Point2D>>(args);
 			::sc2::Point2D position = std::get<0>(params);
+			std::cout << "Arguments unpacked. Calling _isGroundPositionSafe()" << std::endl;
 			return _isGroundPositionSafe(position);
 		}
 		default:
