@@ -108,7 +108,7 @@ namespace Aeolus
 
         ::sc2::Point2D FindClosestSafeSpot(::sc2::Point2D position, const double& radius);
 
-        bool Grid::IsPositionSafe(::sc2::Point2D position, double weight_safety_limit = 1.0) const;
+        bool IsPositionSafe(::sc2::Point2D position, double weight_safety_limit = 1.0) const;
 
 	private:
 		int m_width;
