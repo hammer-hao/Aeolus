@@ -49,10 +49,8 @@ namespace Aeolus
 		}
 		case (constants::ManagerRequestType::IS_GROUND_POSITION_SAFE):
 		{
-			std::cout << "Unpacking arguments" << std::endl;
 			auto params = std::any_cast<std::tuple<::sc2::Point2D>>(args);
 			::sc2::Point2D position = std::get<0>(params);
-			std::cout << "Arguments unpacked. Calling _isGroundPositionSafe()" << std::endl;
 			return _isGroundPositionSafe(position);
 		}
 		default:
@@ -67,12 +65,12 @@ namespace Aeolus
 
 	void PathManager::_addUnitInfluence(const ::sc2::Unit* unit)
 	{
-		std::cout << "PathManager: adding unit influence... " << std::endl;
+		// std::cout << "PathManager: adding unit influence... " << std::endl;
 
 		if (constants::WEIGHT_COSTS.find(unit->unit_type)
 			!= constants::WEIGHT_COSTS.end())
 		{
-			std::cout << "PathManager: found existing unit prifile! " << std::endl;
+			//  std::cout << "PathManager: found existing unit prifile! " << std::endl;
 			// if we pre-defined unit ground/air weight and range
 			auto it = constants::WEIGHT_COSTS.find(unit->unit_type);
 			double ground_cost = it->second.GroundCost;
@@ -104,11 +102,11 @@ namespace Aeolus
 		
 		else if (ManagerMediator::getInstance().CanAttackGround(m_bot, unit))
 		{
-			std::cout << "PathManager: found unit with ground attack " << std::endl;
+			// std::cout << "PathManager: found unit with ground attack " << std::endl;
 			double ground_range = ManagerMediator::getInstance().GroundRange(m_bot, unit);
-			std::cout << "PathManager: unit range acquired " << std::endl;
+			// std::cout << "PathManager: unit range acquired " << std::endl;
 			double ground_dps = ManagerMediator::getInstance().GroundDPS(m_bot, unit);
-			std::cout << "PathManager: unit ground dps acquired " << std::endl;
+			// std::cout << "PathManager: unit ground dps acquired " << std::endl;
 			m_ground_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + Config::range_buffer, ground_dps);
 
 			if (ground_range < 2)

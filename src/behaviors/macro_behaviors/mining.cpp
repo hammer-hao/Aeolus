@@ -33,9 +33,10 @@ namespace Aeolus
 				worker->shield / worker->shield_max : worker->health / worker->health_max;
 			if (m_keep_safe && percentage_health < m_flee_at_health_perc)
 			{
-				std::cout << "Mining: Probe below health threshold. Checking whether current position is safe" << std::endl;
 				bool is_position_safe = ManagerMediator::getInstance().IsGroundPositionSafe(aeolusbot, ::sc2::Point2D(worker->pos));
-				if (!is_position_safe) std::cout << "escape logic" << std::endl;
+				if (!is_position_safe) std::cout << "Position is not safe and health critical. escaping..." << std::endl;
+				::sc2::Point2D safe_spot = ManagerMediator::getInstance().FindClosestGroundSafeSpot(aeolusbot, ::sc2::Point2D(worker->pos), 7.0);
+				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::MOVE_MOVE, safe_spot);
 			}
 			else if (worker_to_patch.find(worker) != worker_to_patch.end())
 			{
