@@ -55,6 +55,10 @@ This project uses the following third-party library:
   A lightweight C++ library for KDTree-based nearest neighbor search.  
   Licensed under the BSD 2-Clause License. See the `thirdparty/nanoflann/LICENSE.txt` file for details.
 
+- **[Eigen](https://eigen.tuxfamily.org/)**:  
+  A C++ template library for linear algebra, including matrices, vectors, numerical solvers, and related algorithms.  
+  Licensed under the Mozilla Public License 2.0. See the `COPYING.MPL2` file or visit [Eigen's GitHub repository](https://gitlab.com/libeigen/eigen) for more details.
+
 ### Acknowledgements
 
 Aeolus draws inspiration from [ares-sc2](https://github.com/davechurchill/ares-sc2), an excellent framework by Dave Churchill. Special thanks to the ares-sc2 project for setting the bar for StarCraft II bot development and serving as a foundation for learning and innovation.
