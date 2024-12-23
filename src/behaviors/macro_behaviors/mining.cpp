@@ -29,8 +29,14 @@ namespace Aeolus
 
 		for (const auto worker : workers)
 		{
-			auto it = worker_to_patch.find(worker);
-			if (it != worker_to_patch.end())
+			double percentage_health = (m_self_race == ::sc2::Race::Protoss) ? 
+				worker->shield / worker->shield_max : worker->health / worker->health_max;
+			bool is_position_safe = ManagerMediator::getInstance().IsGroundPositionSafe(aeolusbot, ::sc2::Point2D(worker->pos));
+			if (m_keep_safe && percentage_health < m_flee_at_health_perc && !is_position_safe)
+			{
+				std::cout << "escape logic" << std::endl;
+			}
+			else if (worker_to_patch.find(worker) != worker_to_patch.end())
 			{
 				::sc2::Point2D start_location_2d = utils::ConvertTo2D(aeolusbot.Observation()->GetStartLocation());
 				//aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, start_location_2d);

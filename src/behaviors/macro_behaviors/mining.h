@@ -20,12 +20,14 @@ namespace Aeolus
 		Mining
 		(
 			double flee_at_health_perc = 0.5,
+			::sc2::Race self_race = ::sc2::Race::Protoss,
 			bool keep_safe = true,
 			bool mineral_boost = true,
 			bool self_defence_active = true
 		) :
 			m_flee_at_health_perc(flee_at_health_perc),
 			m_keep_safe(keep_safe),
+			m_self_race(self_race),
 			m_mineral_boost(mineral_boost),
 			m_self_defence_active(self_defence_active) {}
 
@@ -35,6 +37,7 @@ namespace Aeolus
 	private:
 		double m_flee_at_health_perc;
 		bool m_keep_safe;
+		::sc2::Race m_self_race;
 		bool m_mineral_boost;
 		bool m_self_defence_active;
 

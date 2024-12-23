@@ -224,6 +224,26 @@ namespace Aeolus
 			);
 		}
 
+		::sc2::Point2D FindClosestGroundSafeSpot(AeolusBot& aeolusbot, ::sc2::Point2D position, double radius)
+		{
+			return ManagerRequest<::sc2::Point2D, ::sc2::Point2D, double>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::FIND_CLOSEST_GROUND_SAFE_SPOT,
+				position,
+				radius
+			);
+		}
+
+		bool IsGroundPositionSafe(AeolusBot& aeolusbot, ::sc2::Point2D position)
+		{
+			return ManagerRequest<bool, ::sc2::Point2D>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::IS_GROUND_POSITION_SAFE,
+				position
+			);
+		}
 
 		// UnitPropertyManager
 

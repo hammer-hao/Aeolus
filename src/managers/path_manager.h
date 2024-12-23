@@ -4,6 +4,8 @@
 #include "../pathing/map_data.h"
 #include "../pathing/grid.h"
 
+#include <sc2api/sc2_common.h>
+
 namespace Aeolus
 {
 	class AeolusBot;
@@ -33,15 +35,17 @@ namespace Aeolus
 
 	private:
 		MapData m_mapdata;
-
+		AeolusBot& m_bot;
 		Grid m_ground_grid;
 
 		void _addUnitInfluence(const ::sc2::Unit* unit);
 
-		AeolusBot& m_bot;
+		bool _isGroundPositionSafe(::sc2::Point2D position);
+
+		void _reset_grids(); // reset all grids to cached versions
 
 		::sc2::ImageData _getDefaultGridData();
 
-		void _reset_grids(); // reset all grids to cached versions
+		::sc2::Point2D _getClosestSafeSpot(::sc2::Point2D position, const double& radius);
 	};
 }

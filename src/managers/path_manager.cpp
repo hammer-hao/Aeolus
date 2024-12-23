@@ -4,6 +4,10 @@
 #include "../constants.h"
 #include "manager_mediator.h"
 
+#include <sc2api/sc2_common.h>
+#include <any>
+#include <tuple>
+
 namespace Aeolus
 {
 	void PathManager::update(int iteration)
@@ -12,6 +16,8 @@ namespace Aeolus
 		{
 			m_mapdata.update();
 			m_ground_grid = m_mapdata.GetAStarGrid();
+			m_ground_grid.UpdateCache();
+
 		}
 		else if (iteration > 0)
 		{
@@ -31,9 +37,22 @@ namespace Aeolus
 		switch (request)
 		{
 		case (constants::ManagerRequestType::GET_DEFAULT_GRID_DATA):
-			{
-				return _getDefaultGridData();
-			}
+		{
+			return _getDefaultGridData();
+		}
+		case (constants::ManagerRequestType::FIND_CLOSEST_GROUND_SAFE_SPOT):
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Point2D, double>>(args);
+			::sc2::Point2D position = std::get<0>(params);
+			double radius = std::get<1>(params);
+			return _getClosestSafeSpot(position, radius);
+		}
+		case (constants::ManagerRequestType::IS_GROUND_POSITION_SAFE):
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Point2D>>(args);
+			::sc2::Point2D position = std::get<0>(params);
+			return _isGroundPositionSafe(position);
+		}
 		default:
 			return 0;
 		}
@@ -104,6 +123,16 @@ namespace Aeolus
 			// units with air attack only (no attack vs ground)
 			// TODO: if unit is flying, get ground to air grid and air to air grid 
 		}
+	}
+
+	::sc2::Point2D PathManager::_getClosestSafeSpot(::sc2::Point2D position, const double& radius)
+	{
+		return m_ground_grid.FindClosestSafeSpot(position, radius);
+	}
+
+	bool PathManager::_isGroundPositionSafe(::sc2::Point2D position)
+	{
+		return m_ground_grid.IsPositionSafe(position);
 	}
 
 	void PathManager::_reset_grids()

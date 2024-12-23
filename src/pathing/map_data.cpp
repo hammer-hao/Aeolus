@@ -65,7 +65,9 @@ namespace Aeolus
 
 	Grid MapData::GetAStarGrid(double default_weight, bool include_destructables)
 	{
-		return _addNonPathablesGround(m_default_grid, true);
+		Grid ground_grid = _addNonPathablesGround(m_default_grid, true);
+		ground_grid.InitializeWeights(default_weight);
+		return ground_grid;
 	}
 
 	Grid MapData::_addNonPathablesGround(Grid base_grid, bool include_destructables)

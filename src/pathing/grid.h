@@ -22,7 +22,7 @@ namespace Aeolus
         {
         }
 
-        Grid(const Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic>& matrix)
+        Grid(const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& matrix)
             : m_width(matrix.cols()), m_height(matrix.rows()), m_grid(matrix), m_cached_grid(matrix)
         {
             std::cout << "Grid initialized from Eigen::Matrix with dimensions: "
@@ -44,7 +44,7 @@ namespace Aeolus
                 // Fill the grid directly from the data
                 for (int y = 0; y < m_height; ++y) {
                     for (int x = 0; x < m_width; ++x) {
-                        m_grid(y, x) = static_cast<int>(image_data.data[y * m_width + x]);
+                        m_grid(y, x) = static_cast<double>(image_data.data[y * m_width + x]);
                     }
                 }
             }
@@ -67,14 +67,14 @@ namespace Aeolus
                         unsigned char byte = image_data.data[byte_index];
                         unsigned char bit = (byte >> bit_index) & 1;
 
-                        m_grid(y, x) = static_cast<int>(bit);
+                        m_grid(y, x) = static_cast<double>(bit);
                     }
                 }
             }
             m_cached_grid = m_grid;
 		}
 
-        Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> GetGrid();
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> GetGrid();
 
         void Reset() 
         {
@@ -85,6 +85,8 @@ namespace Aeolus
         {
             m_cached_grid = m_grid;
         }
+
+        void InitializeWeights(double default_weight); // will set all non-zero weights to 1 and others to inf. USE CAREFULLY
 
         void AddCost(double pos_x, double pos_y, double radius, double weight = 100.0, bool safe = true, double initial_default_weight = 0.0);
 
@@ -104,13 +106,15 @@ namespace Aeolus
             return m_height;
         }
 
-        void FlipValues();
+        ::sc2::Point2D FindClosestSafeSpot(::sc2::Point2D position, const double& radius);
+
+        bool Grid::IsPositionSafe(::sc2::Point2D position, double weight_safety_limit = 1.0) const;
 
 	private:
 		int m_width;
 		int m_height;
-        Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> m_grid;
-        Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> m_cached_grid;
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> m_grid;
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> m_cached_grid;
 
         std::vector<std::pair<int, int>> _drawCircle(const double& pos_x, const double& pos_y, const double& radious) const;
 
