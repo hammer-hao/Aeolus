@@ -201,6 +201,19 @@ namespace Aeolus
 			);
 		}
 
+		::sc2::Units GetAllEnemyUnits(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_ALL_ENEMY_UNITS,
+				0
+			);
+		}
+
+
+		// PathManager
+
 		::sc2::ImageData GetDefaultGridData(AeolusBot& aeolusbot)
 		{
 			return ManagerRequest<::sc2::ImageData, int>(
@@ -211,41 +224,60 @@ namespace Aeolus
 			);
 		}
 
+
 		// UnitPropertyManager
 
-		bool CanAttackGround(AeolusBot& aeolusbot, ::sc2::Unit* unit)
+		bool CanAttackGround(AeolusBot& aeolusbot, const ::sc2::Unit* unit)
 		{
-			return ManagerRequest<bool, ::sc2::Unit*>(
+			return ManagerRequest<bool, const ::sc2::Unit*>(
 				aeolusbot,
 				constants::ManagerName::UNIT_PROPERTY_MANAGER,
 				constants::ManagerRequestType::CAN_ATTACK_GROUND,
 				unit
 			);
 		}
-		bool CanAttackAir(AeolusBot& aeolusbot, ::sc2::Unit* unit)
+		bool CanAttackAir(AeolusBot& aeolusbot, const ::sc2::Unit* unit)
 		{
-			return ManagerRequest<bool, ::sc2::Unit*>(
+			return ManagerRequest<bool, const ::sc2::Unit*>(
 				aeolusbot,
 				constants::ManagerName::UNIT_PROPERTY_MANAGER,
 				constants::ManagerRequestType::CAN_ATTACK_AIR,
 				unit
 			);
 		}
-		double GroundRange(AeolusBot& aeolusbot, ::sc2::Unit* unit)
+		double GroundRange(AeolusBot& aeolusbot, const ::sc2::Unit* unit)
 		{
-			return ManagerRequest<double, ::sc2::Unit*>(
+			return ManagerRequest<double, const ::sc2::Unit*>(
 				aeolusbot,
 				constants::ManagerName::UNIT_PROPERTY_MANAGER,
 				constants::ManagerRequestType::GROUND_RANGE,
 				unit
 			);
 		}
-		double AirRange(AeolusBot& aeolusbot, ::sc2::Unit* unit)
+		double AirRange(AeolusBot& aeolusbot, const ::sc2::Unit* unit)
 		{
-			return ManagerRequest<double, ::sc2::Unit*>(
+			return ManagerRequest<double, const ::sc2::Unit*>(
 				aeolusbot,
 				constants::ManagerName::UNIT_PROPERTY_MANAGER,
 				constants::ManagerRequestType::AIR_RANGE,
+				unit
+			);
+		}
+		double GroundDPS(AeolusBot& aeolusbot, const ::sc2::Unit* unit)
+		{
+			return ManagerRequest<double, const ::sc2::Unit*>(
+				aeolusbot,
+				constants::ManagerName::UNIT_PROPERTY_MANAGER,
+				constants::ManagerRequestType::GROUND_DPS,
+				unit
+			);
+		}
+		double AirDPS(AeolusBot& aeolusbot, const ::sc2::Unit* unit)
+		{
+			return ManagerRequest<double, const ::sc2::Unit*>(
+				aeolusbot,
+				constants::ManagerName::UNIT_PROPERTY_MANAGER,
+				constants::ManagerRequestType::AIR_DPS,
 				unit
 			);
 		}

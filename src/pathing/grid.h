@@ -18,12 +18,12 @@ namespace Aeolus
 
         // Default constructor
         Grid()
-            : m_width(0), m_height(0), m_grid(0, 0) // Initialize with empty dimensions
+            : m_width(0), m_height(0), m_grid(0, 0), m_cached_grid(0,0) // Initialize with empty dimensions
         {
         }
 
         Grid(const Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic>& matrix)
-            : m_width(matrix.cols()), m_height(matrix.rows()), m_grid(matrix)
+            : m_width(matrix.cols()), m_height(matrix.rows()), m_grid(matrix), m_cached_grid(matrix)
         {
             std::cout << "Grid initialized from Eigen::Matrix with dimensions: "
                 << m_height << "x" << m_width << std::endl;
@@ -31,7 +31,7 @@ namespace Aeolus
 
 		Grid(::sc2::ImageData image_data)
             : m_width(image_data.width), m_height(image_data.height),
-            m_grid(m_height, m_width)
+            m_grid(m_height, m_width), m_cached_grid(m_height, m_width)
 		{
 
             if (image_data.bits_per_pixel == 8)
@@ -71,9 +71,22 @@ namespace Aeolus
                     }
                 }
             }
+            m_cached_grid = m_grid;
 		}
 
         Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> GetGrid();
+
+        void Reset() 
+        {
+            m_grid = m_cached_grid;
+        }
+
+        void UpdateCache() 
+        {
+            m_cached_grid = m_grid;
+        }
+
+        void AddCost(double pos_x, double pos_y, double radius, double weight = 100.0, bool safe = true, double initial_default_weight = 0.0);
 
         void SetValue(int x, int y, double value);
 
@@ -97,5 +110,11 @@ namespace Aeolus
 		int m_width;
 		int m_height;
         Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> m_grid;
+        Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> m_cached_grid;
+
+        std::vector<std::pair<int, int>> _drawCircle(const double& pos_x, const double& pos_y, const double& radious) const;
+
+        void _applyDiskToGrid(const double& pos_x, const double& pos_y, const std::vector<std::pair<int, int>>& disk,
+            const double& weight, bool safe, const double& initialDefaultWeight);
 	};
 }

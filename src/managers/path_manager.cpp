@@ -12,13 +12,17 @@ namespace Aeolus
 		{
 			m_mapdata.update();
 			m_ground_grid = m_mapdata.GetAStarGrid();
-			m_cached_ground_grid = m_ground_grid;
 		}
 		else if (iteration > 0)
 		{
-			//_reset_grids(); // clean the grids before populating
+			_reset_grids(); // clean the grids before populating
 
-			// ::sc2::Units enemy_units = m_bot.Observation()->GetUnits(::sc2::Unit::Alliance::Enemy, filter=);
+			::sc2::Units enemy_units = ManagerMediator::getInstance().GetAllEnemyUnits(m_bot);
+
+			for (const auto unit : enemy_units)
+			{
+				AddUnitInfluence(unit);
+			}
 		}
 	}
 
@@ -35,21 +39,35 @@ namespace Aeolus
 		}
 	}
 
-	void PathManager::_addUnitInfluence(::sc2::Unit* unit)
+	void PathManager::AddUnitInfluence(const ::sc2::Unit* enemy)
+	{
+		_addUnitInfluence(enemy);
+	}
+
+	void PathManager::_addUnitInfluence(const ::sc2::Unit* unit)
 	{
 		if (constants::WEIGHT_COSTS.find(unit->unit_type)
 			!= constants::WEIGHT_COSTS.end())
 		{
 			// if we pre-defined unit ground/air weight and range
+			auto it = constants::WEIGHT_COSTS.find(unit->unit_type);
+			double ground_cost = it->second.GroundCost;
+			double ground_range = it->second.GroundRange;
 
+			m_ground_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + Config::range_buffer, ground_cost);
 		}
 		else if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_DISRUPTORPHASED)
 		{
 			// A disruptor Nova
+			double ground_cost = 1000;
+			double ground_range = 8 + Config::range_buffer;
+			m_ground_grid.AddCost(unit->pos.x, unit->pos.y, ground_range, ground_cost);
+
 		}
 		else if (unit->unit_type == ::sc2::UNIT_TYPEID::ZERG_BANELING)
 		{
 			// A baneling
+			// this should already by in the weight_cost dict! monitor if we need to add more logic!
 		}
 		else if (unit->unit_type == ::sc2::UNIT_TYPEID::ZERG_INFESTOR && unit->energy >= 75)
 		{
@@ -62,7 +80,11 @@ namespace Aeolus
 		
 		else if (ManagerMediator::getInstance().CanAttackGround(m_bot, unit))
 		{
-			if (ManagerMediator::getInstance().GroundRange(m_bot, unit) < 2)
+			double ground_range = ManagerMediator::getInstance().GroundRange(m_bot, unit);
+			double ground_dps = ManagerMediator::getInstance().GroundDPS(m_bot, unit);
+			m_ground_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + Config::range_buffer, ground_dps);
+
+			if (ground_range < 2)
 			{
 				// melee units
 			}
@@ -70,6 +92,7 @@ namespace Aeolus
 			{
 				// non-melee units
 				// handle ground attack here
+
 				if (ManagerMediator::getInstance().CanAttackAir(m_bot, unit))
 				{
 					// handle air attack
@@ -85,7 +108,7 @@ namespace Aeolus
 
 	void PathManager::_reset_grids()
 	{
-		m_ground_grid = m_cached_ground_grid;
+		m_ground_grid.Reset();
 	}
 
 	::sc2::ImageData PathManager::_getDefaultGridData()

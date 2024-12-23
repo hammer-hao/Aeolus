@@ -29,16 +29,14 @@ namespace Aeolus
 		// Implement the update method.
 		void update(int iteration) override;
 
-		void AddUnitInfluence(::sc2::Unit* enemy);
+		void AddUnitInfluence(const ::sc2::Unit* enemy);
 
 	private:
 		MapData m_mapdata;
 
 		Grid m_ground_grid;
 
-		Grid m_cached_ground_grid;
-
-		void _addUnitInfluence(::sc2::Unit* unit);
+		void _addUnitInfluence(const ::sc2::Unit* unit);
 
 		AeolusBot& m_bot;
 

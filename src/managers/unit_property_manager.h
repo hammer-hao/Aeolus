@@ -26,21 +26,29 @@ namespace Aeolus
 
 	private:
 
-		bool CanAttackGround(::sc2::Unit* unit);
+		bool CanAttackGround(const ::sc2::Unit* unit);
 
 		std::unordered_map<uint64_t, bool> m_can_attack_ground_cache;
 
-		bool CanAttackAir(::sc2::Unit* unit);
+		bool CanAttackAir(const::sc2::Unit* unit);
 
 		std::unordered_map<uint64_t, bool> m_can_attack_air_cache;
 
-		double GroundRange(::sc2::Unit* unit);
+		double GroundRange(const ::sc2::Unit* unit);
 
 		std::unordered_map<uint64_t, double> m_ground_range_cache;
 
-		double AirRange(::sc2::Unit* unit);
+		double AirRange(const ::sc2::Unit* unit);
 
 		std::unordered_map<uint64_t, double> m_air_range_cache;
+
+		double GroundDPS(const ::sc2::Unit* unit);
+
+		std::unordered_map<uint64_t, double> m_ground_dps_cache;
+
+		double AirDPS(const ::sc2::Unit* unit);
+
+		std::unordered_map<uint64_t, double> m_air_dps_cache;
 
 		::sc2::UnitTypes m_unit_data_cache;
 

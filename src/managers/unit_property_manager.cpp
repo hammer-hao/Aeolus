@@ -56,13 +56,25 @@ namespace Aeolus
 			::sc2::Unit* unit = std::get<0>(params);
 			return AirRange(unit);
 		}
+		case constants::ManagerRequestType::GROUND_DPS:
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Unit*>>(args);
+			::sc2::Unit* unit = std::get<0>(params);
+			return GroundDPS(unit);
+		}
+		case constants::ManagerRequestType::AIR_DPS:
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Unit*>>(args);
+			::sc2::Unit* unit = std::get<0>(params);
+			return AirDPS(unit);
+		}
 		default:
 			std::cout << "UnitPropertyMnager: Unknown request type!" << std::endl;
 		}
 		return 0;
 	}
 
-	bool UnitPropertyManager::CanAttackGround(::sc2::Unit* unit)
+	bool UnitPropertyManager::CanAttackGround(const ::sc2::Unit* unit)
 	{
 		uint64_t unit_id = unit->unit_type;
 
@@ -92,7 +104,7 @@ namespace Aeolus
 		return false;
 	}
 
-	bool UnitPropertyManager::CanAttackAir(::sc2::Unit* unit)
+	bool UnitPropertyManager::CanAttackAir(const ::sc2::Unit* unit)
 	{
 		uint64_t unit_id = unit->unit_type;
 
@@ -123,7 +135,7 @@ namespace Aeolus
 		return false;
 	}
 
-	double UnitPropertyManager::GroundRange(::sc2::Unit* unit)
+	double UnitPropertyManager::GroundRange(const ::sc2::Unit* unit)
 	{
 		uint64_t unit_id = unit->unit_type;
 
@@ -149,7 +161,7 @@ namespace Aeolus
 		return 0;
 	}
 
-	double UnitPropertyManager::AirRange(::sc2::Unit* unit)
+	double UnitPropertyManager::AirRange(const ::sc2::Unit* unit)
 	{
 		uint64_t unit_id = unit->unit_type;
 
@@ -172,6 +184,50 @@ namespace Aeolus
 			}
 		}
 		// if the unit cannot attack air, return 0
+		return 0;
+	}
+
+	double UnitPropertyManager::GroundDPS(const ::sc2::Unit* unit)
+	{
+		uint64_t unit_id = unit->unit_type;
+
+		auto it = m_ground_dps_cache.find(unit_id);
+		if (it != m_ground_dps_cache.end()) return m_ground_dps_cache[unit_id];
+
+		if (CanAttackGround(unit))
+		{
+			for (const auto& weapon:m_unit_data_cache[unit_id].weapons)
+				if (weapon.type == ::sc2::Weapon::TargetType::Ground ||
+					weapon.type == ::sc2::Weapon::TargetType::Any)
+				{
+					double ground_dps = weapon.damage_ * weapon.attacks / weapon.speed;
+					m_ground_dps_cache[unit_id] = ground_dps;
+					return ground_dps;
+				}
+		}
+		// if cannot attack ground, return 0
+		return 0;
+	}
+
+	double UnitPropertyManager::AirDPS(const ::sc2::Unit* unit)
+	{
+		uint64_t unit_id = unit->unit_type;
+
+		auto it = m_air_dps_cache.find(unit_id);
+		if (it != m_air_dps_cache.end()) return m_air_dps_cache[unit_id];
+
+		if (CanAttackAir(unit))
+		{
+			for (const auto& weapon : m_unit_data_cache[unit_id].weapons)
+				if (weapon.type == ::sc2::Weapon::TargetType::Air ||
+					weapon.type == ::sc2::Weapon::TargetType::Any)
+				{
+					double air_dps = weapon.damage_ * weapon.attacks / weapon.speed;
+					m_air_dps_cache[unit_id] = air_dps;
+					return air_dps;
+				}
+		}
+		// if cannot attack ground, return 0
 		return 0;
 	}
 }

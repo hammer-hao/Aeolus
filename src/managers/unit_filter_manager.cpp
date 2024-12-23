@@ -10,6 +10,10 @@ namespace Aeolus
 	{
 		switch (request)
 		{
+		case (constants::ManagerRequestType::GET_ALL_ENEMY_UNITS):
+		{
+			return m_all_enemy_units;
+		}
 		case (constants::ManagerRequestType::GET_ALL_STRUCTURES):
 		{	
 			return m_all_structures;
