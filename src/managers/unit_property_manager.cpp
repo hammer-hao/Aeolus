@@ -34,38 +34,38 @@ namespace Aeolus
 		{
 		case constants::ManagerRequestType::CAN_ATTACK_GROUND:
 		{
-			auto params = std::any_cast<std::tuple<::sc2::Unit*>>(args);
-			::sc2::Unit* unit = std::get<0>(params);
+			auto params = std::any_cast<std::tuple<const ::sc2::Unit*>>(args);
+			const ::sc2::Unit* unit = std::get<0>(params);
 			return CanAttackGround(unit);
 		}
 		case constants::ManagerRequestType::CAN_ATTACK_AIR:
 		{
-			auto params = std::any_cast<std::tuple<::sc2::Unit*>>(args);
-			::sc2::Unit* unit = std::get<0>(params);
+			auto params = std::any_cast<std::tuple<const ::sc2::Unit*>>(args);
+			const ::sc2::Unit* unit = std::get<0>(params);
 			return CanAttackAir(unit);
 		}
 		case constants::ManagerRequestType::GROUND_RANGE:
 		{
-			auto params = std::any_cast<std::tuple<::sc2::Unit*>>(args);
-			::sc2::Unit* unit = std::get<0>(params);
+			auto params = std::any_cast<std::tuple<const ::sc2::Unit*>>(args);
+			const ::sc2::Unit* unit = std::get<0>(params);
 			return GroundRange(unit);
 		}
 		case constants::ManagerRequestType::AIR_RANGE:
 		{
-			auto params = std::any_cast<std::tuple<::sc2::Unit*>>(args);
-			::sc2::Unit* unit = std::get<0>(params);
+			auto params = std::any_cast<std::tuple<const ::sc2::Unit*>>(args);
+			const ::sc2::Unit* unit = std::get<0>(params);
 			return AirRange(unit);
 		}
 		case constants::ManagerRequestType::GROUND_DPS:
 		{
-			auto params = std::any_cast<std::tuple<::sc2::Unit*>>(args);
-			::sc2::Unit* unit = std::get<0>(params);
+			auto params = std::any_cast<std::tuple<const ::sc2::Unit*>>(args);
+			const ::sc2::Unit* unit = std::get<0>(params);
 			return GroundDPS(unit);
 		}
 		case constants::ManagerRequestType::AIR_DPS:
 		{
-			auto params = std::any_cast<std::tuple<::sc2::Unit*>>(args);
-			::sc2::Unit* unit = std::get<0>(params);
+			auto params = std::any_cast<std::tuple<const ::sc2::Unit*>>(args);
+			const ::sc2::Unit* unit = std::get<0>(params);
 			return AirDPS(unit);
 		}
 		default:
