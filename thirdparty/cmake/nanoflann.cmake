@@ -9,7 +9,7 @@ set(CMAKE_SKIP_INSTALL_RULES ON CACHE BOOL "Disable install rules")
 FetchContent_Declare(
   nanoflann
   GIT_REPOSITORY https://github.com/jlblancoc/nanoflann.git
-  GIT_TAG        v1.4.2
+  GIT_TAG        v1.6.2
 )
 
 # Add this before calling FetchContent_MakeAvailable for nanoflann
