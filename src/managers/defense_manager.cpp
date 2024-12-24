@@ -1,4 +1,5 @@
 #include "defense_manager.h"
+#include "nanoflann.hpp"
 
 namespace Aeolus
 {
