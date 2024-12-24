@@ -1,5 +1,5 @@
 #include "defense_manager.h"
-#include "nanoflann.hpp"
+#include "../thirdparty/nanoflann.hpp"
 #include "manager_mediator.h"
 #include "../constants.h"
 #include <sc2api/sc2_unit.h>
@@ -50,7 +50,7 @@ namespace Aeolus
 		// Result list to hold units in range for each start point
 		::sc2::Units units_in_range;
 		std::unordered_set<const ::sc2::Unit*> unique_units;
-		nanoflann::SearchParams params;
+		nanoflann::SearchParameters params;
 
 		if (!starting_points.empty())
 		{
@@ -76,12 +76,12 @@ namespace Aeolus
 
 				// perform range search
 				float query_point[2] = { position.x, position.y };
-				std::vector<std::pair<uint32_t, float>> matches;
-				tree.tree->radiusSearch(query_point, distance, matches, params);
+				std::vector<nanoflann::ResultItem<unsigned int, float>> search_results;;
+				tree.tree->radiusSearch(query_point, distance, search_results, params);
 
-				for (const auto& match : matches)
+				for (const auto& result : search_results)
 				{
-					const ::sc2::Unit* unit = tree.unit_map[match.first];
+					const ::sc2::Unit* unit = tree.unit_map[result.first];
 					unique_units.insert(unit);
 				}
 			}

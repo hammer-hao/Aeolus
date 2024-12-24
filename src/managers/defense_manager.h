@@ -2,7 +2,7 @@
 
 #include "manager.h"
 #include "../constants.h"
-#include "nanoflann.hpp"
+#include "../thirdparty/nanoflann.hpp"
 #include "../utils/kdtree_utils.h"
 
 #include <vector>
