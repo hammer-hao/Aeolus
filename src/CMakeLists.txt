@@ -145,6 +145,7 @@ endif ()
 
 target_link_libraries(Aeolus PRIVATE cpp_sc2)
 target_link_libraries(Aeolus PRIVATE eigen)
+target_link_libraries(Aeolus PRIVATE nanoflann)
 
 if (MINGW)
     target_link_libraries(Aeolus PRIVATE ssp)
