@@ -14,6 +14,7 @@ namespace Aeolus {
 			case ManagerName::NEUTRAL_UNIT_MANAGER: return "NeutralUnitManager";
 			case ManagerName::UNIT_FILTER_MANAGER: return "UnitFilterManager";
 			case ManagerName::UNIT_PROPERTY_MANAGER: return "UnitPropertyManager";
+			case ManagerName::DEFENSE_MANAGER: return "DefenseManager";
 			default: throw std::invalid_argument("Unknown Manager Name");
 			}
 		}

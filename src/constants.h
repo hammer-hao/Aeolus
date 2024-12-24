@@ -16,7 +16,8 @@ namespace Aeolus {
 			PATH_MANAGER,
 			NEUTRAL_UNIT_MANAGER,
 			UNIT_FILTER_MANAGER,
-			UNIT_PROPERTY_MANAGER
+			UNIT_PROPERTY_MANAGER,
+			DEFENSE_MANAGER
 		};
 
 		enum class ManagerRequestType
