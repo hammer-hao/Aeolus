@@ -41,7 +41,9 @@ namespace Aeolus {
 			GET_ALL_VESPENE_GEYSERS,
 			GET_ALL_DESTRUCTABLES,
 			GET_ALL_STRUCTURES,
+			GET_ALL_OWN_UNITS,
 			GET_OWN_WORKERS,
+			GET_OWN_TOWN_HALLS,
 			GET_ALL_ENEMY_UNITS,
 
 			// UnitPropertyManager
@@ -50,7 +52,11 @@ namespace Aeolus {
 			GROUND_RANGE,
 			AIR_RANGE,
 			GROUND_DPS,
-			AIR_DPS
+			AIR_DPS,
+
+			// DefenseManager
+			GET_UNITS_IN_RANGE,
+			GET_GROUND_THREATS_NEAR_BASES
 		};
 
 		enum class UnitRole

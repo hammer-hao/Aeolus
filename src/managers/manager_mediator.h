@@ -171,6 +171,26 @@ namespace Aeolus
 			);
 		}
 
+		::sc2::Units GetOwnTownHalls(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_OWN_TOWN_HALLS,
+				0
+			);
+		}
+
+		::sc2::Units GetAllOwnUnits(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_ALL_OWN_UNITS,
+				0
+			);
+		}
+
 		::sc2::Units GetAllMineralPatches(AeolusBot& aeolusbot)
 		{
 			return ManagerRequest<::sc2::Units, int>(
@@ -299,6 +319,29 @@ namespace Aeolus
 				constants::ManagerName::UNIT_PROPERTY_MANAGER,
 				constants::ManagerRequestType::AIR_DPS,
 				unit
+			);
+		}
+
+		// DefenseManager
+
+		::sc2::Units GetUnitsInRange(AeolusBot& aeolusbot, ::sc2::Units starting_points, float distance)
+		{
+			return ManagerRequest<::sc2::Units, ::sc2::Units, float>(
+				aeolusbot,
+				constants::ManagerName::DEFENSE_MANAGER,
+				constants::ManagerRequestType::GET_UNITS_IN_RANGE,
+				starting_points,
+				distance
+			);
+		}
+
+		::sc2::Units GetGroundThreatsNearBases(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::DEFENSE_MANAGER,
+				constants::ManagerRequestType::GET_GROUND_THREATS_NEAR_BASES,
+				0
 			);
 		}
 

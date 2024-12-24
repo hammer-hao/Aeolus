@@ -25,7 +25,11 @@ namespace Aeolus
 
 		m_patch_map = ManagerMediator::getInstance().GetMineralGatheringPoints(aeolusbot);
 
-		m_town_halls = utils::GetOwnedTownHalls(aeolusbot.Observation());
+		m_town_halls = ManagerMediator::getInstance().GetOwnTownHalls(aeolusbot);
+
+		::sc2::Units ground_threats = ManagerMediator::getInstance().GetGroundThreatsNearBases(aeolusbot);
+
+		std::cout << "mining: got " << ground_threats.size() << " ground threats" << std::endl;
 
 		for (const auto worker : workers)
 		{

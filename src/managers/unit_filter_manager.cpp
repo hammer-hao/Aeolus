@@ -18,9 +18,17 @@ namespace Aeolus
 		{	
 			return m_all_structures;
 		}
+		case (constants::ManagerRequestType::GET_ALL_OWN_UNITS):
+		{
+			return m_all_own_units;
+		}
 		case (constants::ManagerRequestType::GET_OWN_WORKERS):
 		{
 			return m_own_workers;
+		}
+		case (constants::ManagerRequestType::GET_OWN_TOWN_HALLS):
+		{
+			return m_own_townhalls;
 		}
 		case (constants::ManagerRequestType::GET_ALL_MINERAL_PATCHES):
 		{

@@ -50,14 +50,16 @@ source_group("Source Files\\utils" FILES
     utils/game_utils.cpp
     utils/grid_utils.cpp
     utils/position_utils.cpp
-    utils/unit_utils.cpp)
+    utils/unit_utils.cpp
+    utils/kdtree_utils.cpp)
 
 source_group("Header Files\\utils" FILES
     utils/feature_layer_utils.h
     utils/game_utils.h
     utils/grid_utils.h
     utils/position_utils.h
-    utils/unit_utils.h)
+    utils/unit_utils.h
+    utils/kdtree_utils.h)
 
 set(bot_sources
     Aeolus.cpp
@@ -80,7 +82,8 @@ set(bot_sources
     utils/game_utils.cpp
     utils/grid_utils.cpp
     utils/position_utils.cpp
-    utils/unit_utils.cpp)
+    utils/unit_utils.cpp
+    utils/kdtree_utils.cpp)
 
 set(bot_headers
     Aeolus.h
@@ -105,7 +108,8 @@ set(bot_headers
     utils/game_utils.h
     utils/grid_utils.h
     utils/position_utils.h
-    utils/unit_utils.h)
+    utils/unit_utils.h
+    utils/kdtree_utils.h)
 
 include(FetchContent)
 
