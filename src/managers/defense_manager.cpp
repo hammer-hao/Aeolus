@@ -2,6 +2,7 @@
 #include "../thirdparty/nanoflann.hpp"
 #include "manager_mediator.h"
 #include "../constants.h"
+#include "../utils/kdtree_utils.h"
 #include <sc2api/sc2_unit.h>
 #include <unordered_set>
 
