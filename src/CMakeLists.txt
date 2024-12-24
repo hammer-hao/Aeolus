@@ -9,7 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Group files into folders
 
 source_group("Source Files" FILES main.cpp bot.cpp constants.cpp behavior_executor.cpp Aeolus.cpp)
-source_group("Header Files" FILES Bot.h constants.h behavior_executor.h Aeolus.h)
+source_group("Header Files" FILES Bot.h constants.h behavior_executor.h Aeolus.h thirdparty/nanoflann.hpp)
 
 source_group("Source Files\\behaviors\\macro_behaviors" FILES behaviors/macro_behaviors/mining.cpp)
 source_group("Header Files\\behaviors" FILES behaviors/behavior.h)
@@ -109,7 +109,8 @@ set(bot_headers
     utils/grid_utils.h
     utils/position_utils.h
     utils/unit_utils.h
-    utils/kdtree_utils.h)
+    utils/kdtree_utils.h
+    thirdparty/nanoflann.hpp)
 
 include(FetchContent)
 
@@ -149,7 +150,6 @@ endif ()
 
 target_link_libraries(Aeolus PRIVATE cpp_sc2)
 target_link_libraries(Aeolus PRIVATE eigen)
-target_link_libraries(Aeolus PRIVATE nanoflann)
 
 if (MINGW)
     target_link_libraries(Aeolus PRIVATE ssp)

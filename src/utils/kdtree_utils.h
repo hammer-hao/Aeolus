@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <nanoflann.hpp>
+#include "../thirdparty/nanoflann.hpp"
 #include <sc2api/sc2_common.h>
 #include <sc2api/sc2_unit.h>
 #include <memory>

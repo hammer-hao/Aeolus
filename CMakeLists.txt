@@ -44,9 +44,6 @@ include(cpp_sc2)
 # eigen
 include(eigen)
 
-#nanoflann
-include(nanoflann)
-
 option(BUILD_WITH_RENDERER ON)
 
 if (BUILD_FOR_LADDER)
