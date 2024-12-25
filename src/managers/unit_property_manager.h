@@ -50,6 +50,8 @@ namespace Aeolus
 
 		std::unordered_map<uint64_t, double> m_air_dps_cache;
 
+		::sc2::Units InAttackRange(const ::sc2::Unit* unit, ::sc2::Units targets);
+
 		::sc2::UnitTypes m_unit_data_cache;
 
 		AeolusBot& m_bot;

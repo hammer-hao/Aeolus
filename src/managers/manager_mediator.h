@@ -322,6 +322,17 @@ namespace Aeolus
 			);
 		}
 
+		::sc2::Units GetUnitsInAtttackRange(AeolusBot& aeolusbot, const ::sc2::Unit* unit, ::sc2::Units targets)
+		{
+			return ManagerRequest<::sc2::Units, const ::sc2::Unit*, ::sc2::Units>(
+				aeolusbot,
+				constants::ManagerName::UNIT_PROPERTY_MANAGER,
+				constants::ManagerRequestType::UNITS_IN_ATTACK_RANGE,
+				unit,
+				targets
+			);
+		}
+
 		// DefenseManager
 
 		::sc2::Units GetUnitsInRange(AeolusBot& aeolusbot, ::sc2::Units starting_points, float distance)

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <unordered_map>
+#include <sc2api/sc2_api.h>
 #include <sc2api/sc2_common.h>
 #include <sc2api/sc2_unit.h>
 #include <sc2api/sc2_interfaces.h>
@@ -33,8 +34,16 @@ namespace Aeolus
 
 		for (const auto worker : workers)
 		{
+			double distance_to_resource = 15.0;
+			bool assigned_to_resource = (worker_to_patch.find(worker) != worker_to_patch.end());
+			if (assigned_to_resource)
+				distance_to_resource = ::sc2::Distance2D(
+					::sc2::Point2D(worker->pos), 
+					::sc2::Point2D(worker_to_patch[worker]->pos));
+
 			double percentage_health = (m_self_race == ::sc2::Race::Protoss) ? 
 				worker->shield / worker->shield_max : worker->health / worker->health_max;
+
 			if (m_keep_safe && percentage_health < m_flee_at_health_perc)
 			{
 				bool is_position_safe = ManagerMediator::getInstance().IsGroundPositionSafe(aeolusbot, ::sc2::Point2D(worker->pos));
@@ -42,7 +51,11 @@ namespace Aeolus
 				::sc2::Point2D safe_spot = ManagerMediator::getInstance().FindClosestGroundSafeSpot(aeolusbot, ::sc2::Point2D(worker->pos), 7.0);
 				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::MOVE_MOVE, safe_spot);
 			}
-			else if (worker_to_patch.find(worker) != worker_to_patch.end())
+			else if (!ground_threats.empty() && _workerIsAttacking(aeolusbot, worker, ground_threats, distance_to_resource)) // detected threats near the town hall
+			{
+				
+			}
+			else if (assigned_to_resource)
 			{
 				::sc2::Point2D start_location_2d = utils::ConvertTo2D(aeolusbot.Observation()->GetStartLocation());
 				//aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, start_location_2d);
@@ -105,5 +118,24 @@ namespace Aeolus
 				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, patch, true);
 			}
 		}
+	}
+
+	bool Mining::_workerIsAttacking(AeolusBot& aeolusbot, const ::sc2::Unit* worker, ::sc2::Units targets, double distance_to_resource)
+	{
+		// attack enemy logic:
+		if (!(utils::HasAbilityQueued(worker, ::sc2::ABILITY_ID::HARVEST_GATHER)
+			|| utils::HasAbilityQueued(worker, ::sc2::ABILITY_ID::HARVEST_RETURN))
+			|| distance_to_resource > 1.0)
+		{
+			// can attack enemy if worker has nothing to do / is far enough from mineral patch
+			::sc2::Units enemies = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, worker, targets);
+			if (!enemies.empty())
+			{
+				const ::sc2::Unit* target = utils::PickAttackTarget(targets);
+				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::ATTACK, target);
+				return true;
+			}
+		}
+		return false;
 	}
 }

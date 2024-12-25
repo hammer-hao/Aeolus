@@ -1,6 +1,7 @@
 #include "unit_property_manager.h"
 #include <sc2api/sc2_unit.h>
 #include <sc2api/sc2_data.h>
+#include <sc2api/sc2_api.h>
 #include "../Aeolus.h"
 
 namespace Aeolus
@@ -67,6 +68,13 @@ namespace Aeolus
 			auto params = std::any_cast<std::tuple<const ::sc2::Unit*>>(args);
 			const ::sc2::Unit* unit = std::get<0>(params);
 			return AirDPS(unit);
+		}
+		case constants::ManagerRequestType::UNITS_IN_ATTACK_RANGE:
+		{
+			auto params = std::any_cast<std::tuple<const ::sc2::Unit*, ::sc2::Units>>(args);
+			const ::sc2::Unit* unit = std::get<0>(params);
+			::sc2::Units targets = std::get<1>(params);
+			return InAttackRange(unit, targets);
 		}
 		default:
 			std::cout << "UnitPropertyMnager: Unknown request type!" << std::endl;
@@ -230,4 +238,23 @@ namespace Aeolus
 		// if cannot attack ground, return 0
 		return 0;
 	}
+
+	::sc2::Units UnitPropertyManager::InAttackRange(const ::sc2::Unit* unit, ::sc2::Units targets)
+	{
+		::sc2::Units units_in_range;
+		if (CanAttackGround(unit))
+		{
+			double ground_range = GroundRange(unit);
+			for (const auto& target : targets)
+			{
+				if (::sc2::Distance2D(::sc2::Point2D(unit->pos), ::sc2::Point2D(target->pos))
+					< ground_range)
+				{
+					units_in_range.push_back(target);
+				}
+			}
+		}
+		return units_in_range;
+	}
+
 }

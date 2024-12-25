@@ -65,5 +65,21 @@ namespace Aeolus
 			}
 			return false;
 		}
+
+		const ::sc2::Unit* PickAttackTarget(::sc2::Units targets)
+		{
+			const ::sc2::Unit* attack_target = targets[0];
+			float max_health = 10000.0;
+
+			for (const auto& target : targets)
+			{
+				if ((target->health + target->shield) < max_health)
+				{
+					max_health = target->health + target->shield;
+					attack_target = target;
+				}
+			}
+			return attack_target;
+		}
 	}
 }

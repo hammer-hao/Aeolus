@@ -17,5 +17,7 @@ namespace Aeolus {
 			const ::sc2::Units& units, 
 			const ::sc2::Point2D& target,
 			bool reverse = false);
+
+		const ::sc2::Unit* PickAttackTarget(::sc2::Units targets);
 	}
 }

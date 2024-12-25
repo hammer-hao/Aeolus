@@ -48,6 +48,8 @@ namespace Aeolus
 			AeolusBot& aeolusbot
 			);
 
+		bool _workerIsAttacking(AeolusBot& aeolusbot, const ::sc2::Unit* worker, ::sc2::Units targets, double distance_to_resource);
+
 		std::unordered_map<const ::sc2::Unit*, ::sc2::Point2D> m_patch_map;
 
 		::sc2::Units m_town_halls;
