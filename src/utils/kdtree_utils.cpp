@@ -5,7 +5,7 @@ namespace Aeolus
 {
 	inline size_t UnitPointCloud::kdtree_get_point_count() const { return points.size(); }
 
-	inline float UnitPointCloud::kdtree_get_pt(const size_t idx, const size_t dim) const
+	inline float UnitPointCloud::kdtree_get_pt(const unsigned long idx, const unsigned long dim) const
 	{
 		return dim == 0 ? points[idx].x : points[idx].y;
 	}

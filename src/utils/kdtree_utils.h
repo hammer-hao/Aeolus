@@ -16,7 +16,7 @@ namespace Aeolus
 		inline size_t kdtree_get_point_count() const;
 
 		// return the x or y coordinate of the ith point
-		inline float kdtree_get_pt(const size_t idx, const size_t dim) const;
+		inline float kdtree_get_pt(const unsigned long idx, const unsigned long dim) const;
 
 		// Optional: Bounding-box computation
 		template <class BBOX> bool kdtree_get_bbox(BBOX&) const;
