@@ -135,7 +135,7 @@ namespace Aeolus
 			if (!enemies.empty())
 			{
 				std::cout << "Attacking!!! " << std::endl;
-				const ::sc2::Unit* target = utils::PickAttackTarget(targets);
+				const ::sc2::Unit* target = utils::PickAttackTarget(enemies);
 				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::ATTACK, target);
 				return true;
 			}
