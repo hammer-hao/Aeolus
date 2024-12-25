@@ -5,6 +5,12 @@ namespace Aeolus
 {
 	std::unique_ptr<UnitsKDTree> UnitsKDTree::create(const std::vector<const ::sc2::Unit*>& units)
 	{
+		if (units.empty())
+		{
+			std::cout << "UnitsKDTree::create - No units to build KDTree." << std::endl;
+			return std::make_unique<UnitsKDTree>();
+		}
+
 		UnitPointCloud cloud;
 		auto units_kd_tree = std::make_unique<UnitsKDTree>();
 

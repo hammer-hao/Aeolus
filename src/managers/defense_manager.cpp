@@ -40,6 +40,9 @@ namespace Aeolus
 		std::cout << "DefenseManager: getting units..." << std::endl;
 		::sc2::Units all_enemy_units = ManagerMediator::getInstance().GetAllEnemyUnits(m_bot);
 		::sc2::Units all_own_units = ManagerMediator::getInstance().GetAllOwnUnits(m_bot);
+		for (const auto& unit : all_enemy_units) {
+			std::cout << "Unit Position: (" << unit->pos.x << ", " << unit->pos.y << ")" << std::endl;
+		}
 		std::cout << "Got " << all_enemy_units.size() << " enemy units, building tree... ";
 		m_all_enemy_units_tree = UnitsKDTree::create(all_enemy_units);
 		std::cout << "DefenseMnager: Tree Built" << std::endl;
@@ -79,6 +82,14 @@ namespace Aeolus
 				std::vector<size_t> indices; // to hold query results;
 
 				// perform range search
+				std::cout << "Query Point: (" << position.x << ", " << position.y << ")" << std::endl;
+				std::cout << "Query Radius: " << distance << std::endl;
+				for (const auto& unit : m_all_enemy_units_tree->unit_map) {
+					double this_distance = std::sqrt(std::pow(unit->pos.x - position.x, 2) + std::pow(unit->pos.y - position.y, 2));
+					std::cout << "Distance to (" << unit->pos.x << ", " << unit->pos.y << "): " << this_distance << std::endl;
+				}
+
+
 				float query_point[2] = { position.x, position.y };
 				std::vector<nanoflann::ResultItem<unsigned int, float>> search_results;
 
