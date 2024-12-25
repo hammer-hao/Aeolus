@@ -84,17 +84,16 @@ namespace Aeolus
 				// perform range search
 				std::cout << "Query Point: (" << position.x << ", " << position.y << ")" << std::endl;
 				std::cout << "Query Radius: " << distance << std::endl;
-				for (const auto& unit : m_all_enemy_units_tree->unit_map) {
+				for (const auto& unit : tree.unit_map) {
 					double this_distance = std::sqrt(std::pow(unit->pos.x - position.x, 2) + std::pow(unit->pos.y - position.y, 2));
 					std::cout << "Distance to (" << unit->pos.x << ", " << unit->pos.y << "): " << this_distance << std::endl;
 				}
-
 
 				float query_point[2] = { position.x, position.y };
 				std::vector<nanoflann::ResultItem<unsigned int, float>> search_results;
 
 				std::cout << "Got a valid starting point, getting units in range..." << std::endl;
-				tree.tree->radiusSearch(query_point, distance, search_results, params);
+				if (tree.tree) tree.tree->radiusSearch(query_point, distance, search_results, params);
 				std::cout << "Radius Search complete." << std::endl;
 
 				for (const auto& result : search_results)
