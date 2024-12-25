@@ -94,6 +94,7 @@ namespace Aeolus
 
 				std::cout << "Got a valid starting point, getting units in range..." << std::endl;
 				if (tree.tree) tree.tree->radiusSearch(query_point, distance, search_results, params);
+				else std::cout << "No existing tree!" << std::endl;
 				std::cout << "Radius Search complete." << std::endl;
 
 				for (const auto& result : search_results)
