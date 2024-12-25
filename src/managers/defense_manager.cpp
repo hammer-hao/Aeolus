@@ -37,9 +37,12 @@ namespace Aeolus
 
 	void DefenseManager::GenerateKDTrees()
 	{
+		std::cout << "DefenseManager: getting units..." << std::endl;
 		::sc2::Units all_enemy_units = ManagerMediator::getInstance().GetAllEnemyUnits(m_bot);
 		::sc2::Units all_own_units = ManagerMediator::getInstance().GetAllOwnUnits(m_bot);
+		std::cout << "Got " << all_enemy_units.size() << " enemy units, building tree... ";
 		m_all_enemy_units_tree = UnitsKDTree::create(all_enemy_units);
+		std::cout << "DefenseMnager: Tree Built" << std::endl;
 		m_all_own_units_tree = UnitsKDTree::create(all_own_units);
 	}
 
@@ -77,8 +80,11 @@ namespace Aeolus
 
 				// perform range search
 				float query_point[2] = { position.x, position.y };
-				std::vector<nanoflann::ResultItem<unsigned int, float>> search_results;;
+				std::vector<nanoflann::ResultItem<unsigned int, float>> search_results;
+
+				std::cout << "Got a valid starting point, getting units in range..." << std::endl;
 				tree.tree->radiusSearch(query_point, distance, search_results, params);
+				std::cout << "Radius Search complete." << std::endl;
 
 				for (const auto& result : search_results)
 				{
