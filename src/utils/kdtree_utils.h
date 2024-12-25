@@ -27,6 +27,9 @@ namespace Aeolus
 
 	struct UnitsKDTree
 	{
+		// Keep a persistent copy of the data so it doesn't go out of scope:
+		UnitPointCloud cloud;
+
 		std::unique_ptr<KDTree> tree;
 		std::vector<const ::sc2::Unit*> unit_map;
 
