@@ -12,14 +12,12 @@ namespace Aeolus
 	{
 		std::vector<::sc2::Point2D> points;
 
-		// return the number of points
-		inline size_t kdtree_get_point_count() const;
-
-		// return the x or y coordinate of the ith point
-		inline float kdtree_get_pt(const unsigned long idx, const unsigned long dim) const;
-
-		// Optional: Bounding-box computation
-		template <class BBOX> bool kdtree_get_bbox(BBOX&) const;
+		inline size_t kdtree_get_point_count() const { return points.size(); }
+		inline float kdtree_get_pt(const unsigned long idx, const unsigned long dim) const {
+			return dim == 0 ? points[idx].x : points[idx].y;
+		}
+		template <class BBOX>
+		bool kdtree_get_bbox(BBOX&) const { return false; }
 	};
 
 	using KDTree = nanoflann::KDTreeSingleIndexAdaptor<
