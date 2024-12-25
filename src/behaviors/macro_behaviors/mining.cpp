@@ -53,7 +53,8 @@ namespace Aeolus
 			}
 			else if (!ground_threats.empty() && _workerIsAttacking(aeolusbot, worker, ground_threats, distance_to_resource)) // detected threats near the town hall
 			{
-				
+				std::cout << "Drilling enemy! " << std::endl;
+				continue;
 			}
 			else if (assigned_to_resource)
 			{
@@ -122,15 +123,18 @@ namespace Aeolus
 
 	bool Mining::_workerIsAttacking(AeolusBot& aeolusbot, const ::sc2::Unit* worker, ::sc2::Units targets, double distance_to_resource)
 	{
+		std::cout << "distance to resource: " << distance_to_resource << std::endl;
 		// attack enemy logic:
 		if (!(utils::HasAbilityQueued(worker, ::sc2::ABILITY_ID::HARVEST_GATHER)
 			|| utils::HasAbilityQueued(worker, ::sc2::ABILITY_ID::HARVEST_RETURN))
 			|| distance_to_resource > 1.0)
 		{
+			std::cout << "Worker ready for attack! checking for units in range... " << std::endl;
 			// can attack enemy if worker has nothing to do / is far enough from mineral patch
 			::sc2::Units enemies = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, worker, targets);
 			if (!enemies.empty())
 			{
+				std::cout << "Attacking!!! " << std::endl;
 				const ::sc2::Unit* target = utils::PickAttackTarget(targets);
 				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::ATTACK, target);
 				return true;
