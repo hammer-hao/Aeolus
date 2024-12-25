@@ -247,8 +247,9 @@ namespace Aeolus
 			double ground_range = GroundRange(unit);
 			for (const auto& target : targets)
 			{
+				ground_range = ground_range + static_cast<double>(unit->radius) + static_cast<double>(target->radius);
 				if (::sc2::Distance2D(::sc2::Point2D(unit->pos), ::sc2::Point2D(target->pos))
-					< ground_range)
+					<= ground_range)
 				{
 					units_in_range.push_back(target);
 				}
