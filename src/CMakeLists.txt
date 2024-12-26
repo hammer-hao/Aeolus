@@ -11,9 +11,14 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 source_group("Source Files" FILES main.cpp bot.cpp constants.cpp behavior_executor.cpp Aeolus.cpp)
 source_group("Header Files" FILES Bot.h constants.h behavior_executor.h Aeolus.h thirdparty/nanoflann.hpp)
 
-source_group("Source Files\\behaviors\\macro_behaviors" FILES behaviors/macro_behaviors/mining.cpp)
+source_group("Source Files\\behaviors\\macro_behaviors" FILES 
+behaviors/macro_behaviors/mining.cpp
+behaviors/macro_behaviors/build_workers.cpp)
 source_group("Header Files\\behaviors" FILES behaviors/behavior.h)
-source_group("Header Files\\behaviors\\macro_behaviors" FILES behaviors/macro_behaviors/macro_behavior.h behaviors/macro_behaviors/mining.h)
+source_group("Header Files\\behaviors\\macro_behaviors" FILES 
+behaviors/macro_behaviors/macro_behavior.h 
+behaviors/macro_behaviors/mining.h
+behaviors/macro_behaviors/build_workers.h)
 
 source_group("Source Files\\Managers" FILES 
     managers/hub.cpp
@@ -68,6 +73,7 @@ set(bot_sources
     constants.cpp
     behavior_executor.cpp
     behaviors/macro_behaviors/mining.cpp
+    behaviors/macro_behaviors/build_workers.cpp
     managers/hub.cpp
     managers/manager_mediator.cpp
     managers/path_manager.cpp
@@ -90,7 +96,9 @@ set(bot_headers
     Bot.h
     constants.h
     behavior_executor.h
-    behaviors/macro_behaviors/macro_behavior.h behaviors/macro_behaviors/mining.h
+    behaviors/macro_behaviors/macro_behavior.h 
+    behaviors/macro_behaviors/mining.h
+    behaviors/macro_behaviors/build_workers.h
     behaviors/behavior.h
     managers/hub.h
     managers/manager.h
