@@ -2,6 +2,7 @@
 #include <set>
 #include <algorithm>
 #include <iterator>
+#include <sc2lib/sc2_search.h>
 
 #include "manager_mediator.h"
 #include "resource_manager.h"
@@ -11,6 +12,41 @@
 
 namespace Aeolus
 {
+	void ResourceManager::update(int iteration)
+	{
+		if (!m_initial_workers_assigned)
+		{
+			std::cout << "assigning initial workers... " << std::endl;
+			CalculateMineralGatheringPoints(m_bot, ::sc2::search::CalculateExpansionLocations(m_bot.Observation(), m_bot.Query()));
+			AssignInitialWorkers();
+			m_initial_workers_assigned = true;
+		}
+		else
+		{
+			::sc2::Units all_workers = ManagerMediator::getInstance().GetUnitsFromRole(m_bot, constants::UnitRole::GATHERING);
+			::sc2::Units unassigned_workers;
+			::sc2::Units own_town_halls = ManagerMediator::getInstance().GetOwnTownHalls(m_bot);
+			if (all_workers.empty() || own_town_halls.empty()) return;
+			else
+			{
+				::sc2::Units available_minerals = GetAvailableMinerals();
+				if (!available_minerals.empty())
+				{
+					for (const auto& worker : all_workers)
+					{
+						if (m_worker_to_patch.find(worker) == m_worker_to_patch.end()) unassigned_workers.push_back(worker);
+					}
+
+					// AssignWorkersToMineralPatches(unassigned_workers, available_minerals);
+					std::cout << "Unassigned workers: " << unassigned_workers.size() << std::endl;
+					std::cout << "Available patches:" << available_minerals.size() << std::endl;
+					_assignWorkersToMineralPatches(unassigned_workers, available_minerals);
+					std::cout << "Assigned unassigned workers to available patches!" << std::endl;
+				}
+			}
+		}
+	}
+
 	std::any ResourceManager::ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args)
 	{
 		// std::cout << "ResourceManager: Received request" << std::endl;
@@ -231,6 +267,57 @@ namespace Aeolus
 
 			m_mineral_gathering_points[mineral_field] = target;
 		}
+	}
 
+	::sc2::Units ResourceManager::GetAvailableMinerals()
+	{
+		::sc2::Units available_minerals;
+		::sc2::Units own_town_halls = ManagerMediator::getInstance().GetOwnTownHalls(m_bot);
+		if (own_town_halls.empty()) return available_minerals;
+		else 
+		{
+			::sc2::Units all_mineral_fields = ManagerMediator::getInstance().GetAllMineralPatches(m_bot);
+			for (const auto& town_hall : own_town_halls)
+			{
+				::sc2::Units townhall_minerals;
+				for (const auto& mineral_field : all_mineral_fields)
+				{
+					if (mineral_field->display_type == ::sc2::Unit::DisplayType::Visible
+						&& ::sc2::Distance2D(::sc2::Point2D(mineral_field->pos), ::sc2::Point2D(town_hall->pos)) <= 10
+						&& m_patch_to_workers[mineral_field].size() < 2)
+					{
+						townhall_minerals.push_back(mineral_field);
+					}
+				}
+				if (!townhall_minerals.empty())
+				{
+					::sc2::Units sorted_townhall_minerals = utils::SortByDistanceTo(townhall_minerals, ::sc2::Point2D(town_hall->pos));
+					available_minerals.insert(available_minerals.end(), sorted_townhall_minerals.begin(), sorted_townhall_minerals.end());
+				}
+			}
+		}
+		return available_minerals;
+	}
+
+	void ResourceManager::_assignWorkersToMineralPatches(::sc2::Units workers, ::sc2::Units patches)
+	{
+		for (const auto& worker : workers)
+		{
+			if (patches.empty()) return;
+			if (m_worker_to_patch.find(worker) != m_worker_to_patch.end()) continue;
+
+			// TODO: improve this for mid and late game!
+			const ::sc2::Unit* mineral = utils::GetClosestUnitTo(::sc2::Point2D(worker->pos), patches);
+
+			if (m_patch_to_workers[mineral].size() < 2)
+			{
+				AssignWorkerToPatch(worker, mineral);
+			}
+
+			if (m_patch_to_workers[mineral].size() >= 2)
+			{
+				patches.erase(std::remove(patches.begin(), patches.end(), mineral));
+			}
+		}
 	}
 }

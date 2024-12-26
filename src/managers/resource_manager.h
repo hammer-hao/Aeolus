@@ -36,10 +36,10 @@ namespace Aeolus
 
 		void AssignInitialWorkers();
 
+		::sc2::Units GetAvailableMinerals();
+
 		// Implement the update method.
-		void update(int iteration) override {
-			// std::cout << "Updating UnitRoleManager at iteration: " << iteration << std::endl;
-		}
+		void update(int iteration) override;
 
 	private:
 
@@ -57,6 +57,7 @@ namespace Aeolus
 			AeolusBot& aeolusbot, 
 			std::vector<::sc2::Point3D> expansion_locations);
 
+		void _assignWorkersToMineralPatches(::sc2::Units workers, ::sc2::Units patches);
 		AeolusBot& m_bot;
 	};
 }

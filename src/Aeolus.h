@@ -50,8 +50,6 @@ namespace Aeolus
         void Macro();
         void PrepareUnits();
         void RegisterBehavior(std::unique_ptr<Behavior> behavior);
-
-        bool m_assigned_initial_workers = false;
     };
 
 }

@@ -14,6 +14,7 @@
 #include "managers/manager_mediator.h"
 #include "behavior_executor.h"
 #include "behaviors/macro_behaviors/mining.h"
+#include "behaviors/macro_behaviors/build_workers.h"
 
 #ifdef BUILD_WITH_RENDERER
 
@@ -39,28 +40,11 @@ namespace Aeolus
     // Game start logic
     void AeolusBot::OnGameStart() {
         std::cout << "Aeolus: Game started!" << std::endl;
-
         //initialize feature layer
         #ifdef BUILD_WITH_RENDERER
         ::sc2::renderer::Initialize("Feature Layers", 50, 50, 2 * constants::DRAW_SIZE, 2 * constants::DRAW_SIZE);
         #endif
-
-        // Initialize resources, strategies, etc.
         manager_hub_ = Hub(*this);
-        // ManagerMediator::getInstance().Populate(*this);
-
-        // register the expansion locations here
-        m_expansion_locations = ::sc2::search::CalculateExpansionLocations(Observation(), Query());
-
-        ManagerMediator::getInstance().CalculateMineralGatheringPoints(*this, m_expansion_locations);
-
-        ::sc2::Units destructables = ManagerMediator::getInstance().GetAllDestructables(*this);
-
-        std::stringstream debugMessage;
-        debugMessage << "Got Destructables: " << destructables.size();
-        Actions()->SendChat(debugMessage.str());
-
-        ::sc2::ImageData default_grid = ManagerMediator::getInstance().GetDefaultGridData(*this);
     }
 
     // Game end logic
@@ -149,6 +133,7 @@ namespace Aeolus
         // std::cout << "Aeolus: Macroing..." << std::endl;
         // Implement custom logic for gathering resources, expanding, etc.
         RegisterBehavior(std::make_unique<Mining>());
+        RegisterBehavior(std::make_unique<BuildWorkers>());
 
         if (Observation()->GetGameLoop() % 50 == 0)
         std::cout << "current gameloop: " << Observation()->GetGameLoop() << std::endl;
@@ -202,14 +187,6 @@ namespace Aeolus
         {
             ManagerMediator::getInstance().CatchUnit(*this, unit);
         }
-
-        if (!m_assigned_initial_workers)
-        {
-            std::cout << "<<< Aeolus: Assigning (initial) workers >>>" << std::endl;
-            ManagerMediator::getInstance().AssignInitialWorkers(*this);
-            m_assigned_initial_workers = true;
-        }
-        
     }
 
     void AeolusBot::RegisterBehavior(std::unique_ptr<Behavior> behavior)
