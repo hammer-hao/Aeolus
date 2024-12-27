@@ -122,7 +122,6 @@ namespace Aeolus
 		if (it != m_worker_to_patch.end())
 		{
 			const ::sc2::Unit* patch = it->second;
-
 			auto& workers = m_patch_to_workers[patch];
 			workers.erase(std::remove(workers.begin(), workers.end(), worker), workers.end());
 
@@ -297,6 +296,15 @@ namespace Aeolus
 			}
 		}
 		return available_minerals;
+	}
+
+	void ResourceManager::OnUnitDestroyed(const ::sc2::Unit* unit)
+	{
+		auto it = m_worker_to_patch.find(unit);
+		if (it != m_worker_to_patch.end())
+		{
+			ClearAssignment(unit);
+		}
 	}
 
 	void ResourceManager::_assignWorkersToMineralPatches(::sc2::Units workers, ::sc2::Units patches)

@@ -66,6 +66,12 @@ namespace Aeolus
 			}
 		}
 
+		void OnUnitDestroyed(const ::sc2::Unit* unit)
+		{
+			m_unit_role_manager_ref->ClearRole(unit);
+			m_resource_manager_ref;
+		}
+
 		void _initializeManagers()
 		{
 			UpdateManagers(0);

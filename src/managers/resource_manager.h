@@ -36,6 +36,8 @@ namespace Aeolus
 
 		void AssignInitialWorkers();
 
+		void OnUnitDestroyed(const ::sc2::Unit* unit);
+
 		::sc2::Units GetAvailableMinerals();
 
 		// Implement the update method.

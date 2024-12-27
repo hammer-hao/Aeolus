@@ -109,6 +109,7 @@ namespace Aeolus
     // Handle unit destruction
     void AeolusBot::OnUnitDestroyed(const ::sc2::Unit* unit_) {
         std::cout << "Aeolus: Unit destroyed!" << std::endl;
+        manager_hub_.OnUnitDestroyed(unit_);
     }
 
     // Handle upgrade completion
