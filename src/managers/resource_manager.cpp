@@ -30,6 +30,7 @@ namespace Aeolus
 			else
 			{
 				::sc2::Units available_minerals = GetAvailableMinerals();
+				std::cout << "Available patches:" << available_minerals.size() << std::endl;
 				if (!available_minerals.empty())
 				{
 					for (const auto& worker : all_workers)
@@ -39,7 +40,6 @@ namespace Aeolus
 
 					// AssignWorkersToMineralPatches(unassigned_workers, available_minerals);
 					std::cout << "Unassigned workers: " << unassigned_workers.size() << std::endl;
-					std::cout << "Available patches:" << available_minerals.size() << std::endl;
 					_assignWorkersToMineralPatches(unassigned_workers, available_minerals);
 					std::cout << "Assigned unassigned workers to available patches!" << std::endl;
 				}

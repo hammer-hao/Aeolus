@@ -103,6 +103,11 @@ namespace Aeolus
 				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::MOVE_MOVE, target_position);
 				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, closest_town_hall, true);
 			}
+			else if (!utils::HasAbilityQueued(worker, ::sc2::ABILITY_ID::HARVEST_RETURN))
+			{
+				// worker has resource but for some reason does not have return minerals queued
+				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, closest_town_hall);
+			}
 		}
 		else if (!utils::HasAbilityQueued(worker, ::sc2::ABILITY_ID::HARVEST_RETURN) && worker->orders.size() < 2)
 		{
@@ -110,13 +115,23 @@ namespace Aeolus
 				&& (::sc2::DistanceSquared2D(worker_position, mineral_move_position) < constants::MINING_BOOST_MAX_RADIUS))
 				// worker is idle
 			{
-				for (const auto& order : worker->orders) {
-					// std::cout << "Order: " << static_cast<int>(order.ability_id) << std::endl;
-				}
 				// std::cout << ::sc2::DistanceSquared2D(worker_position, mineral_move_position) << std::endl;
 				// std::cout << "harvesting..." << std::endl;
 				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::MOVE_MOVE, mineral_move_position);
 				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, patch, true);
+			}
+			// on rare occations, the worker goes idle
+			else if (worker->orders.empty() || utils::HasAbilityQueued(worker, ::sc2::ABILITY_ID::STOP))
+			{
+				std::cout << "worker is idle!!" << std::endl;
+				if (worker->cargo_space_taken > 0)
+				{
+					aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, closest_town_hall, true);
+				}
+				else
+				{
+					aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, patch, true);
+				}
 			}
 		}
 	}

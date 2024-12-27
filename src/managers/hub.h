@@ -69,7 +69,7 @@ namespace Aeolus
 		void OnUnitDestroyed(const ::sc2::Unit* unit)
 		{
 			m_unit_role_manager_ref->ClearRole(unit);
-			m_resource_manager_ref;
+			m_resource_manager_ref->ClearAssignment(unit);
 		}
 
 		void _initializeManagers()
