@@ -38,6 +38,10 @@ namespace Aeolus
 		{
 			return m_vespene_geysers;
 		}
+		case (constants::ManagerRequestType::GET_ALL_RESOURCES):
+		{
+			return m_resources;
+		}
 		case (constants::ManagerRequestType::GET_ALL_DESTRUCTABLES):
 		{
 			return m_destructables;
@@ -91,10 +95,12 @@ namespace Aeolus
 				else if (constants::MINERAL_IDS.find(unit->unit_type) != constants::MINERAL_IDS.end())
 				{
 					m_mineral_fields.push_back(unit);
+					m_resources.push_back(unit);
 				}
 				else if (constants::VESPENE_IDS.find(unit->unit_type) != constants::VESPENE_IDS.end())
 				{
 					m_vespene_geysers.push_back(unit);
+					m_resources.push_back(unit);
 				}
 				else
 				{

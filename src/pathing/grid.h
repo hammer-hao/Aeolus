@@ -74,7 +74,7 @@ namespace Aeolus
             m_cached_grid = m_grid;
 		}
 
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> GetGrid();
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> GetGrid() const;
 
         void Reset() 
         {
@@ -96,12 +96,12 @@ namespace Aeolus
 
         double GetValue(int x, int y);
 
-        int GetWidth()
+        int GetWidth() const
         {
             return m_width;
         }
 
-        int GetHeight()
+        int GetHeight() const
         {
             return m_height;
         }

@@ -11,6 +11,7 @@
 #include "unit_filter_manager.h"
 #include "unit_property_manager.h"
 #include "defense_manager.h"
+#include "placement_manager.h"
 
 namespace Aeolus
 {
@@ -34,6 +35,7 @@ namespace Aeolus
 			managers.push_back(std::make_unique<PathManager>(aeolusbot));
 			managers.push_back(std::make_unique<UnitPropertyManager>(aeolusbot));
 			managers.push_back(std::make_unique<DefenseManager>(aeolusbot));
+			managers.push_back(std::make_unique<PlacementManager>(aeolusbot));
 
 			// Store raw pointers before transferring ownership
 			m_unit_filter_manager_ref = static_cast<UnitFilterManager*>(managers[0].get());
@@ -42,6 +44,7 @@ namespace Aeolus
 			m_path_manager_ref = static_cast<PathManager*>(managers[3].get());
 			m_unit_property_manager_ref = static_cast<UnitPropertyManager*>(managers[4].get());
 			m_defense_manager_ref = static_cast<DefenseManager*>(managers[5].get());
+			m_placement_manager_ref = static_cast<PlacementManager*>(managers[6].get());
 
 			m_managers.push_back(m_unit_filter_manager_ref);
 			m_managers.push_back(m_unit_role_manager_ref);
@@ -49,6 +52,7 @@ namespace Aeolus
 			m_managers.push_back(m_path_manager_ref);
 			m_managers.push_back(m_unit_property_manager_ref);
 			m_managers.push_back(m_defense_manager_ref);
+			m_managers.push_back(m_placement_manager_ref);
 
 			ManagerMediator::getInstance().AddManagers(managers);
 
@@ -77,6 +81,11 @@ namespace Aeolus
 			UpdateManagers(0);
 		}
 
+		void Initialize()
+		{
+			m_placement_manager_ref->Initialize();
+		}
+
 	private:
 		// Unique pointers for ownership
 		std::vector<Manager*> m_managers;
@@ -87,5 +96,6 @@ namespace Aeolus
 		UnitFilterManager* m_unit_filter_manager_ref;
 		UnitPropertyManager* m_unit_property_manager_ref;
 		DefenseManager* m_defense_manager_ref;
+		PlacementManager* m_placement_manager_ref;
 	};
 }

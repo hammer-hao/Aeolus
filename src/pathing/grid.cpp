@@ -5,7 +5,7 @@
 
 namespace Aeolus
 {
-	Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> Grid::GetGrid()
+	Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> Grid::GetGrid() const
 	{
 		// Get the value in Eigen Matrix form
 		return m_grid;

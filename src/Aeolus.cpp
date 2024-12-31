@@ -45,6 +45,7 @@ namespace Aeolus
         ::sc2::renderer::Initialize("Feature Layers", 50, 50, 2 * constants::DRAW_SIZE, 2 * constants::DRAW_SIZE);
         #endif
         manager_hub_ = Hub(*this);
+        manager_hub_.Initialize();
     }
 
     // Game end logic

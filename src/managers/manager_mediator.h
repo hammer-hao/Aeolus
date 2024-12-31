@@ -211,6 +211,16 @@ namespace Aeolus
 			);
 		}
 
+		::sc2::Units GetAllResources(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_ALL_RESOURCES,
+				0
+			);
+		}
+
 		::sc2::Units GetAllStructures(AeolusBot& aeolusbot)
 		{
 			return ManagerRequest<::sc2::Units, int>(
