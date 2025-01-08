@@ -3,6 +3,7 @@
 #include "manager.h"
 #include "../pathing/grid.h"
 #include <sc2api/sc2_common.h>
+#include <Eigen/Dense>
 
 namespace Aeolus
 {
@@ -39,7 +40,7 @@ namespace Aeolus
 		BUILDING_5X5
 	};
 
-	using BuildingMap = std::map<std::pair<int, int>, BuildingAttributes>;
+	using BuildingMap = std::map<std::pair<float, float>, BuildingAttributes>;
 	using BuildingTypeMap = std::unordered_map<BuildingTypes, BuildingMap>;
 	using ExpansionMap = std::vector<BuildingTypeMap>;
 
@@ -67,6 +68,20 @@ namespace Aeolus
 		AeolusBot& m_bot;
 
 		ExpansionMap m_expansion_map;
+
+		Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> m_occupied_points;
+
+		void _addPlacementPosition(
+			BuildingTypes building_type,
+			int expansion_location,
+			::sc2::Point2D position,
+			bool available = true, 
+			bool is_wall = false,
+			int building_tag = 0, 
+			bool worker_on_route = false,
+			double time_requested = 0.0,
+			bool production_pylon = false,
+			bool optimal_pylon = false);
 
 		std::vector<::sc2::Point2D> _findExansionLocations(const ::sc2::HeightMap& height_map, const Grid& placement_grid);
 

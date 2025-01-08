@@ -37,6 +37,9 @@ namespace Aeolus
 		Grid pathing_grid = Grid(m_bot.Observation()->GetGameInfo().pathing_grid);
 		const auto height_map = ::sc2::HeightMap(m_bot.Observation()->GetGameInfo());
 
+		m_occupied_points.resize(placement_grid.GetWidth(), placement_grid.GetHeight()); // (occupied points is x, y)
+		m_occupied_points.setZero();
+
 		std::vector<::sc2::Point2D> expansion_locations;
 		expansion_locations.push_back(::sc2::Point2D(m_bot.Observation()->GetStartLocation()));
 
@@ -222,7 +225,7 @@ namespace Aeolus
 		
 		debug->SendDebug();
 
-		m_expansion_map[0][BuildingTypes::BUILDING_2X2][pylon_position] = BuildingAttributes(true, true, 0, false, 0.0, true, true);
+		_addPlacementPosition(BuildingTypes::BUILDING_2X2, 0, pylon_position_float, true, true);
 
 		return main_location;
 	}
@@ -374,5 +377,21 @@ namespace Aeolus
 		}
 
 		return expansion_locations;
+	}
+
+	void PlacementManager::_addPlacementPosition(
+		BuildingTypes building_type,
+		int expansion_location,
+		::sc2::Point2D position,
+		bool available,
+		bool is_wall,
+		int building_tag,
+		bool worker_on_route,
+		double time_requested,
+		bool production_pylon,
+		bool optimal_pylon)
+	{
+		m_expansion_map[expansion_location][building_type][{position.x, position.y}] = 
+			BuildingAttributes(available, is_wall, building_tag, worker_on_route, time_requested, production_pylon, optimal_pylon);
 	}
 }
