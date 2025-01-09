@@ -275,6 +275,17 @@ namespace Aeolus
 			);
 		}
 
+		std::vector<::sc2::Point2D> GetFloodFillArea(AeolusBot& aeolusbot, ::sc2::Point2D starting_point, int max_distance)
+		{
+			return ManagerRequest<std::vector<::sc2::Point2D>, ::sc2::Point2D, int>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::GET_FLOOD_FILL_AREA,
+				starting_point,
+				max_distance
+			);
+		}
+
 		// UnitPropertyManager
 
 		bool CanAttackGround(AeolusBot& aeolusbot, const ::sc2::Unit* unit)

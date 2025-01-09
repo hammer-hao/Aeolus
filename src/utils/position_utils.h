@@ -7,6 +7,26 @@ namespace Aeolus
 {
 	namespace utils
 	{
+		/**
+		 * @brief Returns intersection points of two circles:
+		 *        Both circles have radius r.
+		 *        The first circle is centered at c1; the second is centered at c2.
+		 *
+		 * @param c1 Center of the first circle
+		 * @param c2 Center of the second circle
+		 * @param r  Radius of each circle (both are the same)
+		 * @return A vector of 0, 1, or 2 intersection points
+		 */
+		std::vector<::sc2::Point2D> circleIntersection(const ::sc2::Point2D& c1, const ::sc2::Point2D& c2, double r);
+
+		/**
+		 * @brief Returns four values of the bounding box of given positions
+		 *
+		 * @param points Points to draw the bounding box on
+		 * @return A tuple of four floats bounding given points
+		 */
+		std::tuple<float, float, float, float> GetBoundingBox(const std::vector<::sc2::Point2D>& points);
+
 		// given a point and a vector of points, get the closest point out of the vector to the given point
 		::sc2::Point2D GetClosestTo(::sc2::Point2D x, std::vector<::sc2::Point2D> y);
 

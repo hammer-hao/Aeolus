@@ -5,6 +5,7 @@
 #include "../Aeolus.h"
 #include "../managers/manager_mediator.h"
 #include <tuple>
+#include <queue>
 
 namespace Aeolus
 {
@@ -12,7 +13,7 @@ namespace Aeolus
 		: m_bot(aeolusbot), m_observation(aeolusbot.Observation()),
 		m_pathing_grid(m_observation->GetGameInfo().pathing_grid),
 		m_placing_grid(m_observation->GetGameInfo().placement_grid),
-		m_terrain_map(m_observation->GetGameInfo().terrain_height)
+		m_terrain_map(m_observation->GetGameInfo())
 	{
 	}
 
@@ -140,5 +141,70 @@ namespace Aeolus
 		// return utils::To8BPPImageData(m_default_grid, 1);
 		Grid grid = GetAStarGrid();
 		return utils::To8BPPImageData(grid, 1);
+	}
+
+	std::vector<::sc2::Point2D> MapData::GetFloodFillArea(::sc2::Point2D start_point, int max_distance)
+	{
+		int rows = m_pathing_grid.GetHeight();
+		int cols = m_pathing_grid.GetWidth();
+
+		std::vector<::sc2::Point2D> result;
+		float terrain_height = m_terrain_map.TerrainHeight(start_point);
+
+		// Track visited cells so we don't revisit them
+		std::vector<std::vector<bool>> visited(rows, std::vector<bool>(cols, false));
+
+		// Directions for traversing up/down/left/right
+		const int dirX[4] = { 1, -1, 0, 0 };
+		const int dirY[4] = { 0, 0, 1, -1 };
+
+		// BFS queue
+		std::queue<std::pair<int, int>> q;
+		int start_x = static_cast<int>(std::round(start_point.x));
+		int start_y = static_cast<int>(std::round(start_point.y));
+		q.push({ start_x, start_y });
+		visited[start_x][start_y] = true;
+
+		const unsigned int maxDistSq = max_distance * max_distance;
+
+		while (!q.empty())
+		{
+			std::pair<int, int> current = q.front();
+			q.pop();
+
+			// add current to result
+			result.push_back(::sc2::Point2D(current.first, current.second));
+
+			// check neighbours
+			for (int i = 0; i < 4; ++i)
+			{
+				std::pair<int, int> neighbor =
+				{
+					static_cast<int>(current.first + dirX[i]),
+					static_cast<int>(current.second + dirY[i])
+				};
+
+				// Check boundaries
+				if (neighbor.first < rows && neighbor.second < cols)
+				{
+					// If not visited yet
+					if (!visited[neighbor.first][neighbor.second])
+					{
+						// Check same terrain level
+						if (m_terrain_map.TerrainHeight(::sc2::Point2D(neighbor.first, neighbor.second)) == terrain_height)
+						{
+							// check distance
+							if (::sc2::DistanceSquared2D(::sc2::Point2D(neighbor.first, neighbor.second), start_point) <= maxDistSq)
+							{
+								visited[neighbor.first][neighbor.second] = true;
+								q.push(neighbor);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return result;
 	}
 }

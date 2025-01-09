@@ -87,5 +87,22 @@ namespace Aeolus
 
 		::sc2::Point2D _calculateProtossRampPylonPos(::sc2::Point2D main_location,
 			const Grid& pathing_grid, const Grid& placement_grid, const ::sc2::HeightMap& height_map);
+
+		std::vector<::sc2::Point2D> _findBuildingLocations(
+			const Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic>& kernel,
+			std::tuple<float, float, float, float> bounds,
+			size_t xStride,
+			size_t yStride,
+			const Grid& placement_grid,
+			const Grid& pathing_grid,
+			const Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> occupied_points,
+			size_t buildingWidth,
+			size_t buildingHeight);
+
+		// Naive 2D "valid" convolution, returning an Eigen::Matrix<uint8_t, Dynamic, Dynamic>
+		Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic>
+			convolve2dValid(
+				const Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic>& input,
+				const Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic>& kernel);
 	};
 }

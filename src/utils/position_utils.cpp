@@ -12,6 +12,75 @@ namespace Aeolus
 {
 	namespace utils
 	{
+		/**
+		 * @brief Returns intersection points of two circles:
+		 *        Both circles have radius r.
+		 *        The first circle is centered at c1; the second is centered at c2.
+		 *
+		 * @param c1 Center of the first circle
+		 * @param c2 Center of the second circle
+		 * @param r  Radius of each circle (both are the same)
+		 * @return A vector of 0, 1, or 2 intersection points
+		 */
+		std::vector<::sc2::Point2D> circleIntersection(const ::sc2::Point2D& c1, const ::sc2::Point2D& c2, double r) {
+			std::vector<::sc2::Point2D> result;
+
+			float d = ::sc2::Distance2D(c1, c2);
+
+			// If centers are the same and radii are the same, infinite intersections (coincident circles):
+			// For this scenario, we won't handle "infinite" solutions—just return empty or decide how you want to handle it.
+			if (d == 0.0) {
+				// Could return empty or special-case
+				return result;
+			}
+
+			// If distance between centers > sum of radii, no intersection
+			// Or if one circle is completely inside the other (d < |r - r| == 0) => no intersection
+			if (d > 2 * r || d < 0.0) {
+				return result;  // no real intersection
+			}
+
+			// Otherwise, we find the two intersection points
+			// Reference formula for intersecting two circles of equal radius:
+			//   1) Find the midpoint M between c1 and c2 along the line connecting them:
+			//      M = c1 + (d/2) * ( (c2 - c1) / d )
+			//   2) Distance from M to either intersection point = h = sqrt(r^2 - (d/2)^2)
+			//   3) Intersection points = M +/- h * ( (c2 - c1) / d ) rotated 90 degrees
+
+			float a = d / 2.0;
+			float h = std::sqrt(r * r - a * a);
+
+			// Vector from c1 to c2
+			float cx = c2.x - c1.x;
+			float cy = c2.y - c1.y;
+
+			// Midpoint M
+			float mx = c1.x + (a / d) * cx;
+			float my = c1.y + (a / d) * cy;
+
+			// Now offset +/- h in the orthonormal direction
+			// Rotate (cx, cy) by 90 deg => ( -cy, cx ) or ( cy, -cx )
+			float rx = -cy * (h / d);
+			float ry = cx * (h / d);
+
+			// Intersection points
+			::sc2::Point2D p1{ mx + rx, my + ry };
+			::sc2::Point2D p2{ mx - rx, my - ry };
+
+			if (d == 2 * r) {
+				// The two circles touch at exactly one point (p1 == p2)
+				result.push_back(p1);
+			}
+			else {
+				// They intersect in two distinct points
+				result.push_back(p1);
+				result.push_back(p2);
+			}
+
+			return result;
+		}
+
+
 		// given a point and a vector of points, get the closest point out of the vector to the given point
 		::sc2::Point2D GetClosestTo(::sc2::Point2D x, std::vector<::sc2::Point2D> y)
 		{
@@ -134,6 +203,25 @@ namespace Aeolus
 			intersections.push_back(::sc2::Point2D(b_x, b_y));
 
 			return intersections;
+		}
+
+		std::tuple<float, float, float, float> GetBoundingBox(const std::vector<::sc2::Point2D>& points)
+		{
+			float x_min = 9999.0f;
+			float x_max = 0.0f;
+			float y_min = 9999.0f;
+			float y_max = 0.0f;
+
+			for (const auto& point : points)
+			{
+				float x = point.x;
+				float y = point.y;
+				if (x < x_min) x_min = x;
+				if (x > x_max) x_max = x;
+				if (y < y_min) y_min = y;
+				if (y > y_max) y_max = y;
+			}
+			return { x_min, x_max, y_min, y_max };
 		}
 	}
 }

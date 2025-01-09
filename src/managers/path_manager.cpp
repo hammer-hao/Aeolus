@@ -53,6 +53,13 @@ namespace Aeolus
 			::sc2::Point2D position = std::get<0>(params);
 			return _isGroundPositionSafe(position);
 		}
+		case (constants::ManagerRequestType::GET_FLOOD_FILL_AREA):
+		{
+			auto params = std::any_cast<std::tuple <::sc2::Point2D, int>>(args);
+			::sc2::Point2D starting_point = std::get<0>(params);
+			int max_distance = std::get<1>(params);
+			return _getFloodFillArea(starting_point, max_distance);
+		}
 		default:
 			return 0;
 		}
@@ -149,5 +156,10 @@ namespace Aeolus
 	::sc2::ImageData PathManager::_getDefaultGridData()
 	{
 		return m_mapdata.getDefaultGridData();
+	}
+
+	std::vector<::sc2::Point2D> PathManager::_getFloodFillArea(::sc2::Point2D starting_point, int max_distance)
+	{
+		return m_mapdata.GetFloodFillArea(starting_point, max_distance);
 	}
 }
