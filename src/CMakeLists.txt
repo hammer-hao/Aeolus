@@ -13,12 +13,14 @@ source_group("Header Files" FILES Bot.h constants.h behavior_executor.h Aeolus.h
 
 source_group("Source Files\\behaviors\\macro_behaviors" FILES 
 behaviors/macro_behaviors/mining.cpp
-behaviors/macro_behaviors/build_workers.cpp)
+behaviors/macro_behaviors/build_workers.cpp
+behaviors/macro_behaviors/expand.cpp)
 source_group("Header Files\\behaviors" FILES behaviors/behavior.h)
 source_group("Header Files\\behaviors\\macro_behaviors" FILES 
 behaviors/macro_behaviors/macro_behavior.h 
 behaviors/macro_behaviors/mining.h
-behaviors/macro_behaviors/build_workers.h)
+behaviors/macro_behaviors/build_workers.h
+behaviors/macro_behaviors/expand.h)
 
 source_group("Source Files\\Managers" FILES 
     managers/hub.cpp
@@ -78,6 +80,7 @@ set(bot_sources
     behavior_executor.cpp
     behaviors/macro_behaviors/mining.cpp
     behaviors/macro_behaviors/build_workers.cpp
+    behaviors/macro_behaviors/expand.cpp
     managers/hub.cpp
     managers/manager_mediator.cpp
     managers/path_manager.cpp
@@ -105,6 +108,7 @@ set(bot_headers
     behaviors/macro_behaviors/macro_behavior.h 
     behaviors/macro_behaviors/mining.h
     behaviors/macro_behaviors/build_workers.h
+    behaviors/macro_behaviors/expand.h
     behaviors/behavior.h
     managers/hub.h
     managers/manager.h
