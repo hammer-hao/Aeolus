@@ -6,9 +6,9 @@ namespace Aeolus
 {
 	void BuildWorkers::execute(AeolusBot& aeolusbot)
 	{
-		std::cout << "BuildWorkers: current minerals: " << aeolusbot.Observation()->GetMinerals() << '\n'
-			<< "unused supply: " << aeolusbot.Observation()->GetFoodCap() - aeolusbot.Observation()->GetFoodUsed() << '\n'
-			<< std::endl;
+		//std::cout << "BuildWorkers: current minerals: " << aeolusbot.Observation()->GetMinerals() << '\n'
+		//	<< "unused supply: " << aeolusbot.Observation()->GetFoodCap() - aeolusbot.Observation()->GetFoodUsed() << '\n'
+		//	<< std::endl;
 		if (aeolusbot.Observation()->GetMinerals() >= 50 &&
 			(aeolusbot.Observation()->GetFoodCap() - aeolusbot.Observation()->GetFoodUsed()) >= 1)
 		{

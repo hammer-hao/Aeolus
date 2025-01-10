@@ -36,5 +36,6 @@ namespace Aeolus {
 
 	private:
 		std::unordered_map<constants::UnitRole, ::sc2::Units> unit_role_map_;
+		std::unordered_set<const ::sc2::Unit*> m_assigned_units;
 	};
 }

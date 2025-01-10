@@ -46,6 +46,8 @@ namespace Aeolus
 
 		::sc2::ImageData _getDefaultGridData();
 
+		Grid _getAStarGrid();
+
 		::sc2::Point2D _getClosestSafeSpot(::sc2::Point2D position, const double& radius);
 
 		std::vector<::sc2::Point2D> _getFloodFillArea(::sc2::Point2D starting_point, int max_distance);

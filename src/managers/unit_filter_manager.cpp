@@ -18,6 +18,10 @@ namespace Aeolus
 		{	
 			return m_all_structures;
 		}
+		case (constants::ManagerRequestType::GET_OWN_STRUCTURES):
+		{
+			return m_own_structures;
+		}
 		case (constants::ManagerRequestType::GET_ALL_OWN_UNITS):
 		{
 			return m_all_own_units;

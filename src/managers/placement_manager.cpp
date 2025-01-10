@@ -20,6 +20,10 @@ namespace Aeolus
 	{
 		switch (request)
 		{
+		case (constants::ManagerRequestType::GET_EXPANSION_LOCATIONS):
+		{
+			return m_expansion_locations;
+		}
 		default: return 0;
 		}
 	}
@@ -86,6 +90,8 @@ namespace Aeolus
 			expansion_locations.push_back(sc2::Point2D(location));
 		}
 
+		m_expansion_locations = expansion_locations;
+
 		for (int i = 0; i < expansion_locations.size(); ++i)
 		{
 			// avoid building within 9 distance of expansion location
@@ -95,66 +101,101 @@ namespace Aeolus
 
 			// max distance for convolution fill
 			int max_dist = 16;
+			::sc2::Point2D wall_pylon;
+			::sc2::Point2D ramp_position;
 
 			if (expansion_locations[i] == ::sc2::Point2D(m_bot.Observation()->GetStartLocation()))
 			{
-				auto wall_pylon = _calculateProtossRampPylonPos(::sc2::Point2D(m_bot.Observation()->GetStartLocation()), pathing_grid, placement_grid, height_map);
+				auto wall_positions = _calculateProtossRampPylonPos(::sc2::Point2D(m_bot.Observation()->GetStartLocation()), pathing_grid, placement_grid, height_map);
+				wall_pylon = wall_positions[0];
+				ramp_position = wall_positions[1];
 				max_dist = 22;
 
-				auto area_points = ManagerMediator::getInstance().GetFloodFillArea(m_bot, expansion_locations[i], max_dist);
+			}
 
-				std::cout << "BFS Flood fill: Found " << area_points.size() << " points. " << std::endl;
+			auto area_points = ManagerMediator::getInstance().GetFloodFillArea(m_bot, expansion_locations[i], max_dist);
 
-				/*
-				float height = height_map.TerrainHeight(area_points[0]);
-				for (const auto& point : area_points)
+			std::cout << "BFS Flood fill: Found " << area_points.size() << " points. " << std::endl;
+
+			/*
+			float height = height_map.TerrainHeight(area_points[0]);
+			for (const auto& point : area_points)
+			{
+				debug->DebugBoxOut(::sc2::Point3D(point.x, point.y, height), ::sc2::Point3D(point.x + 1, point.y + 1, height + 0.25), ::sc2::Colors::Gray);
+			}
+
+			debug->SendDebug();
+
+			*/
+
+			auto bounding_box = utils::GetBoundingBox(area_points);
+
+			// find pylon locations first
+			Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic> kernel(2, 2);
+			kernel.setOnes();
+			auto pylon_locations = _findBuildingLocations(kernel, bounding_box, 7, 7, placement_grid, pathing_grid, m_occupied_points, 2, 2);
+
+			std::cout << "found " << pylon_locations.size() << " pylon locations." << std::endl;
+
+			for (const auto& location : pylon_locations)
+			{
+				if (i == 0 && ::sc2::DistanceSquared2D(wall_pylon, location) < 56.0f) continue;
+				if (height_map.TerrainHeight(location) == height_map.TerrainHeight(expansion_locations[i]))
 				{
-					debug->DebugBoxOut(::sc2::Point3D(point.x, point.y, height), ::sc2::Point3D(point.x + 1, point.y + 1, height + 0.25), ::sc2::Colors::Gray);
-				}
-
-				debug->SendDebug();
-
-				*/
-
-				auto bounding_box = utils::GetBoundingBox(area_points);
-
-				// find pylon locations first
-				Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic> kernel(2, 2);
-				kernel.setOnes();
-				auto pylon_locations = _findBuildingLocations(kernel, bounding_box, 7, 7, placement_grid, pathing_grid, m_occupied_points, 2, 2);
-
-				std::cout << "found " << pylon_locations.size() << " pylon locations." << std::endl;
-
-				for (const auto& location : pylon_locations)
-				{
-					if (::sc2::DistanceSquared2D(wall_pylon, location) < 56.0f) continue;
-					if (height_map.TerrainHeight(location) == height_map.TerrainHeight(expansion_locations[i]))
-					{
-						_addPlacementPosition(BuildingTypes::BUILDING_2X2, i, location, true, false, 0, false, 0.0, true, false);
-						int x_begin = static_cast<int>(std::round(location.x - 1));
-						int y_begin = static_cast<int>(std::round(location.y - 1));
-						m_occupied_points.block<2, 2>(x_begin, y_begin).setConstant(1);
-					}
-				}
-
-				// find 3x3 positions for gateways, cybercore, robo, etc
-				kernel = Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic>(3, 3);
-				kernel.setOnes();
-				auto threebythree_locations = _findBuildingLocations(kernel, bounding_box, 3, 3, placement_grid, pathing_grid, m_occupied_points, 3, 3);
-				size_t num_threebythree = threebythree_locations.size();
-
-				std::cout << "found " << num_threebythree << " three by three locations." << std::endl;
-
-				for (int j = 0; j < num_threebythree; ++j)
-				{
-					// drop some placements to avoid walling in
-					if (num_threebythree > 6 && j % 4 == 0) continue;
-					if (height_map.TerrainHeight(threebythree_locations[j]) == height_map.TerrainHeight(expansion_locations[i]))
-					{
-						_addPlacementPosition(BuildingTypes::BUILDING_3X3, i, threebythree_locations[j]);
-					}
+					_addPlacementPosition(BuildingTypes::BUILDING_2X2, i, location, true, false, 0, false, 0.0, true, false);
+					int x_begin = static_cast<int>(std::round(location.x - 1));
+					int y_begin = static_cast<int>(std::round(location.y - 1));
+					m_occupied_points.block<2, 2>(x_begin, y_begin).setConstant(1);
 				}
 			}
+
+			// find 3x3 positions for gateways, cybercore, robo, etc
+			kernel = Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic>(3, 3);
+			kernel.setOnes();
+			auto threebythree_locations = _findBuildingLocations(kernel, bounding_box, 3, 3, placement_grid, pathing_grid, m_occupied_points, 3, 3);
+			size_t num_threebythree = threebythree_locations.size();
+
+			std::cout << "found " << num_threebythree << " three by three locations." << std::endl;
+
+			for (int j = 0; j < num_threebythree; ++j)
+			{
+				// drop some placements to avoid walling in
+				if (num_threebythree > 6 && j % 4 == 0) continue;
+				if (height_map.TerrainHeight(threebythree_locations[j]) == height_map.TerrainHeight(expansion_locations[i]))
+				{
+					_addPlacementPosition(BuildingTypes::BUILDING_3X3, i, threebythree_locations[j]);
+					int x_begin = static_cast<int>(std::round(threebythree_locations[j].x - 1.5f));
+					int y_begin = static_cast<int>(std::round(threebythree_locations[j].y - 1.5f));
+					m_occupied_points.block<3, 3>(x_begin, y_begin).setConstant(1);
+				}
+			}
+
+			// lastly, find 2x2 positions for additional pylons, cannons, batteries, dark shrines, etc
+			kernel = Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic>(2, 2);
+			kernel.setOnes();
+			auto twobytwo_locations = _findBuildingLocations(kernel, bounding_box, 2, 2, placement_grid, pathing_grid, m_occupied_points, 2, 2);
+			size_t num_twobytwo = twobytwo_locations.size();
+
+			std::cout << "found " << num_twobytwo << " two by two locations." << std::endl;
+
+			for (int j = 0; j < num_twobytwo; ++j)
+			{
+				// don't add any near the top ramp
+				if (i == 0 && ::sc2::DistanceSquared2D(twobytwo_locations[j], ramp_position) < 30.0f) continue;
+
+				// drop some placements to avoid walling in
+				if (num_twobytwo > 6 && j % 5 == 0) continue;
+
+				if (height_map.TerrainHeight(twobytwo_locations[j]) == height_map.TerrainHeight(expansion_locations[i]))
+				{
+					_addPlacementPosition(BuildingTypes::BUILDING_2X2, i, twobytwo_locations[j]);
+					int x_begin = static_cast<int>(std::round(twobytwo_locations[j].x - 1));
+					int y_begin = static_cast<int>(std::round(twobytwo_locations[j].y - 1));
+					m_occupied_points.block<2, 2>(x_begin, y_begin).setConstant(1);
+				}
+			}
+
+			// find optimal pylon for base
 		}
 
 		auto end = std::chrono::high_resolution_clock::now();
@@ -162,7 +203,7 @@ namespace Aeolus
 		std::cout << "Completed placement calculation in " << duration.count() << " ms." << std::endl;
 	}
 
-	::sc2::Point2D PlacementManager::_calculateProtossRampPylonPos(::sc2::Point2D main_location,
+	std::vector<::sc2::Point2D> PlacementManager::_calculateProtossRampPylonPos(::sc2::Point2D main_location,
 		const Grid& pathing_grid, const Grid& placement_grid, const ::sc2::HeightMap& height_map)
 	{
 		float x_offset = 0.5, y_offset = 0.5;
@@ -371,7 +412,7 @@ namespace Aeolus
 			m_occupied_points.block<3, 3>(building1_x, building1_y).setConstant(1);
 			m_occupied_points.block<3, 3>(building2_x, building2_y).setConstant(1);
 
-			return pylon_position;
+			return { pylon_position, upper_middle };
 		}
 	}
 
@@ -383,7 +424,10 @@ namespace Aeolus
 
 	std::vector<::sc2::Point2D> PlacementManager::_findExansionLocations(const ::sc2::HeightMap& height_map, const Grid& placement_grid)
 	{
+		if (!m_expansion_locations.empty()) return m_expansion_locations;
+
 		using namespace sc2;
+		std::vector<Point2D> final_locations;
 		std::vector<Point2D> expansion_locations;
 		Units _resources = ManagerMediator::getInstance().GetAllResources(m_bot);
 		float distance_squared_threshold = 8.5;
@@ -444,7 +488,7 @@ namespace Aeolus
 		// This helps to find valid expansions where the town hall can be placed.
 		const int offset_range = 7;
 		std::vector<Point2D> offsets;
-		offsets.reserve((2 * offset_range + 1) * (2 * offset_range + 1));
+		offsets.reserve((2 * offset_range + 1)* (2 * offset_range + 1));
 		for (int x = -offset_range; x <= offset_range; ++x)
 		{
 			for (int y = -offset_range; y <= offset_range; ++y)
@@ -521,7 +565,27 @@ namespace Aeolus
 				expansion_locations.push_back(best_point);
 		}
 
-		return expansion_locations;
+		auto* query = m_bot.Query();
+		auto* observation = m_bot.Observation();
+		auto* debug = m_bot.Debug();
+
+		std::sort(expansion_locations.begin(), expansion_locations.end(), [query, observation](::sc2::Point2D first, ::sc2::Point2D second) {
+			return query->PathingDistance(observation->GetStartLocation(), first) < query->PathingDistance(observation->GetStartLocation(), second);
+			});
+
+		int i = 0;
+		for (const auto& expansion_location : expansion_locations)
+		{
+			if (i++ > 0)
+			{
+				// debug->DebugTextOut(std::to_string(i), ::sc2::Point3D(expansion_location.x, expansion_location.y, height_map.TerrainHeight(expansion_location)));
+				// std::cout << query->PathingDistance(observation->GetStartLocation(), expansion_location) << std::endl;
+				final_locations.push_back(expansion_location);
+			}
+		}
+		// debug->SendDebug();
+
+		return final_locations;
 	}
 
 	std::vector<::sc2::Point2D> PlacementManager::_findBuildingLocations(
@@ -536,7 +600,8 @@ namespace Aeolus
 		size_t buildingHeight)
 	{
 		auto placement = placement_grid.GetGrid();
-		auto pathing = pathing_grid.GetGrid();
+		// auto pathing = pathing_grid.GetGrid();
+		auto to_avoid = ManagerMediator::getInstance().GetAstarGrid(m_bot).GetGrid();
 
 		// Extract bounds
 		int xMin = static_cast<int>(std::round(std::get<0>(bounds)));
@@ -559,7 +624,7 @@ namespace Aeolus
 				// Check the logic from the original snippet
 				if (occupied_points(i, j) == 0 &&
 					placement(j, i) == 1 &&
-					pathing(j, i) == 1)
+					to_avoid(j, i) == 1)
 				{
 					toConvolve(i - xMin, j - yMin) = 0;
 				}

@@ -7,7 +7,7 @@ namespace Aeolus
 	{
 		if (units.empty())
 		{
-			std::cout << "UnitsKDTree::create - No units to build KDTree." << std::endl;
+			// std::cout << "UnitsKDTree::create - No units to build KDTree." << std::endl;
 			return std::make_unique<UnitsKDTree>();
 		}
 

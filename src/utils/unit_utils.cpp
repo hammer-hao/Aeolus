@@ -32,7 +32,7 @@ namespace Aeolus
 			bool reverse)
 		{
 
-			std::cout << "Sorting units by distance to target..." << std::endl;
+			// std::cout << "Sorting units by distance to target..." << std::endl;
 			// copy the vector to avoid modifying the original
 			::sc2::Units sorted_units = units;
 

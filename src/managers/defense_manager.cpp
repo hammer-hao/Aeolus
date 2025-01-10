@@ -22,10 +22,37 @@ namespace Aeolus
 		{
 		case (constants::ManagerRequestType::GET_UNITS_IN_RANGE):
 		{
-			auto params = std::any_cast<std::tuple<std::vector<StartPointType>, float>>(args);
-			std::vector<StartPointType> starting_points = std::get<0>(params);
+			auto params = std::any_cast<std::tuple<std::vector<::sc2::Point2D>, float>>(args);
+			std::vector<::sc2::Point2D> starting_points = std::get<0>(params);
 			float distance = std::get<1>(params);
-			return UnitsInRange(starting_points, distance, *m_all_enemy_units_tree);
+
+			// Convert that std::vector<::sc2::Point2D> into std::vector<StartPointType>
+			std::vector<StartPointType> st_points;
+			st_points.reserve(starting_points.size());
+			for (auto& pt : starting_points)
+			{
+				// Since StartPointType = std::variant<const sc2::Unit*, sc2::Point2D>
+				// we can push_back the Point2D directly into that variant
+				st_points.push_back(pt);
+			}
+
+			return UnitsInRange(st_points, distance, *m_all_enemy_units_tree);
+		}
+		case (constants::ManagerRequestType::GET_OWN_UNITS_IN_RANGE):
+		{
+			auto params = std::any_cast<std::tuple<std::vector<::sc2::Point2D>, float>>(args);
+			std::vector<::sc2::Point2D> starting_points = std::get<0>(params);
+			float distance = std::get<1>(params);
+			// Convert that std::vector<::sc2::Point2D> into std::vector<StartPointType>
+			std::vector<StartPointType> st_points;
+			st_points.reserve(starting_points.size());
+			for (auto& pt : starting_points)
+			{
+				// Since StartPointType = std::variant<const sc2::Unit*, sc2::Point2D>
+				// we can push_back the Point2D directly into that variant
+				st_points.push_back(pt);
+			}
+			return UnitsInRange(st_points, distance, *m_all_own_units_tree);
 		}
 		case (constants::ManagerRequestType::GET_GROUND_THREATS_NEAR_BASES):
 		{
@@ -79,7 +106,7 @@ namespace Aeolus
 				float query_point[2] = { position.x, position.y };
 				std::vector<nanoflann::ResultItem<unsigned int, float>> search_results;
 				if (tree.tree) tree.tree->radiusSearch(query_point, distance * distance, search_results, params);
-				else std::cout << "No existing tree!" << std::endl;
+				// else std::cout << "No existing tree!" << std::endl;
 
 				for (const auto& result : search_results)
 				{
@@ -87,7 +114,7 @@ namespace Aeolus
 					unique_units.insert(unit);
 				}
 			}
-			units_in_range.assign(unique_units.begin(), unique_units.end());
+			if (unique_units.size() > 0) units_in_range.assign(unique_units.begin(), unique_units.end());
 		}
 		return units_in_range;
 	}

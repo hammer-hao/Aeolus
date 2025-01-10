@@ -29,7 +29,8 @@ source_group("Source Files\\Managers" FILES
     managers/unit_property_manager.cpp
     managers/placement_manager.cpp
     managers/defense_manager.cpp
-    managers/unit_role_manager.cpp)
+    managers/unit_role_manager.cpp
+    managers/building_manager.cpp)
 
 source_group("Header Files\\Managers" FILES 
     managers/hub.h
@@ -41,7 +42,8 @@ source_group("Header Files\\Managers" FILES
     managers/unit_property_manager.h
     managers/placement_manager.h
     managers/defense_manager.h
-    managers/unit_role_manager.h)
+    managers/unit_role_manager.h
+    managers/building_manager.h)
 
 source_group("Source Files\\Pathing" FILES
     pathing/grid.cpp
@@ -85,6 +87,7 @@ set(bot_sources
     managers/unit_role_manager.cpp
     managers/defense_manager.cpp
     managers/placement_manager.cpp
+    managers/building_manager.cpp
     pathing/grid.cpp
     pathing/map_data.cpp
     utils/feature_layer_utils.cpp
@@ -113,6 +116,7 @@ set(bot_headers
     managers/unit_role_manager.h
     managers/defense_manager.h
     managers/placement_manager.h
+    managers/building_manager.h
     pathing/grid.h
     pathing/map_data.h
     pathing/weight_costs.h

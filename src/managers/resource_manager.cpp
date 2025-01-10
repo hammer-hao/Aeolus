@@ -8,6 +8,7 @@
 #include "resource_manager.h"
 #include "../utils/unit_utils.h"
 #include "../utils/position_utils.h"
+#include "../utils/game_utils.h"
 #include "../Aeolus.h"
 
 namespace Aeolus
@@ -30,7 +31,7 @@ namespace Aeolus
 			else
 			{
 				::sc2::Units available_minerals = GetAvailableMinerals();
-				std::cout << "Available patches:" << available_minerals.size() << std::endl;
+				// std::cout << "Available patches:" << available_minerals.size() << std::endl;
 				if (!available_minerals.empty())
 				{
 					for (const auto& worker : all_workers)
@@ -39,9 +40,9 @@ namespace Aeolus
 					}
 
 					// AssignWorkersToMineralPatches(unassigned_workers, available_minerals);
-					std::cout << "Unassigned workers: " << unassigned_workers.size() << std::endl;
+					// std::cout << "Unassigned workers: " << unassigned_workers.size() << std::endl;
 					_assignWorkersToMineralPatches(unassigned_workers, available_minerals);
-					std::cout << "Assigned unassigned workers to available patches!" << std::endl;
+					// std::cout << "Assigned unassigned workers to available patches!" << std::endl;
 				}
 			}
 		}
@@ -97,6 +98,13 @@ namespace Aeolus
 				return 0;
 			}
 		}
+		case (constants::ManagerRequestType::SELECT_WORKER_TO_TARGET):
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Point2D>>(args);
+			::sc2::Point2D target_location = std::get<0>(params);
+			return _selectWorker(target_location);
+		}
+		default: return 0;
 		}
 	}
 
@@ -327,5 +335,20 @@ namespace Aeolus
 				patches.erase(std::remove(patches.begin(), patches.end(), mineral));
 			}
 		}
+	}
+
+	const ::sc2::Unit* ResourceManager::_selectWorker(::sc2::Point2D target_position)
+	{
+		::sc2::Units all_workers = ManagerMediator::getInstance().GetUnitsFromRole(m_bot, constants::UnitRole::GATHERING);
+		::sc2::Units all_available_workers;
+
+		for (const auto& worker : all_workers)
+		{
+			if (!utils::IsWorkerCarryingResource(worker)) all_available_workers.push_back(worker);
+		}
+
+		auto closest_worker = utils::GetClosestUnitTo(target_position, all_available_workers);
+
+		return closest_worker;
 	}
 }

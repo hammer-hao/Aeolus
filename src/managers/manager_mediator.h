@@ -9,6 +9,7 @@
 
 #include "../constants.h"
 #include "manager.h"
+#include "../pathing/grid.h"
 
 namespace Aeolus
 {
@@ -89,6 +90,17 @@ namespace Aeolus
 				);
 		};
 
+		int AssignRole(AeolusBot& aeolusbot, const::sc2::Unit* unit, constants::UnitRole unit_role)
+		{
+			return ManagerRequest<int, const ::sc2::Unit*, constants::UnitRole>(
+				aeolusbot,
+				constants::ManagerName::UNIT_ROLE_MANAGER,
+				constants::ManagerRequestType::ASSIGN_ROLE,
+				unit,
+				unit_role
+			);
+		}
+
 		int CatchUnit(AeolusBot& aeolusbot, const ::sc2::Unit* unit)
 		{
 			// std::cout << "ManagerMediator: sending CatchUnits request to UnitRoleManager..." << std::endl;
@@ -148,6 +160,16 @@ namespace Aeolus
 			);
 		}
 
+		const ::sc2::Unit* SelectWorkerClosestTo(AeolusBot& aeolusbot, ::sc2::Point2D target_location)
+		{
+			return ManagerRequest<const ::sc2::Unit*, ::sc2::Point2D>(
+				aeolusbot,
+				constants::ManagerName::RESOURCE_MANAGER,
+				constants::ManagerRequestType::SELECT_WORKER_TO_TARGET,
+				target_location
+			);
+		}
+
 		// UnitFilterManager
 
 		::sc2::Units GetAllDestructables(AeolusBot& aeolusbot)
@@ -187,6 +209,16 @@ namespace Aeolus
 				aeolusbot,
 				constants::ManagerName::UNIT_FILTER_MANAGER,
 				constants::ManagerRequestType::GET_ALL_OWN_UNITS,
+				0
+			);
+		}
+
+		::sc2::Units GetAllOwnStructures(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_OWN_STRUCTURES,
 				0
 			);
 		}
@@ -250,6 +282,16 @@ namespace Aeolus
 				aeolusbot,
 				constants::ManagerName::PATH_MANAGER,
 				constants::ManagerRequestType::GET_DEFAULT_GRID_DATA,
+				0
+			);
+		}
+
+		Grid GetAstarGrid(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<Grid, int>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::GET_ASTAR_GRID_DATA,
 				0
 			);
 		}
@@ -354,14 +396,35 @@ namespace Aeolus
 			);
 		}
 
+		::sc2::ABILITY_ID GetCreationAbility(AeolusBot& aeolusbot, ::sc2::UNIT_TYPEID unit_id)
+		{
+			return ManagerRequest<::sc2::ABILITY_ID, ::sc2::UNIT_TYPEID>(
+				aeolusbot,
+				constants::ManagerName::UNIT_PROPERTY_MANAGER,
+				constants::ManagerRequestType::GET_CREATION_ABILITY,
+				unit_id
+			);
+		}
+
 		// DefenseManager
 
-		::sc2::Units GetUnitsInRange(AeolusBot& aeolusbot, ::sc2::Units starting_points, float distance)
+		::sc2::Units GetUnitsInRange(AeolusBot& aeolusbot, std::vector<::sc2::Point2D> starting_points, float distance)
 		{
-			return ManagerRequest<::sc2::Units, ::sc2::Units, float>(
+			return ManagerRequest<::sc2::Units, std::vector<::sc2::Point2D>, float>(
 				aeolusbot,
 				constants::ManagerName::DEFENSE_MANAGER,
 				constants::ManagerRequestType::GET_UNITS_IN_RANGE,
+				starting_points,
+				distance
+			);
+		}
+
+		::sc2::Units GetOwnUnitsInRange(AeolusBot& aeolusbot, std::vector<::sc2::Point2D> starting_points, float distance)
+		{
+			return ManagerRequest<::sc2::Units, std::vector<::sc2::Point2D>, float>(
+				aeolusbot,
+				constants::ManagerName::DEFENSE_MANAGER,
+				constants::ManagerRequestType::GET_OWN_UNITS_IN_RANGE,
 				starting_points,
 				distance
 			);
@@ -374,6 +437,48 @@ namespace Aeolus
 				constants::ManagerName::DEFENSE_MANAGER,
 				constants::ManagerRequestType::GET_GROUND_THREATS_NEAR_BASES,
 				0
+			);
+		}
+
+		// PlacementManager
+
+		std::vector<::sc2::Point2D> GetExpansionLocations(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<std::vector<::sc2::Point2D>, int>(
+				aeolusbot,
+				constants::ManagerName::PLACEMENT_MANAGER,
+				constants::ManagerRequestType::GET_EXPANSION_LOCATIONS,
+				0
+			);
+		}
+
+		// BuildingManager
+
+		bool BuildWithSpecificWorker(AeolusBot& aeolusbot,
+			const ::sc2::Unit* worker,
+			::sc2::UNIT_TYPEID structure_type,
+			::sc2::Point2D position,
+			bool assign_role = true)
+		{
+			return ManagerRequest<bool, const ::sc2::Unit*, ::sc2::UNIT_TYPEID, ::sc2::Point2D, bool>
+				(
+					aeolusbot,
+					constants::ManagerName::BUILDING_MANAGER,
+					constants::ManagerRequestType::BUILD_WITH_SPECIFIC_WORKER,
+					worker,
+					structure_type,
+					position,
+					assign_role
+				);
+		}
+
+		size_t GetNumberPending(AeolusBot& aeolusbot, ::sc2::UNIT_TYPEID structure_type)
+		{
+			return ManagerRequest<size_t, ::sc2::UNIT_TYPEID>(
+				aeolusbot,
+				constants::ManagerName::BUILDING_MANAGER,
+				constants::ManagerRequestType::GET_NUMBER_PENDING,
+				structure_type
 			);
 		}
 

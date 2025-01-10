@@ -15,6 +15,7 @@
 #include "behavior_executor.h"
 #include "behaviors/macro_behaviors/mining.h"
 #include "behaviors/macro_behaviors/build_workers.h"
+#include "behaviors/macro_behaviors/expand.h"
 
 #ifdef BUILD_WITH_RENDERER
 
@@ -97,8 +98,8 @@ namespace Aeolus
 
     // Handle idle units
     void AeolusBot::OnUnitIdle(const ::sc2::Unit* unit_) {
-        std::cout << "Aeolus: " << sc2::UnitTypeToName(unit_->unit_type) 
-            << "(" << unit_->tag << ") is idle" << std::endl;
+        // std::cout << "Aeolus: " << sc2::UnitTypeToName(unit_->unit_type) 
+        //     << "(" << unit_->tag << ") is idle" << std::endl;
         // Assign new orders to the idle unit
     }
 
@@ -136,6 +137,7 @@ namespace Aeolus
         // Implement custom logic for gathering resources, expanding, etc.
         RegisterBehavior(std::make_unique<Mining>());
         RegisterBehavior(std::make_unique<BuildWorkers>());
+        RegisterBehavior(std::make_unique<Expand>());
 
         if (Observation()->GetGameLoop() % 50 == 0)
         std::cout << "current gameloop: " << Observation()->GetGameLoop() << std::endl;

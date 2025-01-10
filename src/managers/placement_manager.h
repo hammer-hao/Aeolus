@@ -69,6 +69,8 @@ namespace Aeolus
 
 		ExpansionMap m_expansion_map;
 
+		std::vector<::sc2::Point2D> m_expansion_locations;
+
 		Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> m_occupied_points;
 
 		void _addPlacementPosition(
@@ -85,7 +87,7 @@ namespace Aeolus
 
 		std::vector<::sc2::Point2D> _findExansionLocations(const ::sc2::HeightMap& height_map, const Grid& placement_grid);
 
-		::sc2::Point2D _calculateProtossRampPylonPos(::sc2::Point2D main_location,
+		std::vector<::sc2::Point2D> _calculateProtossRampPylonPos(::sc2::Point2D main_location,
 			const Grid& pathing_grid, const Grid& placement_grid, const ::sc2::HeightMap& height_map);
 
 		std::vector<::sc2::Point2D> _findBuildingLocations(

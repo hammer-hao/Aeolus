@@ -30,7 +30,7 @@ namespace Aeolus
 
 		::sc2::Units ground_threats = ManagerMediator::getInstance().GetGroundThreatsNearBases(aeolusbot);
 
-		std::cout << "mining: got " << ground_threats.size() << " ground threats" << std::endl;
+		// std::cout << "mining: got " << ground_threats.size() << " ground threats" << std::endl;
 
 		for (const auto worker : workers)
 		{
@@ -62,6 +62,16 @@ namespace Aeolus
 				//aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, start_location_2d);
 				//aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, m_patch_map[worker_to_patch[worker]]);
 
+				if (!worker->orders.empty())
+				{
+					if (worker->orders[0].ability_id == ::sc2::ABILITY_ID::HARVEST_GATHER
+						&& worker->orders[0].target_unit_tag != worker_to_patch[worker]->tag)
+					{
+						// shift worker to correct resource if it ends up on wrong one
+						std::cout << "Worker in the wrong spot, shifting..." << std::endl;
+						aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, worker_to_patch[worker]);
+					}
+				}
 				DoMiningBoost(worker_to_patch[worker], worker, m_patch_map, aeolusbot);
 			}
 		}
@@ -138,13 +148,13 @@ namespace Aeolus
 
 	bool Mining::_workerIsAttacking(AeolusBot& aeolusbot, const ::sc2::Unit* worker, ::sc2::Units targets, double distance_to_resource)
 	{
-		std::cout << "distance to resource: " << distance_to_resource << std::endl;
+		// std::cout << "distance to resource: " << distance_to_resource << std::endl;
 		// attack enemy logic:
 		if (!(utils::HasAbilityQueued(worker, ::sc2::ABILITY_ID::HARVEST_GATHER)
 			|| utils::HasAbilityQueued(worker, ::sc2::ABILITY_ID::HARVEST_RETURN))
 			|| distance_to_resource > 1.0)
 		{
-			std::cout << "Worker ready for attack! checking for units in range... " << std::endl;
+			// std::cout << "Worker ready for attack! checking for units in range... " << std::endl;
 			// can attack enemy if worker has nothing to do / is far enough from mineral patch
 			::sc2::Units enemies = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, worker, targets);
 			if (!enemies.empty())

@@ -76,6 +76,12 @@ namespace Aeolus
 			::sc2::Units targets = std::get<1>(params);
 			return InAttackRange(unit, targets);
 		}
+		case constants::ManagerRequestType::GET_CREATION_ABILITY:
+		{
+			auto params = std::any_cast<std::tuple<::sc2::UNIT_TYPEID>>(args);
+			::sc2::UNIT_TYPEID unit_id = std::get<0>(params);
+			return CreationAbility(unit_id);
+		}
 		default:
 			std::cout << "UnitPropertyMnager: Unknown request type!" << std::endl;
 		}
@@ -256,6 +262,17 @@ namespace Aeolus
 			}
 		}
 		return units_in_range;
+	}
+
+	::sc2::ABILITY_ID UnitPropertyManager::CreationAbility(::sc2::UNIT_TYPEID unit_id)
+	{
+		uint64_t id = static_cast<uint64_t>(unit_id);
+		auto it = m_creation_ability_cache.find(id);
+		if (it != m_creation_ability_cache.end()) return m_creation_ability_cache[id];
+
+		::sc2::ABILITY_ID result = m_unit_data_cache[id].ability_id;
+		m_creation_ability_cache[id] = result;
+		return result;
 	}
 
 }

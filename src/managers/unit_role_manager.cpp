@@ -21,6 +21,14 @@ namespace Aeolus {
 			constants::UnitRole role = std::get<0>(params);
 			return GetUnitsFromRole(role);
 		}
+		case constants::ManagerRequestType::ASSIGN_ROLE:
+		{
+			auto params = std::any_cast<std::tuple<const ::sc2::Unit*, constants::UnitRole>>(args);
+			const ::sc2::Unit* unit = std::get<0>(params);
+			constants::UnitRole unit_role = std::get<1>(params);
+			AssignRole(unit, unit_role);
+			return 0;
+		}
 		case constants::ManagerRequestType::CATCH_UNIT:
 		{
 			// std::cout << "UnitRoleManager: Request Dispatched to CatchUnit" << std::endl;
@@ -47,6 +55,7 @@ namespace Aeolus {
 			if (it != units.end())
 			{
 				units.erase(it);
+				m_assigned_units.erase(unit);
 				//std::cout << "Unit with tag" << unit->tag << "Cleared from role "
 				//	<< static_cast<int>(role) << std::endl;
 				return;
@@ -60,13 +69,14 @@ namespace Aeolus {
 		
 		ClearRole(unit);
 		unit_role_map_[unitrole].push_back(unit);
+		m_assigned_units.insert(unit);
 		// std::cout << "Assigned role to unit of type: " << unit->unit_type << std::endl;
 	}
 
 	void UnitRoleManager::CatchUnit(const ::sc2::Unit* unit)
 	{
 		// std::cout << "UnitRoleManager: Catching Unit... " << std::endl;
-
+		if (m_assigned_units.find(unit) != m_assigned_units.end()) return;
 		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_PROBE ||
 			unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_SCV ||
 			unit->unit_type == ::sc2::UNIT_TYPEID::ZERG_DRONE)

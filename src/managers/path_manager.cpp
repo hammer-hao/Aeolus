@@ -40,6 +40,10 @@ namespace Aeolus
 		{
 			return _getDefaultGridData();
 		}
+		case (constants::ManagerRequestType::GET_ASTAR_GRID_DATA):
+		{
+			return _getAStarGrid();
+		}
 		case (constants::ManagerRequestType::FIND_CLOSEST_GROUND_SAFE_SPOT):
 		{
 			auto params = std::any_cast<std::tuple<::sc2::Point2D, double>>(args);
@@ -158,8 +162,14 @@ namespace Aeolus
 		return m_mapdata.getDefaultGridData();
 	}
 
+	Grid PathManager::_getAStarGrid()
+	{
+		return m_mapdata.GetAStarGrid();
+	}
+
 	std::vector<::sc2::Point2D> PathManager::_getFloodFillArea(::sc2::Point2D starting_point, int max_distance)
 	{
 		return m_mapdata.GetFloodFillArea(starting_point, max_distance);
 	}
 }
+

@@ -55,6 +55,8 @@ namespace Aeolus
 
 		std::unordered_map<const ::sc2::Unit*, ::sc2::Point2D> m_mineral_gathering_points;
 
+		const ::sc2::Unit* _selectWorker(::sc2::Point2D target_position);
+
 		void CalculateMineralGatheringPoints(
 			AeolusBot& aeolusbot, 
 			std::vector<::sc2::Point3D> expansion_locations);
