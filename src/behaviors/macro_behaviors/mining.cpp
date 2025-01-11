@@ -26,6 +26,25 @@ namespace Aeolus
 
 		m_patch_map = ManagerMediator::getInstance().GetMineralGatheringPoints(aeolusbot);
 
+		/*
+		#ifdef BUILD_WITH_RENDERER
+
+		auto* debug = aeolusbot.Debug();
+
+		auto height_map = ::sc2::HeightMap(aeolusbot.Observation()->GetGameInfo());
+
+		for (const auto& point : m_patch_map)
+		{
+			debug->DebugSphereOut(::sc2::Point3D(point.second.x, point.second.y, height_map.TerrainHeight(point.second)), 0.25, ::sc2::Colors::White);
+			debug->DebugLineOut(::sc2::Point3D(point.second.x, point.second.y, height_map.TerrainHeight(point.second)),
+				::sc2::Point3D(point.first.first, point.first.second, height_map.TerrainHeight(::sc2::Point2D(point.first.first, point.first.second))),
+				::sc2::Colors::Red);
+		}
+
+		#endif
+
+		*/
+
 		m_town_halls = ManagerMediator::getInstance().GetOwnTownHalls(aeolusbot);
 
 		::sc2::Units ground_threats = ManagerMediator::getInstance().GetGroundThreatsNearBases(aeolusbot);
@@ -58,7 +77,7 @@ namespace Aeolus
 			}
 			else if (assigned_to_resource)
 			{
-				::sc2::Point2D start_location_2d = utils::ConvertTo2D(aeolusbot.Observation()->GetStartLocation());
+				// ::sc2::Point2D start_location_2d = utils::ConvertTo2D(aeolusbot.Observation()->GetStartLocation());
 				//aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, start_location_2d);
 				//aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, m_patch_map[worker_to_patch[worker]]);
 
@@ -68,10 +87,12 @@ namespace Aeolus
 						&& worker->orders[0].target_unit_tag != worker_to_patch[worker]->tag)
 					{
 						// shift worker to correct resource if it ends up on wrong one
-						std::cout << "Worker in the wrong spot, shifting..." << std::endl;
+						// std::cout << "Worker in the wrong spot, shifting..." << std::endl;
 						aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, worker_to_patch[worker]);
 					}
 				}
+				// debug->DebugLineOut(worker->pos, worker_to_patch[worker]->pos, ::sc2::Colors::Red);
+
 				DoMiningBoost(worker_to_patch[worker], worker, m_patch_map, aeolusbot);
 			}
 		}
@@ -80,7 +101,7 @@ namespace Aeolus
 	void Mining::DoMiningBoost(
 		const ::sc2::Unit* patch,
 		const ::sc2::Unit* worker,
-		const std::unordered_map<const ::sc2::Unit*, ::sc2::Point2D>& patch_target_map,
+		const std::map<std::pair<float, float>, ::sc2::Point2D>& patch_target_map,
 		AeolusBot& aeolusbot)
 	{
 		/*
@@ -94,7 +115,8 @@ namespace Aeolus
 		*/
 		// std::cout << "Doing mining boost..." << std::endl;
 
-		::sc2::Point2D mineral_move_position = m_patch_map[patch];
+		// ::sc2::Point2D mineral_move_position = m_patch_map[patch];
+		::sc2::Point2D mineral_move_position = m_patch_map[{patch->pos.x, patch->pos.y}];
 		::sc2::Point2D worker_position = utils::ConvertTo2D(worker->pos);
 		const ::sc2::Unit* closest_town_hall = utils::GetClosestUnitTo(utils::ConvertTo2D(worker->pos), m_town_halls);
 
@@ -121,6 +143,16 @@ namespace Aeolus
 		}
 		else if (!utils::HasAbilityQueued(worker, ::sc2::ABILITY_ID::HARVEST_RETURN) && worker->orders.size() < 2)
 		{
+			const auto height_map = ::sc2::HeightMap(aeolusbot.Observation()->GetGameInfo());
+			/*
+			aeolusbot.Debug()->DebugTextOut(
+				std::to_string(::sc2::DistanceSquared2D(worker_position, mineral_move_position)),
+				worker->pos);
+			aeolusbot.Debug()->DebugLineOut(
+				::sc2::Point3D(mineral_move_position.x, mineral_move_position.y, height_map.TerrainHeight(mineral_move_position)),
+				worker->pos,
+				::sc2::Colors::Teal);
+			*/
 			if ((constants::MINING_BOOST_MIN_RADIUS < ::sc2::DistanceSquared2D(worker_position, mineral_move_position))
 				&& (::sc2::DistanceSquared2D(worker_position, mineral_move_position) < constants::MINING_BOOST_MAX_RADIUS))
 				// worker is idle

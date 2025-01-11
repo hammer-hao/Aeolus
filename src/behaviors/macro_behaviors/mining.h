@@ -44,13 +44,13 @@ namespace Aeolus
 		void DoMiningBoost(
 			const ::sc2::Unit* patch, 
 			const ::sc2::Unit* worker,
-			const std::unordered_map<const ::sc2::Unit*, ::sc2::Point2D>& patch_target_map,
+			const std::map<std::pair<float, float>, ::sc2::Point2D>& patch_target_map,
 			AeolusBot& aeolusbot
 			);
 
 		bool _workerIsAttacking(AeolusBot& aeolusbot, const ::sc2::Unit* worker, ::sc2::Units targets, double distance_to_resource);
 
-		std::unordered_map<const ::sc2::Unit*, ::sc2::Point2D> m_patch_map;
+		std::map<std::pair<float, float>, ::sc2::Point2D> m_patch_map;
 
 		::sc2::Units m_town_halls;
 	};

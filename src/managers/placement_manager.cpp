@@ -22,7 +22,9 @@ namespace Aeolus
 		{
 		case (constants::ManagerRequestType::GET_EXPANSION_LOCATIONS):
 		{
-			return m_expansion_locations;
+			Grid placement_grid = Grid(m_bot.Observation()->GetGameInfo().placement_grid);
+			const auto height_map = ::sc2::HeightMap(m_bot.Observation()->GetGameInfo());
+			return  _findExansionLocations(height_map, placement_grid);
 		}
 		default: return 0;
 		}
@@ -61,7 +63,7 @@ namespace Aeolus
 			}
 		}
 
-		debug->SendDebug();
+		// debug->SendDebug();
 
 		#endif
 
@@ -80,17 +82,7 @@ namespace Aeolus
 		m_occupied_points.resize(placement_grid.GetWidth(), placement_grid.GetHeight()); // (occupied points is x, y)
 		m_occupied_points.setZero();
 
-		std::vector<::sc2::Point2D> expansion_locations;
-
-		auto* debug = m_bot.Debug();
-
-		for (const auto& location : _findExansionLocations(height_map, placement_grid))
-		{
-			float z = height_map.TerrainHeight(location);
-			expansion_locations.push_back(sc2::Point2D(location));
-		}
-
-		m_expansion_locations = expansion_locations;
+		std::vector<::sc2::Point2D> expansion_locations = _findExansionLocations(height_map, placement_grid);
 
 		for (int i = 0; i < expansion_locations.size(); ++i)
 		{
@@ -573,19 +565,29 @@ namespace Aeolus
 			return query->PathingDistance(observation->GetStartLocation(), first) < query->PathingDistance(observation->GetStartLocation(), second);
 			});
 
-		int i = 0;
-		for (const auto& expansion_location : expansion_locations)
+		::sc2::Point2D enemy_base;
+		for (const auto& location : expansion_locations)
 		{
-			if (i++ > 0)
+			if (query->PathingDistance(observation->GetStartLocation(), location) == 0)
 			{
-				// debug->DebugTextOut(std::to_string(i), ::sc2::Point3D(expansion_location.x, expansion_location.y, height_map.TerrainHeight(expansion_location)));
-				// std::cout << query->PathingDistance(observation->GetStartLocation(), expansion_location) << std::endl;
-				final_locations.push_back(expansion_location);
+				if (location != ::sc2::Point2D(observation->GetStartLocation()))
+				{
+					enemy_base = location;
+					break;
+				}
 			}
 		}
-		// debug->SendDebug();
 
-		return final_locations;
+		// Move the enemy base to the end.
+		auto it = std::find(expansion_locations.begin(), expansion_locations.end(), enemy_base);
+		if (it != expansion_locations.end()) {
+			expansion_locations.erase(it); // Remove the enemy base.
+			expansion_locations.push_back(enemy_base); // Add it to the end.
+		}
+
+		m_expansion_locations = expansion_locations;
+
+		return expansion_locations;
 	}
 
 	std::vector<::sc2::Point2D> PlacementManager::_findBuildingLocations(

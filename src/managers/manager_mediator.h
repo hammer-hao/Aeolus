@@ -151,9 +151,9 @@ namespace Aeolus
 			);
 		}
 
-		std::unordered_map<const ::sc2::Unit*, ::sc2::Point2D> GetMineralGatheringPoints(AeolusBot& aeolusbot)
+		std::map<std::pair<float, float>, ::sc2::Point2D> GetMineralGatheringPoints(AeolusBot& aeolusbot)
 		{
-			return ManagerRequest<std::unordered_map<const ::sc2::Unit*, ::sc2::Point2D>>(
+			return ManagerRequest<std::map<std::pair<float, float>, ::sc2::Point2D>>(
 				aeolusbot,
 				constants::ManagerName::RESOURCE_MANAGER,
 				constants::ManagerRequestType::GET_MINERAL_GATHERING_POINTS

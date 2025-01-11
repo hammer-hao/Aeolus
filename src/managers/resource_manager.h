@@ -53,13 +53,13 @@ namespace Aeolus
 
 		std::unordered_map<const ::sc2::Unit*, const ::sc2::Unit*> m_worker_to_patch;
 
-		std::unordered_map<const ::sc2::Unit*, ::sc2::Point2D> m_mineral_gathering_points;
+		std::map<std::pair<float, float>, ::sc2::Point2D> m_mineral_gathering_points;
 
 		const ::sc2::Unit* _selectWorker(::sc2::Point2D target_position);
 
 		void CalculateMineralGatheringPoints(
 			AeolusBot& aeolusbot, 
-			std::vector<::sc2::Point3D> expansion_locations);
+			std::vector<::sc2::Point2D> expansion_locations);
 
 		void _assignWorkersToMineralPatches(::sc2::Units workers, ::sc2::Units patches);
 		AeolusBot& m_bot;

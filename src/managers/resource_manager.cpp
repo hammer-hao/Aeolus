@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <iterator>
 #include <sc2lib/sc2_search.h>
+#include <sc2api/sc2_map_info.h>
+#include <sc2api/sc2_common.h>
 
 #include "manager_mediator.h"
 #include "resource_manager.h"
@@ -18,7 +20,8 @@ namespace Aeolus
 		if (!m_initial_workers_assigned)
 		{
 			std::cout << "assigning initial workers... " << std::endl;
-			CalculateMineralGatheringPoints(m_bot, ::sc2::search::CalculateExpansionLocations(m_bot.Observation(), m_bot.Query()));
+			// CalculateMineralGatheringPoints(m_bot, ::sc2::search::CalculateExpansionLocations(m_bot.Observation(), m_bot.Query()));
+			CalculateMineralGatheringPoints(m_bot, ManagerMediator::getInstance().GetExpansionLocations(m_bot));
 			AssignInitialWorkers();
 			m_initial_workers_assigned = true;
 		}
@@ -71,8 +74,8 @@ namespace Aeolus
 		}
 		case constants::ManagerRequestType::CALCULATE_MINERAL_GATHERING_POINTS:
 		{
-			auto params = std::any_cast<std::tuple<std::vector<::sc2::Point3D> >>(args);
-			std::vector<::sc2::Point3D> expansion_locations = std::get<0>(params);
+			auto params = std::any_cast<std::tuple<std::vector<::sc2::Point2D> >>(args);
+			std::vector<::sc2::Point2D> expansion_locations = std::get<0>(params);
 			CalculateMineralGatheringPoints(aeolusbot, expansion_locations);
 			return 0;
 		}
@@ -147,19 +150,6 @@ namespace Aeolus
 		std::cout << "*** Initial worker assignment in process... ***" << std::endl;
 		// assigned workers keeps a list of workers already assigned to mineral patch
 		std::set<::sc2::Tag> assigned_workers;
-		
-		#ifdef BUILD_WITH_RENDERER
-		auto* debug = m_bot.Debug();
-
-		// Assuming sorted_minerals is a vector of mineral patch pointers
-		for (size_t i = 0; i < sorted_minerals.size(); ++i) {
-			debug->DebugSphereOut(sorted_minerals[i]->pos, 1.0, sc2::Colors::Green);
-			debug->DebugTextOut("Mineral " + std::to_string(i), sorted_minerals[i]->pos, sc2::Colors::Yellow);
-		}
-
-		debug->DebugSphereOut(m_bot.Observation()->GetStartLocation(), 3.0, sc2::Colors::Red);
-		debug->SendDebug();
-		#endif
 
 		// Send all the debug commands at once
 
@@ -214,7 +204,7 @@ namespace Aeolus
 
 	void ResourceManager::CalculateMineralGatheringPoints(
 		AeolusBot& aeolusbot,
-		std::vector<::sc2::Point3D> expansion_locations)
+		std::vector<::sc2::Point2D> expansion_locations)
 	{
 
 		// Calculate targets for Move commands towards mineral fields when speed mining.
@@ -224,20 +214,16 @@ namespace Aeolus
 
 		for (auto& mineral_field : mineral_fields)
 		{
-			::sc2::Point2D mineral_position{ utils::ConvertTo2D(mineral_field->pos) };
-
-			/*
-			fix this later:
+			::sc2::Point2D mineral_position{ mineral_field->pos };
 
 			::sc2::Point2D mining_center{
 				utils::GetClosestTo(
-					utils::ConvertTo2D(mineral_field->pos),
-					utils::ConvertTo2DVector(expansion_locations)
+					mineral_field->pos,
+					expansion_locations
 				)
 			};
 
-			*/
-			::sc2::Point2D mining_center = utils::ConvertTo2D(aeolusbot.Observation()->GetStartLocation());
+			// ::sc2::Point2D mining_center = utils::ConvertTo2D(aeolusbot.Observation()->GetStartLocation());
 
 			::sc2::Point2D target{ utils::GetPositionTowards(
 				mineral_position, 
@@ -272,7 +258,7 @@ namespace Aeolus
 				}
 			}
 
-			m_mineral_gathering_points[mineral_field] = target;
+			m_mineral_gathering_points[{mineral_field->pos.x, mineral_field->pos.y}] = target;
 		}
 	}
 
