@@ -1,6 +1,7 @@
 #pragma once
 #include <sc2api/sc2_common.h>
 #include <sc2api/sc2_unit.h>
+#include <sc2api/sc2_map_info.h>
 #include <vector>
 
 namespace Aeolus
@@ -50,5 +51,15 @@ namespace Aeolus
 			const float& radius_x,
 			const float& radius_y
 		);
+
+		/*
+		Returns whether the position is covered by the power field of a pylon.
+		*/
+		bool isPowered(::sc2::Point2D position, ::sc2::Units pylons, const ::sc2::HeightMap& terrain_height, float pylon_build_progress = 1.0);
+
+		/*
+		Returns whether the give structure can be placed at the given position
+		*/
+		bool canPlaceStructure(int start_x, int start_y, int building_size, ::sc2::PlacementGrid& placement_grid);
 	}
 }

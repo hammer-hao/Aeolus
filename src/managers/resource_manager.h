@@ -5,6 +5,7 @@
 #include <sc2api/sc2_unit.h>
 #include <sc2api/sc2_interfaces.h>
 #include <unordered_map>
+#include <optional>
 
 // Forward declaration to avoid circular dependency
 namespace Aeolus {
@@ -51,17 +52,24 @@ namespace Aeolus
 
 		std::unordered_map<const ::sc2::Unit*, ::sc2::Units> m_patch_to_workers;
 
+		std::unordered_map<const ::sc2::Unit*, ::sc2::Units> m_geyser_to_workers;
+
 		std::unordered_map<const ::sc2::Unit*, const ::sc2::Unit*> m_worker_to_patch;
+
+		std::unordered_map<const ::sc2::Unit*, const ::sc2::Unit*> m_worker_to_geyser;
 
 		std::map<std::pair<float, float>, ::sc2::Point2D> m_mineral_gathering_points;
 
-		const ::sc2::Unit* _selectWorker(::sc2::Point2D target_position);
+		void _removeWorkerFromMineral(const ::sc2::Unit* worker);
+
+		std::optional<const ::sc2::Unit*> _selectWorker(::sc2::Point2D target_position);
 
 		void CalculateMineralGatheringPoints(
 			AeolusBot& aeolusbot, 
 			std::vector<::sc2::Point2D> expansion_locations);
 
 		void _assignWorkersToMineralPatches(::sc2::Units workers, ::sc2::Units patches);
+		void _assignWorkersToGasBuildings(const ::sc2::Units& workers, const ::sc2::Units& gas_buildings);
 		AeolusBot& m_bot;
 	};
 }

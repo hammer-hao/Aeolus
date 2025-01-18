@@ -13,18 +13,41 @@
 #include <queue>
 #include <cmath>
 #include <stdexcept>
+#include <optional>
 
 namespace Aeolus
 {
+	PlacementManager::PlacementManager(AeolusBot& aeolusbot) : m_bot(aeolusbot), 
+		m_height_map(aeolusbot.Observation()->GetGameInfo()),
+		m_placement_grid(aeolusbot.Observation()->GetGameInfo())
+	{
+		m_expansion_map.resize(16);
+	}
+
 	std::any PlacementManager::ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args)
 	{
 		switch (request)
 		{
 		case (constants::ManagerRequestType::GET_EXPANSION_LOCATIONS):
 		{
-			Grid placement_grid = Grid(m_bot.Observation()->GetGameInfo().placement_grid);
-			const auto height_map = ::sc2::HeightMap(m_bot.Observation()->GetGameInfo());
-			return  _findExansionLocations(height_map, placement_grid);
+			// Grid placement_grid = Grid(m_bot.Observation()->GetGameInfo().placement_grid);
+			// const auto height_map = ::sc2::HeightMap(m_bot.Observation()->GetGameInfo());
+			return  _findExansionLocations();
+		}
+		case (constants::ManagerRequestType::REQUEST_BUILDING_PLACEMENT):
+		{
+			auto params = std::any_cast<std::tuple<int, ::sc2::UNIT_TYPEID, bool, bool, bool, bool, float, bool, ::sc2::Point2D>>(args);
+			int base_index = std::get<0>(params);
+			::sc2::UNIT_TYPEID structure_id = std::get<1>(params);
+			bool is_wall = std::get<2>(params);
+			bool find_alternative = std::get<3>(params);
+			bool reserve_placement = std::get<4>(params);
+			bool within_power_field = std::get<5>(params);
+			float pylon_build_progress = std::get<6>(params);
+			bool build_close_to = std::get<7>(params);
+			::sc2::Point2D close_to = std::get<8>(params);
+			return _requestBuildingPlacement(base_index, structure_id, is_wall, find_alternative, reserve_placement,
+				within_power_field, pylon_build_progress, build_close_to, close_to);
 		}
 		default: return 0;
 		}
@@ -32,10 +55,11 @@ namespace Aeolus
 
 	void PlacementManager::update(int iteration)
 	{
+		/*
 		// generate debug outputs for placements
 		#ifdef BUILD_WITH_RENDERER
 
-		const auto height_map = ::sc2::HeightMap(m_bot.Observation()->GetGameInfo());
+		// const auto height_map = ::sc2::HeightMap(m_bot.Observation()->GetGameInfo());
 
 		auto* debug = m_bot.Debug();
 
@@ -43,7 +67,7 @@ namespace Aeolus
 		{
 			for (const auto& building : expansion[BuildingTypes::BUILDING_2X2])
 			{
-				float terrain_height = height_map.TerrainHeight(::sc2::Point2D(building.first.first, building.first.second));
+				float terrain_height = m_height_map.TerrainHeight(::sc2::Point2D(building.first.first, building.first.second));
 				::sc2::Point3D min = ::sc2::Point3D(building.first.first - 1, building.first.second - 1, terrain_height);
 				::sc2::Point3D max = ::sc2::Point3D(building.first.first + 1, building.first.second + 1, terrain_height + 0.25);
 				std::stringstream pos;
@@ -53,7 +77,7 @@ namespace Aeolus
 			}
 			for (const auto& building : expansion[BuildingTypes::BUILDING_3X3])
 			{
-				float terrain_height = height_map.TerrainHeight(::sc2::Point2D(building.first.first, building.first.second));
+				float terrain_height = m_height_map.TerrainHeight(::sc2::Point2D(building.first.first, building.first.second));
 				::sc2::Point3D min = ::sc2::Point3D(building.first.first - 1.5, building.first.second - 1.5, terrain_height);
 				::sc2::Point3D max = ::sc2::Point3D(building.first.first + 1.5, building.first.second + 1.5, terrain_height + 0.25);
 				std::stringstream pos;
@@ -63,10 +87,10 @@ namespace Aeolus
 			}
 		}
 
-		// debug->SendDebug();
+		debug->SendDebug();
 
 		#endif
-
+		*/
 	}
 
 	void PlacementManager::Initialize()
@@ -77,12 +101,12 @@ namespace Aeolus
 
 		Grid placement_grid = Grid(m_bot.Observation()->GetGameInfo().placement_grid);
 		Grid pathing_grid = Grid(m_bot.Observation()->GetGameInfo().pathing_grid);
-		const auto height_map = ::sc2::HeightMap(m_bot.Observation()->GetGameInfo());
+		// const auto height_map = ::sc2::HeightMap(m_bot.Observation()->GetGameInfo());
 
 		m_occupied_points.resize(placement_grid.GetWidth(), placement_grid.GetHeight()); // (occupied points is x, y)
 		m_occupied_points.setZero();
 
-		std::vector<::sc2::Point2D> expansion_locations = _findExansionLocations(height_map, placement_grid);
+		std::vector<::sc2::Point2D> expansion_locations = _findExansionLocations();
 
 		for (int i = 0; i < expansion_locations.size(); ++i)
 		{
@@ -98,7 +122,7 @@ namespace Aeolus
 
 			if (expansion_locations[i] == ::sc2::Point2D(m_bot.Observation()->GetStartLocation()))
 			{
-				auto wall_positions = _calculateProtossRampPylonPos(::sc2::Point2D(m_bot.Observation()->GetStartLocation()), pathing_grid, placement_grid, height_map);
+				auto wall_positions = _calculateProtossRampPylonPos(::sc2::Point2D(m_bot.Observation()->GetStartLocation()), pathing_grid, placement_grid);
 				wall_pylon = wall_positions[0];
 				ramp_position = wall_positions[1];
 				max_dist = 22;
@@ -132,7 +156,7 @@ namespace Aeolus
 			for (const auto& location : pylon_locations)
 			{
 				if (i == 0 && ::sc2::DistanceSquared2D(wall_pylon, location) < 56.0f) continue;
-				if (height_map.TerrainHeight(location) == height_map.TerrainHeight(expansion_locations[i]))
+				if (m_height_map.TerrainHeight(location) == m_height_map.TerrainHeight(expansion_locations[i]))
 				{
 					_addPlacementPosition(BuildingTypes::BUILDING_2X2, i, location, true, false, 0, false, 0.0, true, false);
 					int x_begin = static_cast<int>(std::round(location.x - 1));
@@ -153,7 +177,7 @@ namespace Aeolus
 			{
 				// drop some placements to avoid walling in
 				if (num_threebythree > 6 && j % 4 == 0) continue;
-				if (height_map.TerrainHeight(threebythree_locations[j]) == height_map.TerrainHeight(expansion_locations[i]))
+				if (m_height_map.TerrainHeight(threebythree_locations[j]) == m_height_map.TerrainHeight(expansion_locations[i]))
 				{
 					_addPlacementPosition(BuildingTypes::BUILDING_3X3, i, threebythree_locations[j]);
 					int x_begin = static_cast<int>(std::round(threebythree_locations[j].x - 1.5f));
@@ -178,7 +202,7 @@ namespace Aeolus
 				// drop some placements to avoid walling in
 				if (num_twobytwo > 6 && j % 5 == 0) continue;
 
-				if (height_map.TerrainHeight(twobytwo_locations[j]) == height_map.TerrainHeight(expansion_locations[i]))
+				if (m_height_map.TerrainHeight(twobytwo_locations[j]) == m_height_map.TerrainHeight(expansion_locations[i]))
 				{
 					_addPlacementPosition(BuildingTypes::BUILDING_2X2, i, twobytwo_locations[j]);
 					int x_begin = static_cast<int>(std::round(twobytwo_locations[j].x - 1));
@@ -196,7 +220,7 @@ namespace Aeolus
 	}
 
 	std::vector<::sc2::Point2D> PlacementManager::_calculateProtossRampPylonPos(::sc2::Point2D main_location,
-		const Grid& pathing_grid, const Grid& placement_grid, const ::sc2::HeightMap& height_map)
+		const Grid& pathing_grid, const Grid& placement_grid)
 	{
 		float x_offset = 0.5, y_offset = 0.5;
 
@@ -268,7 +292,7 @@ namespace Aeolus
 			{
 				avg.first += p.first;
 				avg.second += p.second;
-				float terrain_height = height_map.TerrainHeight(::sc2::Point2D(p.first, p.second));
+				float terrain_height = m_height_map.TerrainHeight(::sc2::Point2D(p.first, p.second));
 				if (terrain_height > highest) highest = terrain_height;
 				if (terrain_height < lowest) lowest = terrain_height;
 			}
@@ -289,7 +313,7 @@ namespace Aeolus
 
 		for (const auto& point : main_ramp_cluster)
 		{
-			float z = height_map.TerrainHeight(::sc2::Point2D(point.first, point.second));
+			float z = m_height_map.TerrainHeight(::sc2::Point2D(point.first, point.second));
 			// debug->DebugSphereOut(::sc2::Point3D(point.first, point.second, z), 0.5, ::sc2::Colors::Green);
 		}
 
@@ -299,7 +323,7 @@ namespace Aeolus
 		std::vector<std::pair<int, int>> rampUpperPoints;
 		for (auto& pt : main_ramp_cluster)
 		{
-			float terrain_height = height_map.TerrainHeight(::sc2::Point2D(pt.first, pt.second));
+			float terrain_height = m_height_map.TerrainHeight(::sc2::Point2D(pt.first, pt.second));
 			std::cout << "Terrain height:" << terrain_height << std::endl;
 			if (terrain_height > maxHeight) {
 				maxHeight = terrain_height;
@@ -311,10 +335,12 @@ namespace Aeolus
 			}
 		}
 
+		std::cout << "Found " << rampUpperPoints.size() << " Ramp upper points." << std::endl;
+
 		float UpperxSum = 0, UpperySum = 0;
 		for (const auto& point : rampUpperPoints)
 		{
-			float z = height_map.TerrainHeight(::sc2::Point2D(point.first, point.second));
+			float z = m_height_map.TerrainHeight(::sc2::Point2D(point.first, point.second));
 			// debug->DebugSphereOut(::sc2::Point3D(point.first, point.second, z), 0.5, ::sc2::Colors::Red);
 			UpperxSum += point.first;
 			UpperySum += point.second;
@@ -326,7 +352,7 @@ namespace Aeolus
 		std::vector<std::pair<int, int>> rampLowerPoints;
 		float minHeight = 9999.0f;
 		for (auto& pt : main_ramp_cluster) {
-			float h = height_map.TerrainHeight(::sc2::Point2D(pt.first, pt.second));
+			float h = m_height_map.TerrainHeight(::sc2::Point2D(pt.first, pt.second));
 			if (h < minHeight) {
 				minHeight = h;
 				rampLowerPoints.clear();
@@ -340,7 +366,7 @@ namespace Aeolus
 		float lowerxSum = 0, lowerySum = 0;
 		for (const auto& point : rampLowerPoints)
 		{
-			float z = height_map.TerrainHeight(::sc2::Point2D(point.first, point.second));
+			float z = m_height_map.TerrainHeight(::sc2::Point2D(point.first, point.second));
 			// debug->DebugSphereOut(::sc2::Point3D(point.first, point.second, z), 0.5, ::sc2::Colors::Blue);
 			lowerxSum += point.first;
 			lowerySum += point.second;
@@ -348,8 +374,9 @@ namespace Aeolus
 		::sc2::Point2D lower_middle = { lowerxSum / rampLowerPoints.size(), lowerySum / rampLowerPoints.size() };
 		// debug->DebugSphereOut(::sc2::Point3D(lower_middle.x, lower_middle.y, height_map.TerrainHeight(lower_middle)), 0.5, ::sc2::Colors::Purple);
 
+		std::cout << "Found " << rampLowerPoints.size() << " Ramp lower points." << std::endl;
 
-		if (rampUpperPoints.size() == 2)
+		if (rampUpperPoints.size() >= 2)
 		{
 			::sc2::Point2D p1 = { rampUpperPoints[0].first + x_offset, rampUpperPoints[0].second + y_offset };
 			::sc2::Point2D p2 = { rampUpperPoints[1].first + x_offset, rampUpperPoints[1].second + y_offset };
@@ -414,7 +441,7 @@ namespace Aeolus
 	 * on comparable terrain levels, and then determines valid town-hall placement points for each cluster.
 	 */
 
-	std::vector<::sc2::Point2D> PlacementManager::_findExansionLocations(const ::sc2::HeightMap& height_map, const Grid& placement_grid)
+	std::vector<::sc2::Point2D> PlacementManager::_findExansionLocations()
 	{
 		if (!m_expansion_locations.empty()) return m_expansion_locations;
 
@@ -450,7 +477,7 @@ namespace Aeolus
 						{
 							float distance = Distance2D(resource_a->pos, resource_b->pos);
 							float height_diff = 
-								std::fabs(height_map.TerrainHeight(Point2D(resource_a->pos)) - height_map.TerrainHeight(Point2D(resource_b->pos)));
+								std::fabs(m_height_map.TerrainHeight(Point2D(resource_a->pos)) - m_height_map.TerrainHeight(Point2D(resource_b->pos)));
 
 							if (distance <= distance_squared_threshold && height_diff < 10.0f)
 							{
@@ -524,7 +551,7 @@ namespace Aeolus
 				// Must be buildable at candidate location. 
 				// Our placement grid might be a boolean or 1/0 for valid builds.
 				// Check placement feasibility.
-				if (placement_grid.GetGrid()(static_cast<int>(rounded.y), static_cast<int>(rounded.x)) == 0) continue;
+				if (m_placement_grid.IsPlacable(rounded) == false) continue;
 
 				// Check each resource for minimum required distance (6 for minerals, 7 for geysers).
 				bool valid = true;
@@ -710,6 +737,169 @@ namespace Aeolus
 			}
 		}
 		return result;
+	}
+
+	std::optional<::sc2::Point2D> PlacementManager::_requestBuildingPlacement(int base_number, ::sc2::UNIT_TYPEID structure_type,
+		bool is_wall,
+		bool find_alternative,
+		bool reserve_placement,
+		bool within_power_field,
+		float pylon_build_progress,
+		bool build_close_to,
+		::sc2::Point2D close_to)
+	{
+		::sc2::Point2D result;
+		size_t at_base = base_number;
+
+		BuildingTypes building_type = _structureToBuildingSize(structure_type);
+		if (building_type == NOT_FOUND) return std::nullopt;
+
+		auto available_positions = _findPotentialPlacementsAtBase(building_type, base_number, within_power_field, pylon_build_progress);
+
+		if (available_positions.empty())
+		{
+			if (!find_alternative)
+			{
+				std::cout << "Not available position for building size near base no. " << base_number << std::endl;
+				return std::nullopt;
+			}
+			else
+			{
+				for (int i = base_number + 1; i <= 8; ++i)
+				{
+					at_base = i;
+					available_positions = _findPotentialPlacementsAtBase(building_type, at_base, within_power_field, pylon_build_progress);
+					if (!available_positions.empty()) break;
+				}
+				std::cout << "Not available position for building size anywhere on the map." << std::endl;
+				return std::nullopt;
+			}
+		}
+
+		if (!build_close_to)
+		{
+			result = utils::GetClosestTo(_findExansionLocations()[base_number], available_positions);
+		}
+		else
+		{
+			result = utils::GetClosestTo(close_to, available_positions);
+		}
+
+		if (is_wall)
+		{
+			for (const auto& position : available_positions)
+			{
+				if (m_expansion_map[base_number][building_type][{position.x, position.y}].is_wall)
+				{
+					result = position;
+					break;
+				}
+			}
+		}
+		else if (structure_type == ::sc2::UNIT_TYPEID::PROTOSS_PYLON)
+		{
+			std::vector<::sc2::Point2D> optimal_pylons;
+			for (const auto& position : available_positions)
+			if (!m_expansion_map[base_number][building_type][{position.x, position.y}].is_wall
+				&& m_expansion_map[base_number][building_type][{position.x, position.y}].optimal_pylon)
+				optimal_pylons.push_back(position);
+			if (!optimal_pylons.empty()) result = utils::GetClosestTo(_findExansionLocations()[base_number], optimal_pylons);
+		}
+
+		if (reserve_placement)
+		{
+			m_expansion_map[at_base][building_type][{result.x, result.y}].worker_on_route = true;
+			m_expansion_map[at_base][building_type][{result.x, result.y}].time_requested = m_bot.Observation()->GetGameLoop();
+		}
+
+		return result;
+	}
+
+	std::vector<::sc2::Point2D> PlacementManager::_findPotentialPlacementsAtBase(BuildingTypes building_size, 
+		int base_index,
+		bool within_power_field, 
+		float pylon_build_progress)
+	{
+		std::vector<::sc2::Point2D> result;
+		auto potential_placements = m_expansion_map[base_index][building_size];
+		std::cout << "PlacementManager: selecting from " << potential_placements.size() << "potential placements. " << std::endl;
+		::sc2::Units own_pylons;
+
+		if (within_power_field)
+		{
+			::sc2::Units structures = ManagerMediator::getInstance().GetAllOwnStructures(m_bot);
+			for (const auto& structure : structures)
+			{
+				if (structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_PYLON)
+				{
+					if (structure->build_progress >= pylon_build_progress)
+					{
+						own_pylons.push_back(structure);
+					}
+				}
+			}
+			if (own_pylons.empty()) return result;
+		}
+
+		for (const auto& candidate : potential_placements)
+		{
+			if (candidate.second.available && !candidate.second.worker_on_route)
+			{
+				::sc2::Point2D pos = { candidate.first.first, candidate.first.second };
+				if (!within_power_field
+					|| utils::isPowered(pos, own_pylons, m_height_map))
+				{
+					if (_canPlaceStructure(pos, building_size)) result.push_back(pos);
+				}
+			}
+		}
+		std::cout << "PlacementManager: out of the potential placements there are " << potential_placements.size() << "available placements. " << std::endl;
+		return result;
+	}
+
+	bool PlacementManager::_canPlaceStructure(::sc2::Point2D position, BuildingTypes building_size, bool is_geyser)
+	{
+		if (is_geyser)
+		{
+			return false;
+		}
+		float building_radius;
+		if (building_size == BUILDING_2X2) building_radius = 1.0f;
+		else if (building_size == BUILDING_3X3) building_radius = 1.5f;
+		else if (building_size == BUILDING_5X5) building_radius = 2.5f;
+		else return false;
+		
+		int start_x = static_cast<int>(std::round(position.x - building_radius));
+		int start_y = static_cast<int>(std::round(position.y - building_radius));
+		int size = static_cast<int>(std::round(building_radius * 2));
+
+		return utils::canPlaceStructure(start_x, start_y, size, m_placement_grid);
+	}
+		
+
+	BuildingTypes PlacementManager::_structureToBuildingSize(::sc2::UNIT_TYPEID structure_id)
+	{
+		switch (structure_id)
+		{
+		// 2x2s
+		case (::sc2::UNIT_TYPEID::PROTOSS_PHOTONCANNON): return BUILDING_2X2;
+		case (::sc2::UNIT_TYPEID::PROTOSS_PYLON): return BUILDING_2X2;
+		case (::sc2::UNIT_TYPEID::PROTOSS_SHIELDBATTERY): return BUILDING_2X2;
+		case (::sc2::UNIT_TYPEID::PROTOSS_DARKSHRINE): return BUILDING_2X2;
+		// 3x3s
+		case (::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE): return BUILDING_3X3;
+		case (::sc2::UNIT_TYPEID::PROTOSS_FLEETBEACON): return BUILDING_3X3;
+		case (::sc2::UNIT_TYPEID::PROTOSS_FORGE): return BUILDING_3X3;
+		case (::sc2::UNIT_TYPEID::PROTOSS_GATEWAY): return BUILDING_3X3;
+		case (::sc2::UNIT_TYPEID::PROTOSS_ROBOTICSFACILITY): return BUILDING_3X3;
+		case (::sc2::UNIT_TYPEID::PROTOSS_ROBOTICSBAY): return BUILDING_3X3;
+		case (::sc2::UNIT_TYPEID::PROTOSS_STARGATE): return BUILDING_3X3;
+		case (::sc2::UNIT_TYPEID::PROTOSS_TEMPLARARCHIVE): return BUILDING_3X3;
+		case (::sc2::UNIT_TYPEID::PROTOSS_TWILIGHTCOUNCIL): return BUILDING_3X3;
+		// 5x5
+		case (::sc2::UNIT_TYPEID::PROTOSS_NEXUS): return BUILDING_5X5;
+		default: return NOT_FOUND;
+		}
 	}
 
 	void PlacementManager::_addPlacementPosition(

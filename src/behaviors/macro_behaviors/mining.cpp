@@ -5,6 +5,7 @@
 #include <sc2api/sc2_unit.h>
 #include <sc2api/sc2_interfaces.h>
 #include <sc2api/sc2_action.h>
+#include <optional>
 
 #include "../../managers/manager_mediator.h"
 #include "../../constants.h"
@@ -22,7 +23,8 @@ namespace Aeolus
 		
 		// std::cout << "<<< Mining Behavior: Executing... >>>" << std::endl;
 		::sc2::Units workers = ManagerMediator::getInstance().GetUnitsFromRole(aeolusbot, constants::UnitRole::GATHERING);
-		std::unordered_map<const ::sc2::Unit*, const ::sc2::Unit*> worker_to_patch = ManagerMediator::getInstance().GetWorkersToPatch(aeolusbot);
+		auto worker_to_geyser = ManagerMediator::getInstance().GetWorkersToGeyser(aeolusbot);
+		auto worker_to_patch = ManagerMediator::getInstance().GetWorkersToPatch(aeolusbot);
 
 		m_patch_map = ManagerMediator::getInstance().GetMineralGatheringPoints(aeolusbot);
 
@@ -54,11 +56,23 @@ namespace Aeolus
 		for (const auto worker : workers)
 		{
 			double distance_to_resource = 15.0;
-			bool assigned_to_resource = (worker_to_patch.find(worker) != worker_to_patch.end());
-			if (assigned_to_resource)
-				distance_to_resource = ::sc2::Distance2D(
-					::sc2::Point2D(worker->pos), 
-					::sc2::Point2D(worker_to_patch[worker]->pos));
+
+
+			bool assigned_to_mineral = (worker_to_patch.find(worker) != worker_to_patch.end());
+			bool assigned_to_gas = (worker_to_geyser.find(worker) != worker_to_geyser.end());
+			std::optional<const ::sc2::Unit*> mining_target = std::nullopt;
+
+			if (assigned_to_mineral) mining_target = worker_to_patch[worker];
+			if (assigned_to_gas) mining_target = worker_to_geyser[worker];
+			if (mining_target.has_value())
+			distance_to_resource = ::sc2::Distance2D(
+				::sc2::Point2D(worker->pos),
+				::sc2::Point2D(mining_target.value()->pos));
+			else
+			{
+				std::cout << "Mining: No mining target!" << std::endl;
+				continue;
+			}
 
 			double percentage_health = (m_self_race == ::sc2::Race::Protoss) ? 
 				worker->shield / worker->shield_max : worker->health / worker->health_max;
@@ -75,7 +89,7 @@ namespace Aeolus
 				std::cout << "Drilling enemy! " << std::endl;
 				continue;
 			}
-			else if (assigned_to_resource)
+			else
 			{
 				// ::sc2::Point2D start_location_2d = utils::ConvertTo2D(aeolusbot.Observation()->GetStartLocation());
 				//aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, start_location_2d);
@@ -84,35 +98,34 @@ namespace Aeolus
 				if (!worker->orders.empty())
 				{
 					if (worker->orders[0].ability_id == ::sc2::ABILITY_ID::HARVEST_GATHER
-						&& worker->orders[0].target_unit_tag != worker_to_patch[worker]->tag)
+						&& worker->orders[0].target_unit_tag != mining_target.value()->tag)
 					{
 						// shift worker to correct resource if it ends up on wrong one
 						// std::cout << "Worker in the wrong spot, shifting..." << std::endl;
-						aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, worker_to_patch[worker]);
+						aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, mining_target.value());
 					}
 				}
 				// debug->DebugLineOut(worker->pos, worker_to_patch[worker]->pos, ::sc2::Colors::Red);
 
-				DoMiningBoost(worker_to_patch[worker], worker, m_patch_map, aeolusbot);
+				if (assigned_to_mineral) DoMiningBoost(mining_target.value(), worker, m_patch_map, aeolusbot);
+				else if (assigned_to_gas) DoStandardMining(mining_target.value(), worker, aeolusbot);
 			}
 		}
 	}
 
+	/**
+	* Perform the trick so that worker does not decelerate.
+	* This avoids worker deceleration when mining by issuing a Move command near a
+	* mineral patch/townhall and then issuing a Gather or Return command once the
+	* worker is close enough to immediately perform the action instead of issuing a
+	* Gather command and letting the SC2 engine manage the worker.
+	*/
 	void Mining::DoMiningBoost(
 		const ::sc2::Unit* patch,
 		const ::sc2::Unit* worker,
 		const std::map<std::pair<float, float>, ::sc2::Point2D>& patch_target_map,
 		AeolusBot& aeolusbot)
 	{
-		/*
-		Perform the trick so that worker does not decelerate.
-
-        This avoids worker deceleration when mining by issuing a Move command near a
-        mineral patch/townhall and then issuing a Gather or Return command once the
-        worker is close enough to immediately perform the action instead of issuing a
-        Gather command and letting the SC2 engine manage the worker.
-		
-		*/
 		// std::cout << "Doing mining boost..." << std::endl;
 
 		// ::sc2::Point2D mineral_move_position = m_patch_map[patch];
@@ -178,9 +191,19 @@ namespace Aeolus
 		}
 	}
 
+	void Mining::DoStandardMining(const ::sc2::Unit* resource, const ::sc2::Unit* worker, AeolusBot& aeolusbot)
+	{
+		if (worker->orders.empty()) 
+		{
+			aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, resource);
+			return;
+		}
+	}
+
 	bool Mining::_workerIsAttacking(AeolusBot& aeolusbot, const ::sc2::Unit* worker, ::sc2::Units targets, double distance_to_resource)
 	{
 		// std::cout << "distance to resource: " << distance_to_resource << std::endl;
+		if (distance_to_resource > 30.0f) return false; // stop attacking if too far way
 		// attack enemy logic:
 		if (!(utils::HasAbilityQueued(worker, ::sc2::ABILITY_ID::HARVEST_GATHER)
 			|| utils::HasAbilityQueued(worker, ::sc2::ABILITY_ID::HARVEST_RETURN))

@@ -59,6 +59,8 @@ namespace Aeolus
 
 		std::unordered_map<const ::sc2::Unit*, BuildingOrder> m_building_tracker;
 
+		std::unordered_map<::sc2::UNIT_TYPEID, int> m_building_counter;
+
 		size_t _getNumPending(::sc2::UNIT_TYPEID structure_type);
 
 		void _handleConstructionOrders();

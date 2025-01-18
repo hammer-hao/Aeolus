@@ -42,6 +42,10 @@ namespace Aeolus
 		{
 			return m_vespene_geysers;
 		}
+		case (constants::ManagerRequestType::GET_OWN_GAS_BUILDINGS):
+		{
+			return m_own_gas_buildings;
+		}
 		case (constants::ManagerRequestType::GET_ALL_RESOURCES):
 		{
 			return m_resources;
@@ -123,6 +127,11 @@ namespace Aeolus
 					if (unit_type == static_cast<int>(::sc2::UNIT_TYPEID::PROTOSS_NEXUS))
 					{
 						m_own_townhalls.push_back(unit);
+					}
+					if (unit_type == static_cast<int>(::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR) ||
+						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATORRICH))
+					{
+						m_own_gas_buildings.push_back(unit);
 					}
 				}
 				else

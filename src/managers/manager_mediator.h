@@ -3,6 +3,7 @@
 #include <iostream>
 #include <any>
 #include <map>
+#include <optional>
 
 #include <sc2api/sc2_unit.h>
 #include <sc2api/sc2_map_info.h>
@@ -151,6 +152,15 @@ namespace Aeolus
 			);
 		}
 
+		std::unordered_map<const ::sc2::Unit*, const ::sc2::Unit*> GetWorkersToGeyser(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<std::unordered_map<const ::sc2::Unit*, const ::sc2::Unit*>>(
+				aeolusbot,
+				constants::ManagerName::RESOURCE_MANAGER,
+				constants::ManagerRequestType::GET_WORKERS_TO_GEYSER
+			);
+		}
+
 		std::map<std::pair<float, float>, ::sc2::Point2D> GetMineralGatheringPoints(AeolusBot& aeolusbot)
 		{
 			return ManagerRequest<std::map<std::pair<float, float>, ::sc2::Point2D>>(
@@ -160,9 +170,9 @@ namespace Aeolus
 			);
 		}
 
-		const ::sc2::Unit* SelectWorkerClosestTo(AeolusBot& aeolusbot, ::sc2::Point2D target_location)
+		std::optional<const ::sc2::Unit*> SelectWorkerClosestTo(AeolusBot& aeolusbot, ::sc2::Point2D target_location)
 		{
-			return ManagerRequest<const ::sc2::Unit*, ::sc2::Point2D>(
+			return ManagerRequest<std::optional<const ::sc2::Unit*>, ::sc2::Point2D>(
 				aeolusbot,
 				constants::ManagerName::RESOURCE_MANAGER,
 				constants::ManagerRequestType::SELECT_WORKER_TO_TARGET,
@@ -199,6 +209,16 @@ namespace Aeolus
 				aeolusbot,
 				constants::ManagerName::UNIT_FILTER_MANAGER,
 				constants::ManagerRequestType::GET_OWN_TOWN_HALLS,
+				0
+			);
+		}
+
+		::sc2::Units GetOwnGasBuildings(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_OWN_GAS_BUILDINGS,
 				0
 			);
 		}
@@ -449,6 +469,45 @@ namespace Aeolus
 				constants::ManagerName::PLACEMENT_MANAGER,
 				constants::ManagerRequestType::GET_EXPANSION_LOCATIONS,
 				0
+			);
+		}
+
+		/**
+		* @brief Requests a building placement at the target position.
+		* @param base_number: The index of the base to make the request
+		* @param structure_type: The unit id of the requested structure
+		* @param is_wall: requesting to be placed as a wall?
+		* @param find_alternative: If no placement available, enabling will allow finding placement at other bases
+		* @param reserve_placement: reserve the placement in placementmanager?
+		* @param within_power_field: Set ture if not building a pylon/nexus
+		* @param pylon_build_progress: consider the pylons with progress more than this
+		* @param build_close_to: build close to a give location?
+		* @param close_to: if build_close_to, the given location
+		*/
+		std::optional<::sc2::Point2D> RequestBuildingPlacement(AeolusBot& aeolusbot, 
+			int base_number, 
+			::sc2::UNIT_TYPEID structure_type,
+			bool is_wall = false,
+			bool find_alternative = true,
+			bool reserve_placement = true,
+			bool within_power_field = true,
+			float pylon_build_progress = 1.0,
+			bool build_close_to = false,
+			::sc2::Point2D close_to = { 0, 0 })
+		{
+			return ManagerRequest<std::optional<::sc2::Point2D>, int, ::sc2::UNIT_TYPEID, bool, bool, bool, bool, float, bool, ::sc2::Point2D>(
+				aeolusbot,
+				constants::ManagerName::PLACEMENT_MANAGER,
+				constants::ManagerRequestType::REQUEST_BUILDING_PLACEMENT,
+				base_number,
+				structure_type,
+				is_wall,
+				find_alternative,
+				reserve_placement,
+				within_power_field,
+				pylon_build_progress,
+				build_close_to,
+				close_to
 			);
 		}
 

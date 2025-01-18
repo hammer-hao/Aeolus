@@ -3,6 +3,7 @@
 
 #include <sc2api/sc2_common.h>
 #include <sc2api/sc2_unit.h>
+#include <sc2api/sc2_map_info.h>
 #include <vector>
 #include <limits>
 #include <cmath>
@@ -222,6 +223,29 @@ namespace Aeolus
 				if (y > y_max) y_max = y;
 			}
 			return { x_min, x_max, y_min, y_max };
+		}
+
+		bool isPowered(::sc2::Point2D position, ::sc2::Units pylons, const ::sc2::HeightMap& terrain_height, float pylon_build_progress)
+		{
+			float pylon_power_distancesq = 42.25;
+			float pos_height = terrain_height.TerrainHeight(position);
+			for (const auto& pylon : pylons)
+			{
+				if (pylon->pos.z >= pos_height && pylon->build_progress >= pylon_build_progress
+					&& ::sc2::DistanceSquared2D(position, pylon->pos) < pylon_power_distancesq) return true;
+			}
+		}
+
+		bool canPlaceStructure(int start_x, int start_y, int building_size, ::sc2::PlacementGrid& placement_grid)
+		{
+			for (int i = 0; i < building_size; ++i)
+			{
+				for (int j = 0; j < building_size; ++j)
+				{
+					if (!placement_grid.IsPlacable({ start_x + i, start_y + j })) return false;
+				}
+			}
+			return true;
 		}
 	}
 }

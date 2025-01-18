@@ -48,6 +48,8 @@ namespace Aeolus
 			AeolusBot& aeolusbot
 			);
 
+		void DoStandardMining(const ::sc2::Unit* resource, const ::sc2::Unit* worker, AeolusBot& aeolusbot);
+
 		bool _workerIsAttacking(AeolusBot& aeolusbot, const ::sc2::Unit* worker, ::sc2::Units targets, double distance_to_resource);
 
 		std::map<std::pair<float, float>, ::sc2::Point2D> m_patch_map;

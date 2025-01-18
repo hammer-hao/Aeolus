@@ -22,10 +22,14 @@ namespace Aeolus
 
 		std::cout << "Expand: Selecting a worker... " << std::endl;
 
-		const ::sc2::Unit* worker = ManagerMediator::getInstance().SelectWorkerClosestTo(aeolusbot, target_location);
+		auto worker = ManagerMediator::getInstance().SelectWorkerClosestTo(aeolusbot, target_location);
 
-		std::cout << "Expand: Building with the worker.. " << std::endl;
-		ManagerMediator::getInstance().BuildWithSpecificWorker(aeolusbot, worker, ::sc2::UNIT_TYPEID::PROTOSS_NEXUS, target_location);
+		if (worker.has_value())
+		{
+			std::cout << "Expand: Building with the worker.. " << std::endl;
+			ManagerMediator::getInstance().BuildWithSpecificWorker(aeolusbot, 
+				worker.value(), ::sc2::UNIT_TYPEID::PROTOSS_NEXUS, target_location);
+		}
 	}
 
 	::sc2::Point2D Expand::_getNextExpansionLocation(AeolusBot& aeolusbot)

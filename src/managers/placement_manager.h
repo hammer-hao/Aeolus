@@ -37,7 +37,8 @@ namespace Aeolus
 	{
 		BUILDING_2X2,
 		BUILDING_3X3,
-		BUILDING_5X5
+		BUILDING_5X5,
+		NOT_FOUND
 	};
 
 	using BuildingMap = std::map<std::pair<float, float>, BuildingAttributes>;
@@ -47,10 +48,8 @@ namespace Aeolus
 	class PlacementManager :public Manager
 	{
 	public:
-		PlacementManager(AeolusBot& aeolusbot) : m_bot(aeolusbot)
-		{
-			m_expansion_map.resize(16);
-		}
+
+		PlacementManager(AeolusBot& aeolusbot);
 
 		std::string_view GetName() const override
 		{
@@ -69,6 +68,10 @@ namespace Aeolus
 
 		ExpansionMap m_expansion_map;
 
+		::sc2::HeightMap m_height_map;
+
+		::sc2::PlacementGrid m_placement_grid;
+
 		std::vector<::sc2::Point2D> m_expansion_locations;
 
 		Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> m_occupied_points;
@@ -85,10 +88,38 @@ namespace Aeolus
 			bool production_pylon = false,
 			bool optimal_pylon = false);
 
-		std::vector<::sc2::Point2D> _findExansionLocations(const ::sc2::HeightMap& height_map, const Grid& placement_grid);
+		std::vector<::sc2::Point2D> _findExansionLocations();
 
 		std::vector<::sc2::Point2D> _calculateProtossRampPylonPos(::sc2::Point2D main_location,
-			const Grid& pathing_grid, const Grid& placement_grid, const ::sc2::HeightMap& height_map);
+			const Grid& pathing_grid, const Grid& placement_grid);
+
+		/**
+		* @brief Requests and reserves a placement for a building.
+		* @param base_number: The base to request the placement for
+		* @param structure_type: The unit id of the structure requested
+		* @param is_wall: Is the structure a wall?
+		* @param find_alternative: If true, consider other bases if no placement is found
+		* @param reserve_placement: Reserve this booking so no other request is made at location
+		* @param within_power_field: If true, only find positions within pylon field
+		* @param build_close_to: build close to a give position?
+		* @param close_to: is build_close_to, the position to build near by
+		* @return The building location assigned by PlacementManager for the requested structure
+		*/
+		std::optional<::sc2::Point2D> _requestBuildingPlacement(int base_number, ::sc2::UNIT_TYPEID structure_type,
+			bool is_wall = false,
+			bool find_alternative = true,
+			bool reserve_placement = true,
+			bool within_power_field = true,
+			float pylon_build_progress = 1.0,
+			bool build_close_to = false,
+			::sc2::Point2D close_to = { 0, 0 });
+
+		std::vector<::sc2::Point2D> _findPotentialPlacementsAtBase(BuildingTypes building_size, int base_index,
+			bool within_power_field, float pylon_build_progress = 1.0);
+
+		bool _canPlaceStructure(::sc2::Point2D position, BuildingTypes building_size, bool is_geyser=false);
+
+		static BuildingTypes _structureToBuildingSize(::sc2::UNIT_TYPEID structure_id);
 
 		std::vector<::sc2::Point2D> _findBuildingLocations(
 			const Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic>& kernel,

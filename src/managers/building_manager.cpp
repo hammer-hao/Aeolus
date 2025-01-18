@@ -4,6 +4,7 @@
 #include "../constants.h"
 #include "../Aeolus.h"
 #include "../utils/position_utils.h"
+#include "../utils/unit_utils.h"
 #include <sc2api/sc2_common.h>
 
 namespace Aeolus
@@ -43,7 +44,7 @@ namespace Aeolus
 		if (m_building_tracker.find(worker) == m_building_tracker.end())
 		{
 			m_building_tracker[worker] = { structure_type, position, 0.0, true };
-
+			m_building_counter[structure_type] += 1;
 			if (assign_role)
 			{
 				std::cout << "BuildingManager: Assigned BUILDING role!" << std::endl;
@@ -74,31 +75,57 @@ namespace Aeolus
 				workers_to_remove.push_back(worker);
 				continue;
 			}
-
-			// find threshold for stopping and issueing build command
-			float distance_threshold = constants::GAS_BUILDINGS.find(building_order.building_id) == constants::GAS_BUILDINGS.end() ?
-				1.0f: 20.25f;
-
-			// if the worker is too far, move to target first
-			if (::sc2::DistanceSquared2D(worker->pos, building_order.target) > distance_threshold)
+			
+			if (constants::GAS_BUILDINGS.find(building_order.building_id) != constants::GAS_BUILDINGS.end())
 			{
-				if (worker->orders.size() > 0)
+				float distance_threshold = 20.25f;
+
+				// if the worker is too far, move to target first
+				if (::sc2::DistanceSquared2D(worker->pos, building_order.target) > distance_threshold)
 				{
-					if (worker->orders[0].target_pos == building_order.target) continue;
+					if (worker->orders.size() > 0)
+					{
+						if (worker->orders[0].target_pos == building_order.target) continue;
+					}
+					m_bot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::MOVE_MOVE, building_order.target);
 				}
-				m_bot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::MOVE_MOVE, building_order.target);
-			}
+				// When the worker arrive, issue the build command
+				else if (worker->orders.size() == 0)
+				{
+					::sc2::Units all_vespene_geysers = ManagerMediator::getInstance().GetAllVespeneGeysers(m_bot);
+					if (all_vespene_geysers.empty()) return;
 
-			// When the worker arrive, issue the build command
-			else if (worker->orders.size() == 0)
+					auto target_geyser = utils::SortByDistanceTo(all_vespene_geysers, building_order.target)[0];
+					::sc2::ABILITY_ID build_command = ManagerMediator::getInstance().GetCreationAbility(m_bot, building_order.building_id);
+					m_bot.Actions()->UnitCommand(worker, build_command, target_geyser);
+				}
+			}
+			else
 			{
-				::sc2::ABILITY_ID build_command = ManagerMediator::getInstance().GetCreationAbility(m_bot, building_order.building_id);
-				m_bot.Actions()->UnitCommand(worker, build_command, building_order.target);
+				float distance_threshold = 1.0f;
+
+				// if the worker is too far, move to target first
+				if (::sc2::DistanceSquared2D(worker->pos, building_order.target) > distance_threshold)
+				{
+					if (worker->orders.size() > 0)
+					{
+						if (worker->orders[0].target_pos == building_order.target) continue;
+					}
+					m_bot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::MOVE_MOVE, building_order.target);
+				}
+
+				// When the worker arrive, issue the build command
+				else if (worker->orders.size() == 0)
+				{
+					::sc2::ABILITY_ID build_command = ManagerMediator::getInstance().GetCreationAbility(m_bot, building_order.building_id);
+					m_bot.Actions()->UnitCommand(worker, build_command, building_order.target);
+				}
 			}
 		}
 
 		for (const auto& worker : workers_to_remove)
 		{
+			m_building_counter[m_building_tracker[worker].building_id] -= 1;
 			m_building_tracker.erase(worker);
 			ManagerMediator::getInstance().AssignRole(m_bot, worker, constants::UnitRole::GATHERING);
 		}

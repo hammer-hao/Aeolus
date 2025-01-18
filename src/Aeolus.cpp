@@ -15,7 +15,9 @@
 #include "behavior_executor.h"
 #include "behaviors/macro_behaviors/mining.h"
 #include "behaviors/macro_behaviors/build_workers.h"
+#include "behaviors/macro_behaviors/build_structure.h"
 #include "behaviors/macro_behaviors/expand.h"
+#include "behaviors/macro_behaviors/build_geysers.h"
 
 #ifdef BUILD_WITH_RENDERER
 
@@ -79,6 +81,7 @@ namespace Aeolus
         // std::cout << "Aeolus: Taking a step..." << std::endl;
         Macro();
 
+        #ifndef BUILD_FOR_LADDER
         if (Observation()->GetGameLoop() % 100 == 0)
         {
             std::stringstream debugMessage;
@@ -86,6 +89,8 @@ namespace Aeolus
                 << " Total Minerals Mined: " << Observation()->GetMinerals();
             Actions()->SendChat(debugMessage.str());
         }
+        #endif
+
         // Call AfterStep at the end of each step
         AfterStep();
     }
@@ -138,6 +143,9 @@ namespace Aeolus
         RegisterBehavior(std::make_unique<Mining>());
         RegisterBehavior(std::make_unique<BuildWorkers>());
         RegisterBehavior(std::make_unique<Expand>());
+        RegisterBehavior(std::make_unique<BuildGeysers>());
+
+        if (Observation()->GetGameLoop() == 500) RegisterBehavior(std::make_unique<BuildStructure>(::sc2::UNIT_TYPEID::PROTOSS_PYLON, 0, true));
 
         if (Observation()->GetGameLoop() % 50 == 0)
         std::cout << "current gameloop: " << Observation()->GetGameLoop() << std::endl;

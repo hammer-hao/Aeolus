@@ -2,6 +2,8 @@
 #include <set>
 #include <algorithm>
 #include <iterator>
+#include <optional>
+#include <chrono> 
 #include <sc2lib/sc2_search.h>
 #include <sc2api/sc2_map_info.h>
 #include <sc2api/sc2_common.h>
@@ -34,13 +36,26 @@ namespace Aeolus
 			else
 			{
 				::sc2::Units available_minerals = GetAvailableMinerals();
+
+				::sc2::Units all_gas_buildings = ManagerMediator::getInstance().GetOwnGasBuildings(m_bot);
+
+				for (const auto& worker : all_workers)
+				{
+					if (m_worker_to_patch.find(worker) == m_worker_to_patch.end()) unassigned_workers.push_back(worker);
+				}
+
+				if (!all_gas_buildings.empty())
+				{
+					auto start_time = std::chrono::high_resolution_clock::now();
+					_assignWorkersToGasBuildings(unassigned_workers, all_gas_buildings);
+					auto end_time = std::chrono::high_resolution_clock::now();
+					auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+					if (iteration % 100 == 0) std::cout << elapsed_ms << std::endl;
+				}
+
 				// std::cout << "Available patches:" << available_minerals.size() << std::endl;
 				if (!available_minerals.empty())
 				{
-					for (const auto& worker : all_workers)
-					{
-						if (m_worker_to_patch.find(worker) == m_worker_to_patch.end()) unassigned_workers.push_back(worker);
-					}
 
 					// AssignWorkersToMineralPatches(unassigned_workers, available_minerals);
 					// std::cout << "Unassigned workers: " << unassigned_workers.size() << std::endl;
@@ -85,6 +100,10 @@ namespace Aeolus
 		case constants::ManagerRequestType::GET_WORKERS_TO_PATCH:
 		{
 			return m_worker_to_patch;  // This might be throwing an exception
+		}
+		case constants::ManagerRequestType::GET_WORKERS_TO_GEYSER:
+		{
+			return m_worker_to_geyser;
 		}
 		case constants::ManagerRequestType::ASSIGN_INITIAL_WORKERS:
 		{
@@ -301,6 +320,35 @@ namespace Aeolus
 		}
 	}
 
+	void ResourceManager::_assignWorkersToGasBuildings(const ::sc2::Units& workers, const ::sc2::Units& gas_buildings)
+	{
+		constexpr int c_num_per_gas = 3;
+		auto own_town_halls = ManagerMediator::getInstance().GetOwnTownHalls(m_bot);
+		if (own_town_halls.empty()) return;
+
+		// for each gas building, assign worker one at a time.
+		for (const auto& gas_building : gas_buildings)
+		{
+			if (gas_building->build_progress >= 1.0f)
+			{
+				// If there's no nexus near by, don't assign
+				if (utils::GetCloserThan(own_town_halls, 12, gas_building->pos).empty()) continue;
+				if (m_geyser_to_workers[gas_building].size() >= c_num_per_gas) continue;
+
+				auto worker = _selectWorker(gas_building->pos);
+				if (!worker.has_value()) continue;
+				if (std::find(m_geyser_to_workers[gas_building].begin(), 
+					m_geyser_to_workers[gas_building].end(), 
+					worker.value()) 
+					!=
+					m_geyser_to_workers[gas_building].end()) continue;
+				m_geyser_to_workers[gas_building].push_back(worker.value());
+				m_worker_to_geyser[worker.value()] = gas_building;
+				_removeWorkerFromMineral(worker.value());
+			}
+		}
+	}
+
 	void ResourceManager::_assignWorkersToMineralPatches(::sc2::Units workers, ::sc2::Units patches)
 	{
 		for (const auto& worker : workers)
@@ -323,7 +371,19 @@ namespace Aeolus
 		}
 	}
 
-	const ::sc2::Unit* ResourceManager::_selectWorker(::sc2::Point2D target_position)
+	void ResourceManager::_removeWorkerFromMineral(const ::sc2::Unit* worker)
+	{
+		auto it = m_worker_to_patch.find(worker);
+		if (it != m_worker_to_patch.end())
+		{
+			auto patch = it->second;
+			m_worker_to_patch.erase(worker);
+			m_patch_to_workers[patch].erase(std::remove(m_patch_to_workers[patch].begin(),
+				m_patch_to_workers[patch].end(), worker));
+		}
+	}
+
+	std::optional<const ::sc2::Unit*> ResourceManager::_selectWorker(::sc2::Point2D target_position)
 	{
 		::sc2::Units all_workers = ManagerMediator::getInstance().GetUnitsFromRole(m_bot, constants::UnitRole::GATHERING);
 		::sc2::Units all_available_workers;
@@ -332,9 +392,11 @@ namespace Aeolus
 		{
 			if (!utils::IsWorkerCarryingResource(worker)) all_available_workers.push_back(worker);
 		}
+		
+		if (all_available_workers.empty()) return std::nullopt;
 
 		auto closest_worker = utils::GetClosestUnitTo(target_position, all_available_workers);
-
-		return closest_worker;
+		if (closest_worker == nullptr) return std::nullopt;
+		return std::optional<const sc2::Unit*>{closest_worker};
 	}
 }
