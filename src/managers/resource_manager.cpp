@@ -329,19 +329,20 @@ namespace Aeolus
 		// for each gas building, assign worker one at a time.
 		for (const auto& gas_building : gas_buildings)
 		{
-			if (gas_building->build_progress >= 1.0f)
+			if (m_geyser_to_workers[gas_building].size() >= c_num_per_gas) continue;
+			if (gas_building->build_progress >= 1.0f
+				&& !utils::GetCloserThan(own_town_halls, 12, gas_building->pos).empty())
 			{
-				// If there's no nexus near by, don't assign
-				if (utils::GetCloserThan(own_town_halls, 12, gas_building->pos).empty()) continue;
-				if (m_geyser_to_workers[gas_building].size() >= c_num_per_gas) continue;
-
+				std::cout << "ResourceManager: Selecting a worker" << std::endl;
 				auto worker = _selectWorker(gas_building->pos);
 				if (!worker.has_value()) continue;
+				std::cout << "ResourceManager: Selected a worker!" << std::endl;
 				if (std::find(m_geyser_to_workers[gas_building].begin(), 
 					m_geyser_to_workers[gas_building].end(), 
 					worker.value()) 
 					!=
 					m_geyser_to_workers[gas_building].end()) continue;
+				std::cout << "ResourceManager: Adding worker to gas!" << std::endl;
 				m_geyser_to_workers[gas_building].push_back(worker.value());
 				m_worker_to_geyser[worker.value()] = gas_building;
 				_removeWorkerFromMineral(worker.value());
@@ -390,7 +391,9 @@ namespace Aeolus
 
 		for (const auto& worker : all_workers)
 		{
-			if (!utils::IsWorkerCarryingResource(worker)) all_available_workers.push_back(worker);
+			if (!utils::IsWorkerCarryingResource(worker)
+				&& m_worker_to_patch.find(worker) != m_worker_to_patch.end())
+				all_available_workers.push_back(worker);
 		}
 		
 		if (all_available_workers.empty()) return std::nullopt;
