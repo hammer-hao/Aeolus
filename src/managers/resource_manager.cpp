@@ -50,7 +50,8 @@ namespace Aeolus
 					_assignWorkersToGasBuildings(unassigned_workers, all_gas_buildings);
 					auto end_time = std::chrono::high_resolution_clock::now();
 					auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-					if (iteration % 100 == 0) std::cout << elapsed_ms << std::endl;
+					if (iteration % 100 == 0) std::cout <<
+						"Number of gas buildings: " << all_gas_buildings.size() << "Elapsed_ms: " << elapsed_ms << std::endl;
 				}
 
 				// std::cout << "Available patches:" << available_minerals.size() << std::endl;

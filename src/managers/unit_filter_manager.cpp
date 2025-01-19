@@ -75,6 +75,7 @@ namespace Aeolus
 		m_own_townhalls.clear();
 		m_own_workers.clear();
 		m_all_own_units.clear();
+		m_own_gas_buildings.clear();
 		m_gas_buildings.clear();
 		m_enemy_units.clear();
 		m_enemy_structures.clear();
