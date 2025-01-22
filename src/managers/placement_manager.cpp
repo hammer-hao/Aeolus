@@ -822,7 +822,7 @@ namespace Aeolus
 	{
 		std::vector<::sc2::Point2D> result;
 		auto potential_placements = m_expansion_map[base_index][building_size];
-		std::cout << "PlacementManager: selecting from " << potential_placements.size() << "potential placements. " << std::endl;
+		// std::cout << "PlacementManager: selecting from " << potential_placements.size() << "potential placements. " << std::endl;
 		::sc2::Units own_pylons;
 
 		if (within_power_field)
@@ -862,7 +862,7 @@ namespace Aeolus
 			result = placements_within_power_field;
 		}
 
-		std::cout << "PlacementManager: out of the potential placements there are " << potential_placements.size() << "available placements. " << std::endl;
+		// std::cout << "PlacementManager: out of the potential placements there are " << potential_placements.size() << "available placements. " << std::endl;
 		return result;
 	}
 

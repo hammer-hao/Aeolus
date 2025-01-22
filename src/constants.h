@@ -67,6 +67,7 @@ namespace Aeolus {
 			AIR_DPS,
 			UNITS_IN_ATTACK_RANGE,
 			GET_CREATION_ABILITY,
+			GET_UNIT_COST,
 
 			// DefenseManager
 			GET_UNITS_IN_RANGE,

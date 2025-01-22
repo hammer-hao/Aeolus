@@ -10,6 +10,11 @@ namespace Aeolus
 
 		size_t num_pending = ManagerMediator::getInstance().GetNumberPending(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_NEXUS);
 
+		for (const auto& th : ManagerMediator::getInstance().GetOwnTownHalls(aeolusbot))
+		{
+			if (th->build_progress < 1.0f) num_pending++;
+		}
+
 		if (ManagerMediator::getInstance().GetOwnTownHalls(aeolusbot).size() + num_pending >= m_to_count
 			|| num_pending >= m_max_pending) 
 			return false;
