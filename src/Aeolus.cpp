@@ -18,6 +18,8 @@
 #include "behaviors/macro_behaviors/build_structure.h"
 #include "behaviors/macro_behaviors/expand.h"
 #include "behaviors/macro_behaviors/build_geysers.h"
+#include "behaviors/macro_behaviors/auto_supply.h"
+#include "behaviors/macro_behaviors/production_controller.h"
 
 #include "build_order_executor.h"
 
@@ -148,6 +150,11 @@ namespace Aeolus
         RegisterBehavior(std::make_unique<BuildWorkers>());
         RegisterBehavior(std::make_unique<Expand>());
         RegisterBehavior(std::make_unique<BuildGeysers>());
+        RegisterBehavior(std::make_unique<AutoSupply>());
+        RegisterBehavior(std::make_unique<ProductionController>(
+            std::map<::sc2::UNIT_TYPEID, float>{{::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.0f}}
+        )
+        );
 
         if (Observation()->GetGameLoop() % 50 == 0)
         std::cout << "current gameloop: " << Observation()->GetGameLoop() << std::endl;
