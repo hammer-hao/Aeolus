@@ -393,7 +393,8 @@ namespace Aeolus
 		for (const auto& worker : all_workers)
 		{
 			if (!utils::IsWorkerCarryingResource(worker)
-				&& m_worker_to_patch.find(worker) != m_worker_to_patch.end())
+				&& m_worker_to_patch.find(worker) != m_worker_to_patch.end()
+				&& m_worker_to_geyser.find(worker) == m_worker_to_geyser.end())
 				all_available_workers.push_back(worker);
 		}
 		

@@ -70,7 +70,7 @@ namespace Aeolus
 				::sc2::Point2D(mining_target.value()->pos));
 			else
 			{
-				std::cout << "Mining: No mining target!" << std::endl;
+				// std::cout << "Mining: No mining target!" << std::endl;
 				continue;
 			}
 
@@ -107,8 +107,14 @@ namespace Aeolus
 				}
 				// debug->DebugLineOut(worker->pos, worker_to_patch[worker]->pos, ::sc2::Colors::Red);
 
-				if (assigned_to_mineral) DoMiningBoost(mining_target.value(), worker, m_patch_map, aeolusbot);
-				else if (assigned_to_gas) DoStandardMining(mining_target.value(), worker, aeolusbot);
+				if (assigned_to_gas)
+				{
+					DoStandardMining(mining_target.value(), worker, aeolusbot);
+				}
+				else if (assigned_to_mineral)
+				{
+					DoMiningBoost(mining_target.value(), worker, m_patch_map, aeolusbot);
+				}
 			}
 		}
 		return true;
