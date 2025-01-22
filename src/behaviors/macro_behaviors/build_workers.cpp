@@ -4,7 +4,7 @@
 
 namespace Aeolus
 {
-	void BuildWorkers::execute(AeolusBot& aeolusbot)
+	bool BuildWorkers::execute(AeolusBot& aeolusbot)
 	{
 		//std::cout << "BuildWorkers: current minerals: " << aeolusbot.Observation()->GetMinerals() << '\n'
 		//	<< "unused supply: " << aeolusbot.Observation()->GetFoodCap() - aeolusbot.Observation()->GetFoodUsed() << '\n'
@@ -20,6 +20,8 @@ namespace Aeolus
 					aeolusbot.Actions()->UnitCommand(town_hall, ::sc2::ABILITY_ID::TRAIN_PROBE);
 				}
 			}
+			return true;
 		}
+		return false;
 	}
 }

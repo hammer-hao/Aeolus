@@ -18,7 +18,7 @@
 
 namespace Aeolus
 {
-	void Mining::execute(AeolusBot& aeolusbot)
+	bool Mining::execute(AeolusBot& aeolusbot)
 	{
 		
 		// std::cout << "<<< Mining Behavior: Executing... >>>" << std::endl;
@@ -111,6 +111,7 @@ namespace Aeolus
 				else if (assigned_to_gas) DoStandardMining(mining_target.value(), worker, aeolusbot);
 			}
 		}
+		return true;
 	}
 
 	/**

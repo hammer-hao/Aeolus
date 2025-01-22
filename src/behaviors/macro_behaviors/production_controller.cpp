@@ -11,7 +11,7 @@
 
 namespace Aeolus
 {
-	void ProductionController::execute(AeolusBot& aeolusbot)
+	bool ProductionController::execute(AeolusBot& aeolusbot)
 	{
 		auto& mediator = ManagerMediator::getInstance();
 		auto* observation = aeolusbot.Observation();
@@ -45,7 +45,7 @@ namespace Aeolus
 			auto trained_from = _isTrainedFrom(unit_type);
 			if (trained_from.has_value())
 			{
-				if (_techUp(aeolusbot, unit_type)) return;
+				if (_techUp(aeolusbot, unit_type)) return true;
 
 				if (minerals > m_add_production_at_bank.first
 					&& vespene > m_add_production_at_bank.second)
@@ -54,6 +54,7 @@ namespace Aeolus
 				}
 			}
 		}
+		return true;
 	}
 
 	std::optional<::sc2::UNIT_TYPEID> ProductionController::_isTrainedFrom(::sc2::UNIT_TYPEID unit_type)

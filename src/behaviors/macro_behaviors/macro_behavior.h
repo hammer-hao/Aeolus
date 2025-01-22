@@ -19,6 +19,6 @@ namespace Aeolus
 	public:
 		~MacroBehavior() override = default;
 
-		virtual void execute(AeolusBot& aeolusbot) = 0;
+		virtual bool execute(AeolusBot& aeolusbot) = 0;
 	};
 }

@@ -4,21 +4,21 @@
 
 namespace Aeolus
 {
-	void Expand::execute(AeolusBot& aeolusbot)
+	bool Expand::execute(AeolusBot& aeolusbot)
 	{
-		if (aeolusbot.Observation()->GetMinerals() < 400) return;
+		if (aeolusbot.Observation()->GetMinerals() < 400) return false;
 
 		size_t num_pending = ManagerMediator::getInstance().GetNumberPending(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_NEXUS);
 
 		if (ManagerMediator::getInstance().GetOwnTownHalls(aeolusbot).size() + num_pending >= m_to_count
 			|| num_pending >= m_max_pending) 
-			return;
+			return false;
 
 		std::cout << "Expand: solving next expansion location... " << std::endl;
 		
 		auto target_location = _getNextExpansionLocation(aeolusbot);
 
-		if (target_location == ::sc2::Point2D(0, 0)) return;
+		if (target_location == ::sc2::Point2D(0, 0)) return false;
 
 		std::cout << "Expand: Selecting a worker... " << std::endl;
 
@@ -27,9 +27,10 @@ namespace Aeolus
 		if (worker.has_value())
 		{
 			std::cout << "Expand: Building with the worker.. " << std::endl;
-			ManagerMediator::getInstance().BuildWithSpecificWorker(aeolusbot, 
+			return ManagerMediator::getInstance().BuildWithSpecificWorker(aeolusbot, 
 				worker.value(), ::sc2::UNIT_TYPEID::PROTOSS_NEXUS, target_location);
 		}
+		return false;
 	}
 
 	::sc2::Point2D Expand::_getNextExpansionLocation(AeolusBot& aeolusbot)

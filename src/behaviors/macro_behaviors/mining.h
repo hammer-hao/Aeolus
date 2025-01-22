@@ -3,6 +3,7 @@
 #include "macro_behavior.h"
 
 #include <unordered_map>
+#include <sc2api/sc2_unit.h>
 
 namespace Aeolus
 {
@@ -32,7 +33,7 @@ namespace Aeolus
 			m_self_defence_active(self_defence_active) {}
 
 		~Mining() override = default;
-		void execute(AeolusBot& aeolusbot) override;
+		bool execute(AeolusBot& aeolusbot) override;
 
 	private:
 		double m_flee_at_health_perc;

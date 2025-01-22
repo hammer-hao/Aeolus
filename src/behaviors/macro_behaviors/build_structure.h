@@ -18,7 +18,7 @@ namespace Aeolus
 		{
 		}
 		~BuildStructure() override = default;
-		void execute(AeolusBot& aeolusbot) override;
+		bool execute(AeolusBot& aeolusbot) override;
 
 	private:
 		::sc2::UNIT_TYPEID structure_id;

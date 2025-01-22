@@ -14,7 +14,7 @@ namespace Aeolus
 		mediator for information retrieval*/
 
 	public:
-		virtual void execute(AeolusBot& aeolusbot) = 0;
+		virtual bool execute(AeolusBot& aeolusbot) = 0;
 
 		/* Execute the implemented behavior.
 		Parameters:

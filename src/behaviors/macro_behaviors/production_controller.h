@@ -25,7 +25,7 @@ namespace Aeolus
 
 		~ProductionController() override = default;
 
-		void execute(AeolusBot& aeolusbot) override;
+		bool execute(AeolusBot& aeolusbot) override;
 
 	private:
 		std::map<::sc2::UNIT_TYPEID, float> m_army_composition_map;

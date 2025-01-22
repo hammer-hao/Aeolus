@@ -15,7 +15,7 @@ namespace Aeolus
 		{
 		}
 		~Expand() override = default;
-		void execute(AeolusBot& aeolusbot) override;
+		bool execute(AeolusBot& aeolusbot) override;
 
 	private:
 		int m_to_count;

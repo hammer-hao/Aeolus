@@ -8,11 +8,11 @@
 
 namespace Aeolus
 {
-	void BuildGeysers::execute(AeolusBot& aeolusbot)
+	bool BuildGeysers::execute(AeolusBot& aeolusbot)
 	{
 		auto* observation = aeolusbot.Observation();
 		if (m_smart_gas && (observation->GetMinerals() - observation->GetVespene()) < m_smart_gas_threshold)
-			return;
+			return false;
 		
 		::sc2::Units existing_geysers;
 		int pending_geysers = 0;
@@ -30,7 +30,7 @@ namespace Aeolus
 			}
 		}
 
-		if (active_geysers > m_to_active_count || pending_geysers > m_max_pending) return;
+		if (active_geysers > m_to_active_count || pending_geysers > m_max_pending) return false;
 
 		::sc2::Units all_gas_springs = ManagerMediator::getInstance().GetAllVespeneGeysers(aeolusbot);
 		::sc2::Units own_town_halls = ManagerMediator::getInstance().GetOwnTownHalls(aeolusbot);
@@ -61,7 +61,7 @@ namespace Aeolus
 		if (available_gas_springs.empty())
 		{
 			std::cout << "No geyser position available!" << std::endl;
-			return;
+			return false;
 		}
 		::sc2::Point2D build_target = utils::SortByDistanceTo(available_gas_springs, observation->GetStartLocation())[0]->pos;
 
@@ -70,5 +70,6 @@ namespace Aeolus
 			ManagerMediator::getInstance().BuildWithSpecificWorker(aeolusbot, 
 				build_worker.value(), ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR, build_target);
 		// yay!
+		return true;
 	}
 }
