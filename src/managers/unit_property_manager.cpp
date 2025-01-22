@@ -82,6 +82,12 @@ namespace Aeolus
 			::sc2::UNIT_TYPEID unit_id = std::get<0>(params);
 			return CreationAbility(unit_id);
 		}
+		case constants::ManagerRequestType::GET_UNIT_COST:
+		{
+			auto params = std::any_cast<std::tuple<::sc2::UNIT_TYPEID>>(args);
+			::sc2::UNIT_TYPEID unit_type = std::get<0>(params);
+			return GetCost(unit_type);
+		}
 		default:
 			std::cout << "UnitPropertyMnager: Unknown request type!" << std::endl;
 		}
@@ -275,4 +281,14 @@ namespace Aeolus
 		return result;
 	}
 
+	std::pair<int, int> UnitPropertyManager::GetCost(::sc2::UNIT_TYPEID unit_type)
+	{
+		uint64_t id = static_cast<uint64_t>(unit_type);
+		auto it = m_cost_cache.find(id);
+		if (it != m_cost_cache.end()) return m_cost_cache[id];
+
+		std::pair<int, int> result = { m_unit_data_cache[id].mineral_cost, m_unit_data_cache[id].vespene_cost };
+		m_cost_cache[id] = result;
+		return result;
+	}
 }

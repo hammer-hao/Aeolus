@@ -54,6 +54,10 @@ namespace Aeolus
 
 		std::unordered_map<uint64_t, ::sc2::ABILITY_ID> m_creation_ability_cache;
 
+		std::pair<int, int> GetCost(::sc2::UNIT_TYPEID unit_type);
+
+		std::unordered_map<uint64_t, std::pair<int, int>> m_cost_cache;
+
 		::sc2::Units InAttackRange(const ::sc2::Unit* unit, ::sc2::Units targets);
 
 		::sc2::UnitTypes m_unit_data_cache;

@@ -426,6 +426,16 @@ namespace Aeolus
 			);
 		}
 
+		std::pair<int, int> GetUnitCost(AeolusBot& aeolusbot, ::sc2::UNIT_TYPEID unit_type)
+		{
+			return ManagerRequest<std::pair<int, int>, ::sc2::UNIT_TYPEID>(
+				aeolusbot,
+				constants::ManagerName::UNIT_PROPERTY_MANAGER,
+				constants::ManagerRequestType::GET_UNIT_COST,
+				unit_type
+			);
+		}
+
 		// DefenseManager
 
 		::sc2::Units GetUnitsInRange(AeolusBot& aeolusbot, std::vector<::sc2::Point2D> starting_points, float distance)
