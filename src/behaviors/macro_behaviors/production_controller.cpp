@@ -1,0 +1,91 @@
+#include "production_controller.h"
+
+#include "../../managers/manager_mediator.h"
+#include "macro_behavior.h"
+#include "../../Aeolus.h"
+#include "../../constants.h"
+#include <map>
+#include <optional>
+#include <sc2api/sc2_unit.h>
+#include <sc2api/sc2_score.h>
+
+namespace Aeolus
+{
+	void ProductionController::execute(AeolusBot& aeolusbot)
+	{
+		auto& mediator = ManagerMediator::getInstance();
+		auto* observation = aeolusbot.Observation();
+		float mineral_collection_rate = observation->GetScore().score_details.collection_rate_minerals;
+		float gas_collection_rate = observation->GetScore().score_details.collection_rate_vespene;
+		int minerals = observation->GetMinerals();
+		int vespene = observation->GetVespene();
+		::sc2::Units all_own_units = mediator.GetAllOwnUnits(aeolusbot);
+		::sc2::Units all_own_structures = mediator.GetAllOwnStructures(aeolusbot);
+
+		std::map<::sc2::UNIT_TYPEID, size_t> unit_count_map;
+		size_t total_unit_count = 0;
+
+		for (const auto& unit : all_own_units)
+			if (m_army_composition_map.find(unit->unit_type) != m_army_composition_map.end())
+			{
+				unit_count_map[unit->unit_type]++;
+				total_unit_count++;
+			}
+
+		for (const auto& item : m_army_composition_map)
+		{
+			::sc2::UNIT_TYPEID unit_type = item.first;
+			float proportion = item.second;
+
+			int num_units = 0;
+			for (const auto& unit : all_own_units) if (unit->unit_type == unit_type) ++num_units;
+
+			float current_proportion = static_cast<float>(unit_count_map[unit_type]) / static_cast<float>(total_unit_count);
+
+			auto trained_from = _isTrainedFrom(unit_type);
+			if (trained_from.has_value())
+			{
+				if (_techUp(aeolusbot, unit_type)) return;
+
+				if (minerals > m_add_production_at_bank.first
+					&& vespene > m_add_production_at_bank.second)
+				{
+
+				}
+			}
+		}
+	}
+
+	std::optional<::sc2::UNIT_TYPEID> ProductionController::_isTrainedFrom(::sc2::UNIT_TYPEID unit_type)
+	{
+		if (constants::GATEWAY_UNITS.find(unit_type) != constants::GATEWAY_UNITS.end())
+		{
+			return ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY;
+		}
+		else if (constants::ROBO_UNITS.find(unit_type) != constants::ROBO_UNITS.end())
+		{
+			return ::sc2::UNIT_TYPEID::PROTOSS_ROBOTICSFACILITY;
+		}
+		else if (constants::STARGATE_UNITS.find(unit_type) != constants::STARGATE_UNITS.end())
+		{
+			return ::sc2::UNIT_TYPEID::PROTOSS_STARGATE;
+		}
+		return std::nullopt;
+	}
+
+	bool ProductionController::_techUp(AeolusBot& aeolusbot, ::sc2::UNIT_TYPEID unit_type, int base_location)
+	{
+		return false;
+	}
+
+	bool ProductionController::_buildProductionDueToBank(AeolusBot& aeolusbot,
+		::sc2::UNIT_TYPEID unit_type,
+		float mineral_collection_rate,
+		float gas_collection_rate,
+		size_t existing_production_count,
+		::sc2::UNIT_TYPEID production_structure_id,
+		float target_proportion)
+	{
+		return false;
+	}
+}
