@@ -19,6 +19,8 @@
 #include "behaviors/macro_behaviors/expand.h"
 #include "behaviors/macro_behaviors/build_geysers.h"
 
+#include "build_order_executor.h"
+
 #ifdef BUILD_WITH_RENDERER
 
 #include "utils/feature_layer_utils.h"
@@ -33,6 +35,7 @@ namespace Aeolus
     // Constructor
     AeolusBot::AeolusBot() {
         std::cout << "Aeolus bot initialized!" << std::endl;
+        build_order_step = 0;
     }
 
     // Destructor (optional)
@@ -140,12 +143,11 @@ namespace Aeolus
     void AeolusBot::Macro() {
         // std::cout << "Aeolus: Macroing..." << std::endl;
         // Implement custom logic for gathering resources, expanding, etc.
+        ExecuteBuildOrder();
         RegisterBehavior(std::make_unique<Mining>());
         RegisterBehavior(std::make_unique<BuildWorkers>());
         RegisterBehavior(std::make_unique<Expand>());
         RegisterBehavior(std::make_unique<BuildGeysers>());
-
-        if (Observation()->GetGameLoop() == 500) RegisterBehavior(std::make_unique<BuildStructure>(::sc2::UNIT_TYPEID::PROTOSS_PYLON, 0, true));
 
         if (Observation()->GetGameLoop() % 50 == 0)
         std::cout << "current gameloop: " << Observation()->GetGameLoop() << std::endl;
@@ -204,5 +206,10 @@ namespace Aeolus
     void AeolusBot::RegisterBehavior(std::unique_ptr<Behavior> behavior)
     {
         BehaviorExecutor::GetInstance().AddBehavior(std::move(behavior));
+    }
+
+    void AeolusBot::ExecuteBuildOrder()
+    {
+        BuildOrderExecutor::GetInstance().execute(*this);
     }
 }

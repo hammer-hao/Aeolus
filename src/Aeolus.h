@@ -18,7 +18,15 @@ namespace Aeolus
         // Destructor (optional, if you have cleanup tasks)
         ~AeolusBot();
 
+        void RegisterBehavior(std::unique_ptr<Behavior> behavior);
+
+        void incrementBuild() { build_order_step++; }
+
+        size_t getBuildOrderStep() { return build_order_step; }
+
     private:
+
+        size_t build_order_step;
 
         std::vector<::sc2::Point3D> m_expansion_locations;
 
@@ -49,7 +57,9 @@ namespace Aeolus
         void ManageProduction(); // Custom production logic
         void Macro();
         void PrepareUnits();
-        void RegisterBehavior(std::unique_ptr<Behavior> behavior);
+
+        // implement the build runner
+        void ExecuteBuildOrder();
     };
 
 }
