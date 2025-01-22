@@ -839,6 +839,9 @@ namespace Aeolus
 				}
 			}
 			if (own_pylons.empty()) return result;
+
+			// find positions cloe to pylons
+
 		}
 
 		for (const auto& candidate : potential_placements)
@@ -846,13 +849,19 @@ namespace Aeolus
 			if (candidate.second.available && !candidate.second.worker_on_route)
 			{
 				::sc2::Point2D pos = { candidate.first.first, candidate.first.second };
-				if (!within_power_field
-					|| utils::isPowered(pos, own_pylons, m_height_map))
-				{
-					if (_canPlaceStructure(pos, building_size)) result.push_back(pos);
-				}
+				if (_canPlaceStructure(pos, building_size)) result.push_back(pos);
 			}
 		}
+
+		if (within_power_field)
+		{
+			std::vector<::sc2::Point2D> placements_within_power_field;
+			for (const auto& placement : result)
+				if (utils::isPowered(placement, own_pylons, m_height_map)) 
+					placements_within_power_field.push_back(placement);
+			result = placements_within_power_field;
+		}
+
 		std::cout << "PlacementManager: out of the potential placements there are " << potential_placements.size() << "available placements. " << std::endl;
 		return result;
 	}

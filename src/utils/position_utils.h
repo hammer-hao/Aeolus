@@ -55,7 +55,7 @@ namespace Aeolus
 		/*
 		Returns whether the position is covered by the power field of a pylon.
 		*/
-		bool isPowered(::sc2::Point2D position, ::sc2::Units pylons, const ::sc2::HeightMap& terrain_height, float pylon_build_progress = 1.0);
+		bool isPowered(::sc2::Point2D position, ::sc2::Units pylons, const ::sc2::HeightMap& terrain_height, float pylon_build_progress = 0.95f);
 
 		/*
 		Returns whether the give structure can be placed at the given position
