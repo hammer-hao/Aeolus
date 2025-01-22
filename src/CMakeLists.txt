@@ -16,6 +16,8 @@ behaviors/macro_behaviors/mining.cpp
 behaviors/macro_behaviors/build_workers.cpp
 behaviors/macro_behaviors/build_structure.cpp
 behaviors/macro_behaviors/build_geysers.cpp
+behaviors/macro_behaviors/auto_supply.cpp
+behaviors/macro_behaviors/production_controller.cpp
 behaviors/macro_behaviors/expand.cpp)
 source_group("Header Files\\behaviors" FILES behaviors/behavior.h)
 source_group("Header Files\\behaviors\\macro_behaviors" FILES 
@@ -24,6 +26,8 @@ behaviors/macro_behaviors/mining.h
 behaviors/macro_behaviors/build_workers.h
 behaviors/macro_behaviors/build_structure.h
 behaviors/macro_behaviors/build_geysers.h
+behaviors/macro_behaviors/auto_supply.h
+behaviors/macro_behaviors/production_controller.h
 behaviors/macro_behaviors/expand.h)
 
 source_group("Source Files\\Managers" FILES 
@@ -88,6 +92,8 @@ set(bot_sources
     behaviors/macro_behaviors/build_structure.cpp
     behaviors/macro_behaviors/build_geysers.cpp
     behaviors/macro_behaviors/expand.cpp
+    behaviors/macro_behaviors/auto_supply.cpp
+    behaviors/macro_behaviors/production_controller.cpp
     managers/hub.cpp
     managers/manager_mediator.cpp
     managers/path_manager.cpp
@@ -119,6 +125,8 @@ set(bot_headers
     behaviors/macro_behaviors/build_structure.h
     behaviors/macro_behaviors/build_geysers.h
     behaviors/macro_behaviors/expand.h
+    behaviors/macro_behaviors/auto_supply.h
+    behaviors/macro_behaviors/production_controller.h
     behaviors/behavior.h
     managers/hub.h
     managers/manager.h
