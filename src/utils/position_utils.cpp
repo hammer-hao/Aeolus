@@ -227,9 +227,9 @@ namespace Aeolus
 
 		bool isPowered(::sc2::Point2D position, ::sc2::Units pylons, const ::sc2::HeightMap& terrain_height, float pylon_build_progress)
 		{
-			std::cout << "checking if " << position.x << position.y << " is powered..." << std::endl;
+			// std::cout << "checking if " << position.x << position.y << " is powered..." << std::endl;
 			float pylon_power_distancesq = 42.25;
-			float pos_height = terrain_height.TerrainHeight(position) - 0.01f;
+			float pos_height = terrain_height.TerrainHeight(position) - 1.0f;
 			for (const auto& pylon : pylons)
 			{
 				//std::cout << "Pylon height: " << pylon->pos.z << " Position height: " << pos_height << std::endl;
