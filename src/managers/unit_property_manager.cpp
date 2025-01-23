@@ -88,6 +88,18 @@ namespace Aeolus
 			::sc2::UNIT_TYPEID unit_type = std::get<0>(params);
 			return GetCost(unit_type);
 		}
+		case constants::ManagerRequestType::GET_REQUIRED_TECH:
+		{
+			auto params = std::any_cast<std::tuple<::sc2::UNIT_TYPEID>>(args);
+			::sc2::UNIT_TYPEID unit_type = std::get<0>(params);
+			return GetTechRequirement(unit_type);
+		}
+		case constants::ManagerRequestType::GET_UNIT_SUPPLY_COST:
+		{
+			auto params = std::any_cast<std::tuple<::sc2::UNIT_TYPEID>>(args);
+			::sc2::UNIT_TYPEID unit_type = std::get<0>(params);
+			return GetUnitSupplyCost(unit_type);
+		}
 		default:
 			std::cout << "UnitPropertyMnager: Unknown request type!" << std::endl;
 		}
@@ -289,6 +301,28 @@ namespace Aeolus
 
 		std::pair<int, int> result = { m_unit_data_cache[id].mineral_cost, m_unit_data_cache[id].vespene_cost };
 		m_cost_cache[id] = result;
+		return result;
+	}
+
+	::sc2::UNIT_TYPEID UnitPropertyManager::GetTechRequirement(::sc2::UNIT_TYPEID unit_type)
+	{
+		uint64_t id = static_cast<uint64_t>(unit_type);
+		auto it = m_tech_requirement_cache.find(id);
+		if (it != m_tech_requirement_cache.end()) return m_tech_requirement_cache[id];
+
+		::sc2::UNIT_TYPEID result = m_unit_data_cache[id].tech_requirement;
+		m_tech_requirement_cache[id] = result;
+		return result;
+	}
+
+	int UnitPropertyManager::GetUnitSupplyCost(::sc2::UNIT_TYPEID unit_type)
+	{
+		uint64_t id = static_cast<uint64_t>(unit_type);
+		auto it = m_supply_cost_map.find(id);
+		if (it != m_supply_cost_map.end()) return m_supply_cost_map[id];
+
+		int result = static_cast<int>(m_unit_data_cache[id].food_required);
+		m_supply_cost_map[id] = result;
 		return result;
 	}
 }

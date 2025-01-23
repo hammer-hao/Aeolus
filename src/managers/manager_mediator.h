@@ -436,6 +436,27 @@ namespace Aeolus
 			);
 		}
 
+		::sc2::UNIT_TYPEID GetRequiredTech(AeolusBot& aeolusbot, ::sc2::UNIT_TYPEID unit_type)
+		{
+			return ManagerRequest<::sc2::UNIT_TYPEID, ::sc2::UNIT_TYPEID>(
+				aeolusbot,
+				constants::ManagerName::UNIT_PROPERTY_MANAGER,
+				constants::ManagerRequestType::GET_REQUIRED_TECH,
+				unit_type
+			);
+		}
+
+		int GetUnitSupplyCost(AeolusBot& aeolusbot, ::sc2::UNIT_TYPEID unit_type)
+		{
+			return ManagerRequest<int, ::sc2::UNIT_TYPEID>
+				(
+					aeolusbot,
+					constants::ManagerName::UNIT_PROPERTY_MANAGER,
+					constants::ManagerRequestType::GET_UNIT_SUPPLY_COST,
+					unit_type
+				);
+		}
+
 		// DefenseManager
 
 		::sc2::Units GetUnitsInRange(AeolusBot& aeolusbot, std::vector<::sc2::Point2D> starting_points, float distance)

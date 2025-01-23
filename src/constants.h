@@ -68,6 +68,8 @@ namespace Aeolus {
 			UNITS_IN_ATTACK_RANGE,
 			GET_CREATION_ABILITY,
 			GET_UNIT_COST,
+			GET_REQUIRED_TECH,
+			GET_UNIT_SUPPLY_COST,
 
 			// DefenseManager
 			GET_UNITS_IN_RANGE,

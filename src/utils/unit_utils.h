@@ -19,5 +19,7 @@ namespace Aeolus {
 			bool reverse = false);
 
 		const ::sc2::Unit* PickAttackTarget(::sc2::Units targets);
+
+		std::optional<::sc2::UNIT_TYPEID> _isTrainedFrom(::sc2::UNIT_TYPEID unit_type);
 	}
 }

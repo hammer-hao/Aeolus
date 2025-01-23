@@ -71,18 +71,20 @@ namespace Aeolus
 					continue;
 
 				// Record the time before calling update()
-				auto start_time = std::chrono::high_resolution_clock::now();
+				// auto start_time = std::chrono::high_resolution_clock::now();
 
 				manager->update(iter);
 
 				// Record the time after update()
-				auto end_time = std::chrono::high_resolution_clock::now();
+				// auto end_time = std::chrono::high_resolution_clock::now();
 
 				// Calculate elapsed time in milliseconds
-				auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+				// auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
 
 				// Print the manager name and how long update() took
-				if (iter % 100 == 0) std::cout << manager->GetName() << " took " << elapsed_ms << " ms to update." << std::endl;
+				//if (iter % 100 == 0) std::cout << manager->GetName() << " took " << elapsed_ms << " ms to update." << std::endl;
+
+				// std::cout << manager->GetName() << " updated. " << std::endl;
 			}
 		}
 

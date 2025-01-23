@@ -59,6 +59,7 @@ namespace Aeolus
 					<< behaviorIndex << "!" << std::endl;
 			}
 			behaviorIndex++;
+			//std::cout << "Executed behavior index " << behaviorIndex << std::endl;
 		}
 
 		/*

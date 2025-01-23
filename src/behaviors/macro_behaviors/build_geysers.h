@@ -10,7 +10,7 @@ namespace Aeolus
 	class BuildGeysers : public MacroBehavior
 	{
 	public:
-		BuildGeysers(int to_active_count = 8, int max_pending = 2, bool smart_gas = true, int smart_gas_threshold = 600) :
+		BuildGeysers(int to_active_count = 8, int max_pending = 2, bool smart_gas = true, int smart_gas_threshold = 250) :
 			m_to_active_count(to_active_count), 
 			m_max_pending(max_pending),
 			m_smart_gas(smart_gas),

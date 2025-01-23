@@ -20,6 +20,7 @@
 #include "behaviors/macro_behaviors/build_geysers.h"
 #include "behaviors/macro_behaviors/auto_supply.h"
 #include "behaviors/macro_behaviors/production_controller.h"
+#include "behaviors/macro_behaviors/spawn_controller.h"
 
 #include "build_order_executor.h"
 
@@ -65,7 +66,7 @@ namespace Aeolus
     // Called every game step
     void AeolusBot::OnStep() {
 
-        // std::cout << "Aeolus: Taking a step... " << std::endl;
+        std::cout << "Aeolus: Taking a step... " << std::endl;
 
         // Example: Get game loop information
         //uint32_t game_loop = observation->GetGameLoop();
@@ -84,6 +85,8 @@ namespace Aeolus
         #endif
 
         // std::cout << "Aeolus: Taking a step..." << std::endl;
+        // std::cout << "DEBUG: About to call Macro()" << std::endl; // Add this
+
         Macro();
 
         #ifndef BUILD_FOR_LADDER
@@ -95,9 +98,11 @@ namespace Aeolus
             Actions()->SendChat(debugMessage.str());
         }
         #endif
-
+        // std::cout << "Aeolus: Taken a step!" << std::endl;
         // Call AfterStep at the end of each step
         AfterStep();
+
+        // std::cout << "Aeolus: Executed all behaviors!" << std::endl;
     }
 
     // Handle unit creation
@@ -155,6 +160,10 @@ namespace Aeolus
             std::map<::sc2::UNIT_TYPEID, float>{{::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.0f}}
         )
         );
+        RegisterBehavior(std::make_unique<SpawnController>(
+            std::map<::sc2::UNIT_TYPEID, float>{{::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.0f}}
+        )
+        );
 
         if (Observation()->GetGameLoop() % 50 == 0)
         std::cout << "current gameloop: " << Observation()->GetGameLoop() << std::endl;
@@ -184,6 +193,7 @@ namespace Aeolus
         // Logit to execute before each step begins
         PrepareUnits();
         manager_hub_.UpdateManagers(Observation()->GetGameLoop());
+
     }
 
     // Custom AfterStep logic

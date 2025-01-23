@@ -5,6 +5,7 @@
 #include "macro_behavior.h"
 #include "../../Aeolus.h"
 #include "../../constants.h"
+#include "../../utils/unit_utils.h"
 #include <map>
 #include <optional>
 #include <sc2api/sc2_unit.h>
@@ -43,7 +44,7 @@ namespace Aeolus
 
 			float current_proportion = static_cast<float>(unit_count_map[unit_type]) / static_cast<float>(total_unit_count);
 
-			auto trained_from = _isTrainedFrom(unit_type);
+			auto trained_from = utils::_isTrainedFrom(unit_type);
 			if (trained_from.has_value())
 			{
 				if (_techUp(aeolusbot, unit_type)) return true;
@@ -63,23 +64,6 @@ namespace Aeolus
 			}
 		}
 		return true;
-	}
-
-	std::optional<::sc2::UNIT_TYPEID> ProductionController::_isTrainedFrom(::sc2::UNIT_TYPEID unit_type)
-	{
-		if (constants::GATEWAY_UNITS.find(unit_type) != constants::GATEWAY_UNITS.end())
-		{
-			return ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY;
-		}
-		else if (constants::ROBO_UNITS.find(unit_type) != constants::ROBO_UNITS.end())
-		{
-			return ::sc2::UNIT_TYPEID::PROTOSS_ROBOTICSFACILITY;
-		}
-		else if (constants::STARGATE_UNITS.find(unit_type) != constants::STARGATE_UNITS.end())
-		{
-			return ::sc2::UNIT_TYPEID::PROTOSS_STARGATE;
-		}
-		return std::nullopt;
 	}
 
 	bool ProductionController::_techUp(AeolusBot& aeolusbot, ::sc2::UNIT_TYPEID unit_type, int base_location)
@@ -103,14 +87,14 @@ namespace Aeolus
 
 		int rate_supported_by_minerals = static_cast<int>(
 			mineral_collection_rate / (unit_cost.first + 1)
-			+ m_alpha
-			+ target_proportion
+			* m_alpha
+			* target_proportion
 			);
 
 		int rate_supported_by_gas = static_cast<int>(
 			gas_collection_rate / (unit_cost.second + 1)
-			+ m_alpha
-			+ target_proportion
+			* m_alpha
+			* target_proportion
 			);
 
 		std::cout << "We can currently support " << std::min(rate_supported_by_gas, rate_supported_by_minerals)

@@ -77,13 +77,14 @@ namespace Aeolus
 		::sc2::Units structures = ManagerMediator::getInstance().GetAllStructures(m_bot);
 		for (auto& structure : structures)
 		{
-			int size;
+			int size = 0;
 			if (constants::BUILDINGS_2X2.find(structure->unit_type) != constants::BUILDINGS_2X2.end())
 				size = 2;
 			else if (constants::BUILDINGS_3X3.find(structure->unit_type) != constants::BUILDINGS_3X3.end())
 				size = 3;
 			else if (constants::BUILDING_5X5.find(structure->unit_type) != constants::BUILDING_5X5.end())
 				size = 5;
+			else continue;
 			// left bottom point
 			int x_start = static_cast<int>(structure->pos.x - (size / 2));
 			int y_start = static_cast<int>(structure->pos.y - (size / 2));

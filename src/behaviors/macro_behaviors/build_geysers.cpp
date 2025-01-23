@@ -11,7 +11,7 @@ namespace Aeolus
 	bool BuildGeysers::execute(AeolusBot& aeolusbot)
 	{
 		auto* observation = aeolusbot.Observation();
-		if (m_smart_gas && (observation->GetMinerals() - observation->GetVespene()) < m_smart_gas_threshold)
+		if (m_smart_gas && (static_cast<int>(observation->GetMinerals()) - static_cast<int>(observation->GetVespene())) < m_smart_gas_threshold)
 			return false;
 		
 		::sc2::Units existing_geysers;

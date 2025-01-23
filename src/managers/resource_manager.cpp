@@ -50,8 +50,8 @@ namespace Aeolus
 					_assignWorkersToGasBuildings(unassigned_workers, all_gas_buildings);
 					auto end_time = std::chrono::high_resolution_clock::now();
 					auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-					if (iteration % 100 == 0) std::cout <<
-						"Number of gas buildings: " << all_gas_buildings.size() << "Elapsed_ms: " << elapsed_ms << std::endl;
+					// if (iteration % 100 == 0) std::cout <<
+						// "Number of gas buildings: " << all_gas_buildings.size() << "Elapsed_ms: " << elapsed_ms << std::endl;
 				}
 
 				// std::cout << "Available patches:" << available_minerals.size() << std::endl;
@@ -292,6 +292,7 @@ namespace Aeolus
 			::sc2::Units all_mineral_fields = ManagerMediator::getInstance().GetAllMineralPatches(m_bot);
 			for (const auto& town_hall : own_town_halls)
 			{
+				if (town_hall->build_progress < 0.9f) continue;
 				::sc2::Units townhall_minerals;
 				for (const auto& mineral_field : all_mineral_fields)
 				{
@@ -334,16 +335,16 @@ namespace Aeolus
 			if (gas_building->build_progress >= 1.0f
 				&& !utils::GetCloserThan(own_town_halls, 12, gas_building->pos).empty())
 			{
-				std::cout << "ResourceManager: Selecting a worker" << std::endl;
+				// std::cout << "ResourceManager: Selecting a worker" << std::endl;
 				auto worker = _selectWorker(gas_building->pos);
 				if (!worker.has_value()) continue;
-				std::cout << "ResourceManager: Selected a worker!" << std::endl;
+				// std::cout << "ResourceManager: Selected a worker!" << std::endl;
 				if (std::find(m_geyser_to_workers[gas_building].begin(), 
 					m_geyser_to_workers[gas_building].end(), 
 					worker.value()) 
 					!=
 					m_geyser_to_workers[gas_building].end()) continue;
-				std::cout << "ResourceManager: Adding worker to gas!" << std::endl;
+				// std::cout << "ResourceManager: Adding worker to gas!" << std::endl;
 				m_geyser_to_workers[gas_building].push_back(worker.value());
 				m_worker_to_geyser[worker.value()] = gas_building;
 				_removeWorkerFromMineral(worker.value());

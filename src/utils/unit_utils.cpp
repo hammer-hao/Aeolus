@@ -3,6 +3,7 @@
 #include <sc2api/sc2_unit.h>
 #include <algorithm>
 #include <cmath>
+#include "../constants.h"
 
 
 namespace Aeolus
@@ -80,6 +81,23 @@ namespace Aeolus
 				}
 			}
 			return attack_target;
+		}
+
+		std::optional<::sc2::UNIT_TYPEID> _isTrainedFrom(::sc2::UNIT_TYPEID unit_type)
+		{
+			if (constants::GATEWAY_UNITS.find(unit_type) != constants::GATEWAY_UNITS.end())
+			{
+				return ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY;
+			}
+			else if (constants::ROBO_UNITS.find(unit_type) != constants::ROBO_UNITS.end())
+			{
+				return ::sc2::UNIT_TYPEID::PROTOSS_ROBOTICSFACILITY;
+			}
+			else if (constants::STARGATE_UNITS.find(unit_type) != constants::STARGATE_UNITS.end())
+			{
+				return ::sc2::UNIT_TYPEID::PROTOSS_STARGATE;
+			}
+			return std::nullopt;
 		}
 	}
 }
