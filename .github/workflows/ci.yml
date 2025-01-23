@@ -42,7 +42,7 @@ jobs:
           cp "${{ env.BUILD_DIR }}/bin/Aeolus" artifacts/Aeolus
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Aeolus
           path: artifacts/Aeolus
