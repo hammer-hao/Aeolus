@@ -97,15 +97,15 @@ namespace Aeolus
 			* target_proportion
 			);
 
-		std::cout << "We can currently support " << std::min(rate_supported_by_gas, rate_supported_by_minerals)
+		/*std::cout << "We can currently support " << std::min(rate_supported_by_gas, rate_supported_by_minerals)
 			<< " simutaneous productions." << std::endl;
-		std::cout << "Existing production count: " << existing_production_count << std::endl;
+		std::cout << "Existing production count: " << existing_production_count << std::endl;*/
 
 		if (existing_production_count < rate_supported_by_minerals
 			&& existing_production_count < rate_supported_by_gas)
 		{
 			return std::make_unique<BuildStructure>(production_structure_id, m_base_location, false).get()->execute(aeolusbot);
-			std::cout << "Building more production to match our income... " << std::endl;
+			// std::cout << "Building more production to match our income... " << std::endl;
 		}
 		return false;
 	}

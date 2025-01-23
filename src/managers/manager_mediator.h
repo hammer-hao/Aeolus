@@ -180,6 +180,19 @@ namespace Aeolus
 			);
 		}
 
+		/**
+		* @brief Clears the worker assignment for MINERALS ONLY.
+		*/
+		int ClearWorkerAssignment(AeolusBot& aeolusbot, const ::sc2::Unit* worker)
+		{
+			return ManagerRequest<int, const ::sc2::Unit* >(
+				aeolusbot,
+				constants::ManagerName::RESOURCE_MANAGER,
+				constants::ManagerRequestType::CLEAR_ASSIGNMENT,
+				worker
+			);
+		}
+
 		// UnitFilterManager
 
 		::sc2::Units GetAllDestructables(AeolusBot& aeolusbot)

@@ -185,13 +185,17 @@ namespace Aeolus
 			// on rare occations, the worker goes idle
 			else if (worker->orders.empty() || utils::HasAbilityQueued(worker, ::sc2::ABILITY_ID::STOP))
 			{
-				std::cout << "worker is idle!!" << std::endl;
+				// std::cout << "worker is idle!!" << std::endl;
 				if (worker->cargo_space_taken > 0)
 				{
 					aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, closest_town_hall, true);
 				}
 				else
 				{
+					// reassign the worker to a mineral patch
+					// ManagerMediator::getInstance().ClearWorkerAssignment(aeolusbot, worker);
+
+					// legacy solution: mine from a patch: will cause worker to be idle once patch mined out
 					aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, patch, true);
 				}
 			}
