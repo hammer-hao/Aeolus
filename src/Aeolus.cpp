@@ -239,7 +239,7 @@ namespace Aeolus
                     }
                 }
 
-                auto enemy_target = utils::PickAttackTarget(close_units);
+                auto enemy_target = ::Aeolus::utils::PickAttackTarget(close_units);
 
                 if ((unit->shield / unit->shield_max) < 0.1)
                 {
