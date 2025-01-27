@@ -30,11 +30,11 @@
 #include "behaviors/micro_behaviors/stutter_unit_back.h"
 
 #include "build_order_executor.h"
+#include "utils/unit_utils.h"
 
 #ifdef BUILD_WITH_RENDERER
 
 #include "utils/feature_layer_utils.h"
-#include "utils/unit_utils.h"
 #include <sc2renderer/sc2_renderer.h>
 
 #endif // BUILD_WITH_RENDERER
@@ -239,7 +239,7 @@ namespace Aeolus
                     }
                 }
 
-                auto enemy_target = ::Aeolus::utils::PickAttackTarget(close_units);
+                auto enemy_target = utils::PickAttackTarget(close_units);
 
                 if ((unit->shield / unit->shield_max) < 0.1)
                 {
