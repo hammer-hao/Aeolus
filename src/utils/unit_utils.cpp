@@ -183,7 +183,7 @@ namespace Aeolus
 
 			// get the relative angle of the units
 			float facing_angle = unit->facing;
-			float target_angle = std::atan2f(unit_pos.y - target_pos.y, unit_pos.x - target_pos.x);
+			float target_angle = std::atan2(unit_pos.y - target_pos.y, unit_pos.x - target_pos.x);
 
 			// get the difference between facing angle and target
 			facing_angle = (facing_angle >= 0) ? facing_angle : facing_angle + 2 * 3.14159f;
