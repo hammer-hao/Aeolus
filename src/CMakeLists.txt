@@ -183,6 +183,7 @@ set(bot_headers
     utils/position_utils.h
     utils/unit_utils.h
     utils/kdtree_utils.h
+    utils/Astar.hpp
     thirdparty/nanoflann.hpp)
 
 include(FetchContent)
