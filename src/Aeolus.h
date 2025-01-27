@@ -60,6 +60,9 @@ namespace Aeolus
 
         // implement the build runner
         void ExecuteBuildOrder();
+
+        // micro units
+        void Micro(::sc2::Units units, ::sc2::Point2D target);
     };
 
 }

@@ -22,11 +22,19 @@
 #include "behaviors/macro_behaviors/production_controller.h"
 #include "behaviors/macro_behaviors/spawn_controller.h"
 
+#include "behaviors/micro_behaviors/micro_behavior.h"
+#include "behaviors/micro_behaviors/path_to_target.h"
+#include "behaviors/micro_behaviors/shoot_target_in_range.h"
+#include "behaviors/micro_behaviors/keep_unit_safe.h"
+#include "behaviors/micro_behaviors/a_move.h"
+#include "behaviors/micro_behaviors/stutter_unit_back.h"
+
 #include "build_order_executor.h"
 
 #ifdef BUILD_WITH_RENDERER
 
 #include "utils/feature_layer_utils.h"
+#include "utils/unit_utils.h"
 #include <sc2renderer/sc2_renderer.h>
 
 #endif // BUILD_WITH_RENDERER
@@ -66,7 +74,7 @@ namespace Aeolus
     // Called every game step
     void AeolusBot::OnStep() {
 
-        std::cout << "Aeolus: Taking a step... " << std::endl;
+        // std::cout << "Aeolus: Taking a step... " << std::endl;
 
         // Example: Get game loop information
         //uint32_t game_loop = observation->GetGameLoop();
@@ -89,6 +97,10 @@ namespace Aeolus
 
         Macro();
 
+        // Micro our units
+        ::sc2::Units forces = ManagerMediator::getInstance().GetUnitsFromRole(*this, constants::UnitRole::ATTACKING);
+        if (!forces.empty()) Micro(forces, ManagerMediator::getInstance().GetExpansionLocations(*this).back());
+
         #ifndef BUILD_FOR_LADDER
         if (Observation()->GetGameLoop() % 100 == 0)
         {
@@ -109,6 +121,11 @@ namespace Aeolus
     void AeolusBot::OnUnitCreated(const ::sc2::Unit* unit_) {
         std::cout << "Aeolus:" << sc2::UnitTypeToName(unit_->unit_type) 
             << "(" << unit_->tag << ") was created" << std::endl;
+        // Assign role based on unit type
+        if (unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER)
+        {
+            ManagerMediator::getInstance().AssignRole(*this, unit_, constants::UnitRole::ATTACKING);
+        }
     }
 
     // Handle idle units
@@ -152,7 +169,9 @@ namespace Aeolus
         // Implement custom logic for gathering resources, expanding, etc.
         ExecuteBuildOrder();
         RegisterBehavior(std::make_unique<Mining>());
-        RegisterBehavior(std::make_unique<BuildWorkers>());
+        RegisterBehavior(std::make_unique<BuildWorkers>(
+            std::min(ManagerMediator::getInstance().GetOwnTownHalls(*this).size() * 22, static_cast<size_t>(86))
+        ));
         RegisterBehavior(std::make_unique<Expand>());
         RegisterBehavior(std::make_unique<BuildGeysers>());
         RegisterBehavior(std::make_unique<AutoSupply>());
@@ -169,6 +188,85 @@ namespace Aeolus
         std::cout << "current gameloop: " << Observation()->GetGameLoop() << std::endl;
     }
 
+    void AeolusBot::Micro(::sc2::Units units, ::sc2::Point2D target)
+    {
+        std::vector<::sc2::Point2D> starting_points;
+        float search_radius = 15.0f;
+        for (const auto& unit : units) starting_points.push_back(unit->pos);
+        auto enemies_in_range = ManagerMediator::getInstance().GetEnemyUnitsInRangeMap(*this, 
+            starting_points, search_radius);
+
+        for (int i = 0; i < units.size(); ++i)
+        {
+            const ::sc2::Unit* unit = units[i];
+
+            // 1) Create the MicroBehavior as a unique_ptr
+            auto combat_behavior = std::make_unique<MicroBehavior>(unit);
+
+            // 2) Filter out close enemies
+            ::sc2::Units close_units;
+            for (const auto& enemy : enemies_in_range[i])
+                if (enemy->display_type != ::sc2::Unit::DisplayType::Snapshot
+                    && constants::IGNORED_UNITS.find(enemy->unit_type) == constants::IGNORED_UNITS.end())
+                    close_units.push_back(enemy);
+
+            ::sc2::Units close_non_structures;
+            for (const auto& enemy : close_units) if (constants::ALL_STRUCTURES.find(enemy->unit_type) == constants::ALL_STRUCTURES.end())
+                close_non_structures.push_back(enemy);
+
+            // Add the path behavior if no close enemy is spotted
+            if (!close_units.empty())
+            {
+                auto in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(*this, unit, close_non_structures);
+                if (!in_attack_range.empty())
+                {
+                    combat_behavior->AddBehavior(
+                        std::make_unique<ShootTargetInRange>(
+                            in_attack_range
+                        )
+                    );
+                }
+                else
+                {
+                    auto all_in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(*this, unit, close_units);
+                    if (!all_in_attack_range.empty())
+                    {
+                        combat_behavior->AddBehavior(
+                            std::make_unique<ShootTargetInRange>(
+                                all_in_attack_range
+                            )
+                        );
+                    }
+                }
+
+                auto enemy_target = utils::PickAttackTarget(close_units);
+
+                if ((unit->shield / unit->shield_max) < 0.1)
+                {
+                    combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                }
+                else
+                {
+                    combat_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
+                }
+            }
+            else
+            {
+                combat_behavior->AddBehavior(
+                    std::make_unique<PathToTarget>(
+                        target
+                    ));
+
+                combat_behavior->AddBehavior(
+                    std::make_unique<AMove>(
+                        target
+                    ));
+            }
+
+            // Now register the combat behavior
+            RegisterBehavior(std::move(combat_behavior));
+        }
+    }
 
     // Custom macro/economy management logic
     void AeolusBot::ManageEconomy() {

@@ -6,6 +6,9 @@
 #include <vector>
 
 namespace Aeolus {
+
+	class AeolusBot;
+
 	namespace utils {
 
 		// helper function to convert 3D position to 2D
@@ -21,5 +24,9 @@ namespace Aeolus {
 		const ::sc2::Unit* PickAttackTarget(::sc2::Units targets);
 
 		std::optional<::sc2::UNIT_TYPEID> _isTrainedFrom(::sc2::UNIT_TYPEID unit_type);
+
+		float GetTurnRate(const ::sc2::UNIT_TYPEID& unit_type);
+
+		bool isAttackReady(AeolusBot& aeolusbot, const ::sc2::Unit* unit, const ::sc2::Unit* target);
 	}
 }

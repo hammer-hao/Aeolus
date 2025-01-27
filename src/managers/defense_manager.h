@@ -36,6 +36,12 @@ namespace Aeolus
 
 		::sc2::Units UnitsInRange(const std::vector<StartPointType>& starting_points, float distance, UnitsKDTree& query_tree);
 
+		// We'll return a vector of the same size as 'starting_points', where each element is the list of units in range of that start point.
+		std::vector<::sc2::Units> UnitsInRangeMap(
+			const std::vector<StartPointType>& starting_points,
+			float distance,
+			UnitsKDTree& tree);
+
 		::sc2::Units MainThreatsNearTownHall();
 
 	private:

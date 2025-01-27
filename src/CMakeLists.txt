@@ -20,6 +20,15 @@ behaviors/macro_behaviors/auto_supply.cpp
 behaviors/macro_behaviors/production_controller.cpp
 behaviors/macro_behaviors/spawn_controller.cpp
 behaviors/macro_behaviors/expand.cpp)
+
+source_group("Source Files\\behaviors\\micro_behaviors" FILES 
+behaviors/micro_behaviors/a_move.cpp
+behaviors/micro_behaviors/keep_unit_safe.cpp
+behaviors/micro_behaviors/path_to_target.cpp
+behaviors/micro_behaviors/shoot_target_in_range.cpp
+behaviors/micro_behaviors/stutter_unit_back.cpp)
+
+
 source_group("Header Files\\behaviors" FILES behaviors/behavior.h)
 source_group("Header Files\\behaviors\\macro_behaviors" FILES 
 behaviors/macro_behaviors/macro_behavior.h 
@@ -31,6 +40,15 @@ behaviors/macro_behaviors/auto_supply.h
 behaviors/macro_behaviors/production_controller.h
 behaviors/macro_behaviors/spawn_controller.h
 behaviors/macro_behaviors/expand.h)
+
+source_group("Header Files\\behaviors\\micro_behaviors" FILES
+behaviors/micro_behaviors/a_move.h
+behaviors/micro_behaviors/keep_unit_safe.h
+behaviors/micro_behaviors/micro_behavior.h
+behaviors/micro_behaviors/micro_maneuver.h
+behaviors/micro_behaviors/path_to_target.h
+behaviors/micro_behaviors/shoot_target_in_range.h
+behaviors/micro_behaviors/stutter_unit_back.h)
 
 source_group("Source Files\\Managers" FILES 
     managers/hub.cpp
@@ -80,7 +98,8 @@ source_group("Header Files\\utils" FILES
     utils/grid_utils.h
     utils/position_utils.h
     utils/unit_utils.h
-    utils/kdtree_utils.h)
+    utils/kdtree_utils.h
+    utils/Astar.hpp)
 
 set(bot_sources
     Aeolus.cpp
@@ -97,6 +116,11 @@ set(bot_sources
     behaviors/macro_behaviors/auto_supply.cpp
     behaviors/macro_behaviors/production_controller.cpp
     behaviors/macro_behaviors/spawn_controller.cpp
+    behaviors/micro_behaviors/a_move.cpp
+    behaviors/micro_behaviors/keep_unit_safe.cpp
+    behaviors/micro_behaviors/path_to_target.cpp
+    behaviors/micro_behaviors/shoot_target_in_range.cpp
+    behaviors/micro_behaviors/stutter_unit_back.cpp
     managers/hub.cpp
     managers/manager_mediator.cpp
     managers/path_manager.cpp
@@ -131,6 +155,13 @@ set(bot_headers
     behaviors/macro_behaviors/auto_supply.h
     behaviors/macro_behaviors/production_controller.h
     behaviors/macro_behaviors/spawn_controller.h
+    behaviors/micro_behaviors/a_move.h
+    behaviors/micro_behaviors/keep_unit_safe.h
+    behaviors/micro_behaviors/micro_behavior.h
+    behaviors/micro_behaviors/micro_maneuver.h
+    behaviors/micro_behaviors/path_to_target.h
+    behaviors/micro_behaviors/shoot_target_in_range.h
+    behaviors/micro_behaviors/stutter_unit_back.h
     behaviors/behavior.h
     managers/hub.h
     managers/manager.h

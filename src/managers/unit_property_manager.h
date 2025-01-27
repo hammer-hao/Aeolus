@@ -66,6 +66,10 @@ namespace Aeolus
 
 		std::unordered_map<uint64_t, int> m_supply_cost_map;
 
+		float GetMovementSpeed(::sc2::UNIT_TYPEID unit_type);
+
+		std::unordered_map<uint64_t, int> m_movement_speed_cache;
+
 		::sc2::Units InAttackRange(const ::sc2::Unit* unit, ::sc2::Units targets);
 
 		::sc2::UnitTypes m_unit_data_cache;

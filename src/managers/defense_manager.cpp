@@ -54,6 +54,24 @@ namespace Aeolus
 			}
 			return UnitsInRange(st_points, distance, *m_all_own_units_tree);
 		}
+		case (constants::ManagerRequestType::GET_ENEMY_UNITS_IN_RANGE_MAP):
+		{
+			auto params = std::any_cast<std::tuple<std::vector<::sc2::Point2D>, float>>(args);
+			std::vector<::sc2::Point2D> starting_points = std::get<0>(params);
+			float distance = std::get<1>(params);
+
+			// Convert that std::vector<::sc2::Point2D> into std::vector<StartPointType>
+			std::vector<StartPointType> st_points;
+			st_points.reserve(starting_points.size());
+			for (auto& pt : starting_points)
+			{
+				// Since StartPointType = std::variant<const sc2::Unit*, sc2::Point2D>
+				// we can push_back the Point2D directly into that variant
+				st_points.push_back(pt);
+			}
+
+			return UnitsInRangeMap(st_points, distance, *m_all_enemy_units_tree);
+		}
 		case (constants::ManagerRequestType::GET_GROUND_THREATS_NEAR_BASES):
 		{
 			return MainThreatsNearTownHall();
@@ -117,6 +135,56 @@ namespace Aeolus
 			if (unique_units.size() > 0) units_in_range.assign(unique_units.begin(), unique_units.end());
 		}
 		return units_in_range;
+	}
+
+	std::vector<::sc2::Units> DefenseManager::UnitsInRangeMap(
+		const std::vector<StartPointType>& starting_points,
+		float distance,
+		UnitsKDTree& tree)
+	{
+		// We'll return a vector of the same size as 'starting_points',
+		// where each element is the list of units in range of that start point.
+		std::vector<::sc2::Units> results(starting_points.size());
+
+		nanoflann::SearchParameters params;
+
+		if (!starting_points.empty() && tree.tree) {
+			// Loop through each starting point
+			for (size_t i = 0; i < starting_points.size(); ++i) {
+				// Determine the position (x, y) for this start point
+				const auto& point = starting_points[i];
+				::sc2::Point2D position;
+				if (std::holds_alternative<const ::sc2::Unit*>(point)) {
+					position.x = std::get<const ::sc2::Unit*>(point)->pos.x;
+					position.y = std::get<const ::sc2::Unit*>(point)->pos.y;
+				}
+				else {
+					position = std::get<::sc2::Point2D>(point);
+				}
+
+				// Prepare for the radius search
+				float query_point[2] = { position.x, position.y };
+				std::vector<nanoflann::ResultItem<unsigned int, float>> search_results;
+
+				// Perform range search for this single start point
+				tree.tree->radiusSearch(query_point, distance * distance, search_results, params);
+
+				// Collect unique units for this start point
+				std::unordered_set<const ::sc2::Unit*> unique_units;
+				for (const auto& result : search_results) {
+					const ::sc2::Unit* unit = tree.unit_map[result.first];
+					unique_units.insert(unit);
+				}
+
+				// Move into the results vector element for this start point
+				if (!unique_units.empty()) {
+					results[i].reserve(unique_units.size());
+					results[i].assign(unique_units.begin(), unique_units.end());
+				}
+			}
+		}
+
+		return results;
 	}
 
 	::sc2::Units DefenseManager::MainThreatsNearTownHall()

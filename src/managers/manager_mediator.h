@@ -361,6 +361,24 @@ namespace Aeolus
 			);
 		}
 
+		::sc2::Point2D FindNextPathingPoint(AeolusBot& aeolusbot, ::sc2::Point2D start,
+			::sc2::Point2D goal, bool sense_danger = true, int danger_distance = 20,
+			float danger_threshold = 5.0f, bool smoothing = false, int sensitivity = 3)
+		{
+			return ManagerRequest<::sc2::Point2D, ::sc2::Point2D, ::sc2::Point2D, bool, int, float, bool, int>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::GET_NEXT_PATH_POINT,
+				start,
+				goal,
+				sense_danger,
+				danger_distance,
+				danger_threshold,
+				smoothing,
+				sensitivity
+			);
+		}
+
 		// UnitPropertyManager
 
 		bool CanAttackGround(AeolusBot& aeolusbot, const ::sc2::Unit* unit)
@@ -470,6 +488,17 @@ namespace Aeolus
 				);
 		}
 
+		float GetUnitMovementSpeed(AeolusBot& aeolusbot, ::sc2::UNIT_TYPEID unit_type)
+		{
+			return ManagerRequest<float, ::sc2::UNIT_TYPEID>
+				(
+					aeolusbot,
+					constants::ManagerName::UNIT_PROPERTY_MANAGER,
+					constants::ManagerRequestType::GET_UNIT_MOVEMENT_SPEED,
+					unit_type
+				);
+		}
+
 		// DefenseManager
 
 		::sc2::Units GetUnitsInRange(AeolusBot& aeolusbot, std::vector<::sc2::Point2D> starting_points, float distance)
@@ -501,6 +530,17 @@ namespace Aeolus
 				constants::ManagerName::DEFENSE_MANAGER,
 				constants::ManagerRequestType::GET_GROUND_THREATS_NEAR_BASES,
 				0
+			);
+		}
+
+		std::vector<::sc2::Units> GetEnemyUnitsInRangeMap(AeolusBot& aeolusbot, std::vector<::sc2::Point2D> starting_points, float distance)
+		{
+			return ManagerRequest<std::vector<::sc2::Units>, std::vector<::sc2::Point2D>, float>(
+				aeolusbot,
+				constants::ManagerName::DEFENSE_MANAGER,
+				constants::ManagerRequestType::GET_ENEMY_UNITS_IN_RANGE_MAP,
+				starting_points,
+				distance
 			);
 		}
 

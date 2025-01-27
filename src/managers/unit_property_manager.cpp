@@ -100,6 +100,12 @@ namespace Aeolus
 			::sc2::UNIT_TYPEID unit_type = std::get<0>(params);
 			return GetUnitSupplyCost(unit_type);
 		}
+		case constants::ManagerRequestType::GET_UNIT_MOVEMENT_SPEED:
+		{
+			auto params = std::any_cast<std::tuple<::sc2::UNIT_TYPEID>>(args);
+			::sc2::UNIT_TYPEID unit_type = std::get<0>(params);
+			return GetMovementSpeed(unit_type);
+		}
 		default:
 			std::cout << "UnitPropertyMnager: Unknown request type!" << std::endl;
 		}
@@ -323,6 +329,17 @@ namespace Aeolus
 
 		int result = static_cast<int>(m_unit_data_cache[id].food_required);
 		m_supply_cost_map[id] = result;
+		return result;
+	}
+
+	float UnitPropertyManager::GetMovementSpeed(::sc2::UNIT_TYPEID unit_type)
+	{
+		uint64_t id = static_cast<uint64_t>(unit_type);
+		auto it = m_movement_speed_cache.find(id);
+		if (it != m_movement_speed_cache.end()) return m_movement_speed_cache[id];
+
+		float result = static_cast<float>(m_unit_data_cache[id].movement_speed);
+		m_movement_speed_cache[id] = result;
 		return result;
 	}
 }

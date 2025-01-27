@@ -2,6 +2,7 @@
 #include "../pathing/weight_costs.h"
 #include "../Aeolus.h"
 #include "../constants.h"
+#include "../utils/Astar.hpp"
 #include "manager_mediator.h"
 
 #include <sc2api/sc2_common.h>
@@ -22,6 +23,7 @@ namespace Aeolus
 		else if (iteration > 0)
 		{
 			_reset_grids(); // clean the grids before populating
+			_reset_danger_tiles(); // clean the danger tiles cache
 
 			::sc2::Units enemy_units = ManagerMediator::getInstance().GetAllEnemyUnits(m_bot);
 
@@ -63,6 +65,18 @@ namespace Aeolus
 			::sc2::Point2D starting_point = std::get<0>(params);
 			int max_distance = std::get<1>(params);
 			return _getFloodFillArea(starting_point, max_distance);
+		}
+		case (constants::ManagerRequestType::GET_NEXT_PATH_POINT):
+		{
+			auto params = std::any_cast<std::tuple <::sc2::Point2D, ::sc2::Point2D, bool, int, float, bool, int>>(args);
+			::sc2::Point2D start = std::get<0>(params);
+			::sc2::Point2D goal = std::get<1>(params);
+			bool sense_danger = std::get<2>(params);
+			int danger_distance = std::get<3>(params);
+			float danger_threshold = std::get<4>(params);
+			bool smoothing = std::get<5>(params);
+			int sensitivity = std::get<6>(params);
+			return AStarPathFindNext(start, goal, m_ground_grid, sense_danger, danger_distance, danger_threshold, smoothing, sensitivity);
 		}
 		default:
 			return 0;
@@ -157,6 +171,12 @@ namespace Aeolus
 		m_ground_grid.Reset();
 	}
 
+	void PathManager::_reset_danger_tiles()
+	{
+		m_danger_tiles_cache.clear();
+		m_danger_tiles_is_cached = false;
+	}
+
 	::sc2::ImageData PathManager::_getDefaultGridData()
 	{
 		return m_mapdata.getDefaultGridData();
@@ -170,6 +190,51 @@ namespace Aeolus
 	std::vector<::sc2::Point2D> PathManager::_getFloodFillArea(::sc2::Point2D starting_point, int max_distance)
 	{
 		return m_mapdata.GetFloodFillArea(starting_point, max_distance);
+	}
+
+	::sc2::Point2D PathManager::AStarPathFindNext(::sc2::Point2D start, ::sc2::Point2D goal,
+		const Grid& grid, bool sense_danger, int danger_distance,
+		float danger_threshold, bool smoothing, int sensitivity)
+	{
+		auto cost_grid = m_ground_grid.GetGrid();
+
+		if (sense_danger)
+		{
+			std::vector<std::pair<int, int>> dangers;
+
+			if (m_danger_tiles_is_cached) dangers = m_danger_tiles_cache;
+			else
+			{
+				for (int y = 0; y < cost_grid.rows(); ++y)
+				{
+					for (int x = 0; x < cost_grid.cols(); ++x)
+					{
+						if (cost_grid(y, x) < danger_threshold) dangers.emplace_back(x, y);
+					}
+				}
+				m_danger_tiles_is_cached = true;
+			}
+			
+			if (!dangers.empty())
+			{
+				double closest_danger_distance = std::numeric_limits<double>::infinity();
+				for (const auto& danger : dangers)
+				{
+					closest_danger_distance = std::min(
+						(std::pow(danger.first, 2) + std::pow(danger.second, 2)),
+						closest_danger_distance);
+				}
+				if (closest_danger_distance >= (danger_distance * danger_distance))
+					return goal;
+			}
+			else return goal;
+		}
+
+		// sensed danger and danger is within distance, perform custom pathfinding.
+		auto path = AStarPathFind(start, goal, cost_grid, smoothing, sensitivity);
+
+		if (path.empty()) return goal;
+		else return path.front();
 	}
 }
 
