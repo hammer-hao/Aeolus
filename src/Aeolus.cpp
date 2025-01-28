@@ -31,6 +31,7 @@
 
 #include "build_order_executor.h"
 #include "utils/unit_utils.h"
+#include "utils/position_utils.h"
 
 #ifdef BUILD_WITH_RENDERER
 
@@ -47,6 +48,7 @@ namespace Aeolus
     AeolusBot::AeolusBot() {
         std::cout << "Aeolus bot initialized!" << std::endl;
         build_order_step = 0;
+        m_current_base_target = 0;
     }
 
     // Destructor (optional)
@@ -99,7 +101,7 @@ namespace Aeolus
 
         // Micro our units
         ::sc2::Units forces = ManagerMediator::getInstance().GetUnitsFromRole(*this, constants::UnitRole::ATTACKING);
-        if (!forces.empty()) Micro(forces, ManagerMediator::getInstance().GetExpansionLocations(*this).back());
+        if (!forces.empty()) Micro(forces, CalculateTarget());
 
         #ifndef BUILD_FOR_LADDER
         if (Observation()->GetGameLoop() % 100 == 0)
@@ -265,6 +267,27 @@ namespace Aeolus
 
             // Now register the combat behavior
             RegisterBehavior(std::move(combat_behavior));
+        }
+    }
+
+    // calculate the next target to attack
+    ::sc2::Point2D AeolusBot::CalculateTarget()
+    {
+        auto enemy_structures = ManagerMediator::getInstance().GetAllEnemyStructures(*this);
+        if (!enemy_structures.empty())
+        {
+            return utils::GetClosestUnitTo(Observation()->GetStartLocation(), enemy_structures)->pos;
+        }
+        else if (Observation()->GetGameLoop() / 22.4f < 240.0f) 
+            return ManagerMediator::getInstance().GetExpansionLocations(*this).back();
+        else
+        {
+            auto targets = ManagerMediator::getInstance().GetExpansionLocations(*this);
+            if (Observation()->GetVisibility(targets[m_current_base_target]) == ::sc2::Visibility::Visible)
+            {
+                m_current_base_target = (m_current_base_target + 1) % targets.size();
+            }
+            return targets[m_current_base_target];
         }
     }
 

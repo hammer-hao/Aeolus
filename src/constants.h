@@ -58,6 +58,7 @@ namespace Aeolus {
 			GET_OWN_GAS_BUILDINGS,
 			GET_OWN_STRUCTURES,
 			GET_ALL_ENEMY_UNITS,
+			GET_ALL_ENEMY_STRUCTURES,
 
 			// UnitPropertyManager
 			CAN_ATTACK_GROUND,

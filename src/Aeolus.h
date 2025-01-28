@@ -63,6 +63,11 @@ namespace Aeolus
 
         // micro units
         void Micro(::sc2::Units units, ::sc2::Point2D target);
+
+        int m_current_base_target;
+
+        // calculate the next target to attack
+        ::sc2::Point2D CalculateTarget();
     };
 
 }
