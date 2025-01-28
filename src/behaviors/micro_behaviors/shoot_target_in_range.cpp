@@ -1,4 +1,5 @@
 #include "shoot_target_in_range.h"
+#include "attack_target_unit.h"
 
 #include "micro_maneuver.h"
 #include <sc2api/sc2_common.h>
@@ -38,8 +39,8 @@ namespace Aeolus
 
 		if (_isAttackReady(aeolusbot, unit, enemy_target))
 		{
-			aeolusbot.Actions()->UnitCommand(unit, ::sc2::ABILITY_ID::ATTACK_ATTACK, enemy_target);
-			return true;
+			AttackTargetUnit attack_target_unit = AttackTargetUnit(enemy_target);
+			return attack_target_unit.execute(aeolusbot, unit);
 		}
 
 		return false;

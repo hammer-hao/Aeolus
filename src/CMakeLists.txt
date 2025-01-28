@@ -26,7 +26,9 @@ behaviors/micro_behaviors/a_move.cpp
 behaviors/micro_behaviors/keep_unit_safe.cpp
 behaviors/micro_behaviors/path_to_target.cpp
 behaviors/micro_behaviors/shoot_target_in_range.cpp
-behaviors/micro_behaviors/stutter_unit_back.cpp)
+behaviors/micro_behaviors/stutter_unit_back.cpp
+behaviors/micro_behaviors/move.cpp
+behaviors/micro_behaviors/attack_target_unit.cpp)
 
 
 source_group("Header Files\\behaviors" FILES behaviors/behavior.h)
@@ -48,7 +50,9 @@ behaviors/micro_behaviors/micro_behavior.h
 behaviors/micro_behaviors/micro_maneuver.h
 behaviors/micro_behaviors/path_to_target.h
 behaviors/micro_behaviors/shoot_target_in_range.h
-behaviors/micro_behaviors/stutter_unit_back.h)
+behaviors/micro_behaviors/stutter_unit_back.h
+behaviors/micro_behaviors/move.h
+behaviors/micro_behaviors/attack_target_unit.h)
 
 source_group("Source Files\\Managers" FILES 
     managers/hub.cpp
@@ -121,6 +125,8 @@ set(bot_sources
     behaviors/micro_behaviors/path_to_target.cpp
     behaviors/micro_behaviors/shoot_target_in_range.cpp
     behaviors/micro_behaviors/stutter_unit_back.cpp
+    behaviors/micro_behaviors/move.cpp
+    behaviors/micro_behaviors/attack_target_unit.cpp
     managers/hub.cpp
     managers/manager_mediator.cpp
     managers/path_manager.cpp
@@ -162,6 +168,8 @@ set(bot_headers
     behaviors/micro_behaviors/path_to_target.h
     behaviors/micro_behaviors/shoot_target_in_range.h
     behaviors/micro_behaviors/stutter_unit_back.h
+    behaviors/micro_behaviors/move.h
+    behaviors/micro_behaviors/attack_target_unit.h
     behaviors/behavior.h
     managers/hub.h
     managers/manager.h

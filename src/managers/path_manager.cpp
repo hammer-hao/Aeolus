@@ -209,7 +209,7 @@ namespace Aeolus
 				{
 					for (int x = 0; x < cost_grid.cols(); ++x)
 					{
-						if (cost_grid(y, x) < danger_threshold) dangers.emplace_back(x, y);
+						if (cost_grid(y, x) > danger_threshold) dangers.emplace_back(x, y);
 					}
 				}
 				m_danger_tiles_is_cached = true;
@@ -221,7 +221,7 @@ namespace Aeolus
 				for (const auto& danger : dangers)
 				{
 					closest_danger_distance = std::min(
-						(std::pow(danger.first, 2) + std::pow(danger.second, 2)),
+						(std::pow(danger.first - start.x, 2) + std::pow(danger.second - start.y, 2)),
 						closest_danger_distance);
 				}
 				if (closest_danger_distance >= (danger_distance * danger_distance))

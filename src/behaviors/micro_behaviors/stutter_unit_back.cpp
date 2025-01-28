@@ -8,6 +8,7 @@
 #include "../../managers/manager_mediator.h"
 #include "../../utils/unit_utils.h"
 #include "keep_unit_safe.h"
+#include "attack_target_unit.h"
 
 namespace Aeolus
 {
@@ -17,12 +18,11 @@ namespace Aeolus
 
 		if (utils::isAttackReady(aeolusbot, unit, m_target))
 		{
-			aeolusbot.Actions()->UnitCommand(unit, ::sc2::ABILITY_ID::ATTACK, m_target);
-			return true;
+			AttackTargetUnit attack_target_unit = AttackTargetUnit(m_target);
+			return attack_target_unit.execute(aeolusbot, unit);
 		}
 
 		KeepUnitSafe keep_unit_safe = KeepUnitSafe();
-		
 		return keep_unit_safe.execute(aeolusbot, unit);
 	}
 }

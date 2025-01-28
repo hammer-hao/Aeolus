@@ -7,15 +7,16 @@
 namespace Aeolus
 {
 	class AeolusBot;
+
 	/*
-	@brief A-moves unit to a target point. Will not issue the command if duplicate.
+	* @brief Issues a move command, but avoids repeating the command if it is already being performed.
 	*/
-	class AMove : public MicroManeuver
+	class Move : public MicroManeuver
 	{
 	public:
-		AMove(::sc2::Point2D target) : m_target(target) {}
+		Move(::sc2::Point2D target) : m_target(target) {}
 
-		~AMove() override = default;
+		~Move() override = default;
 
 		bool execute(AeolusBot& aeolusbot, const ::sc2::Unit* unit) override;
 

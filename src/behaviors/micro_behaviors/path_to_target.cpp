@@ -1,5 +1,6 @@
 #include "path_to_target.h"
 #include "micro_maneuver.h"
+#include "move.h"
 #include <sc2api/sc2_common.h>
 #include <sc2api/sc2_unit.h>
 
@@ -15,7 +16,11 @@ namespace Aeolus
 
 		::sc2::Point2D move_to = ManagerMediator::getInstance().FindNextPathingPoint(aeolusbot, unit->pos, m_target);
 
-		aeolusbot.Actions()->UnitCommand(unit, ::sc2::ABILITY_ID::MOVE_MOVE, move_to);
+		aeolusbot.Actions()->UnitCommand(unit, ::sc2::ABILITY_ID::MOVE_MOVE, m_target);
 		return true;
+
+		//Move move = Move(move_to);
+
+		//return move.execute(aeolusbot, unit);
 	}
 }
