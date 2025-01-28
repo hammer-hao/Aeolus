@@ -285,7 +285,9 @@ namespace Aeolus
             auto targets = ManagerMediator::getInstance().GetExpansionLocations(*this);
             if (Observation()->GetVisibility(targets[m_current_base_target]) == ::sc2::Visibility::Visible)
             {
-                m_current_base_target = (m_current_base_target + 1) % targets.size();
+                if (m_current_base_target == 0) m_current_base_target = (targets.size() - 1);
+                else if (m_current_base_target == targets.size() - 1) m_current_base_target = 1;
+                else m_current_base_target = (m_current_base_target + 1) % targets.size();
             }
             return targets[m_current_base_target];
         }
