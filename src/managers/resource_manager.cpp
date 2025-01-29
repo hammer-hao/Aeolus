@@ -112,8 +112,8 @@ namespace Aeolus
 			{
 				std::cout << "*** Initial worker assignment in process... ***" << std::endl;
 				AssignInitialWorkers();
-				return 0;
 				m_initial_workers_assigned = true;
+				return 0;
 			}
 			else
 			{

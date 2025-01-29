@@ -4,6 +4,7 @@
 #include "Bot.h"  // Include the base Bot class
 #include "managers/hub.h"
 #include "behavior_executor.h"
+#include "build_order_executor.h"
 
 namespace Aeolus
 {
@@ -59,6 +60,7 @@ namespace Aeolus
         void PrepareUnits();
 
         // implement the build runner
+        BuildOrderEnum m_build_order;
         void ExecuteBuildOrder();
 
         // micro units

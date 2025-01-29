@@ -10,7 +10,8 @@ namespace Aeolus
 		//	<< "unused supply: " << aeolusbot.Observation()->GetFoodCap() - aeolusbot.Observation()->GetFoodUsed() << '\n'
 		//	<< std::endl;
 		if (aeolusbot.Observation()->GetMinerals() >= 50 &&
-			(aeolusbot.Observation()->GetFoodCap() - aeolusbot.Observation()->GetFoodUsed()) >= 1)
+			(aeolusbot.Observation()->GetFoodCap() - aeolusbot.Observation()->GetFoodUsed()) >= 1 &&
+			ManagerMediator::getInstance().GetOwnWorkers(aeolusbot).size() < m_to_count)
 		{
 			::sc2::Units own_town_halls = ManagerMediator::getInstance().GetOwnTownHalls(aeolusbot);
 			for (const auto& town_hall : own_town_halls)

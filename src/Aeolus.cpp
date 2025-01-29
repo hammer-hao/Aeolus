@@ -49,6 +49,7 @@ namespace Aeolus
         std::cout << "Aeolus bot initialized!" << std::endl;
         build_order_step = 0;
         m_current_base_target = 0;
+        m_build_order = BuildOrderEnum::MACRO_STALKERS;
     }
 
     // Destructor (optional)
@@ -350,6 +351,6 @@ namespace Aeolus
 
     void AeolusBot::ExecuteBuildOrder()
     {
-        BuildOrderExecutor::GetInstance().execute(*this);
+        BuildOrderExecutor::GetInstance().execute(*this, m_build_order);
     }
 }
