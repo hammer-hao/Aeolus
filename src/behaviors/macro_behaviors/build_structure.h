@@ -13,6 +13,9 @@ namespace Aeolus
 	class BuildStructure : public MacroBehavior
 	{
 	public:
+		/**
+		* @brief Creates a new BuildStructure behavior.
+		*/
 		BuildStructure(::sc2::UNIT_TYPEID structure_id, int base_index, bool is_wall) :
 			structure_id(structure_id), base_index(base_index), is_wall(is_wall)
 		{
