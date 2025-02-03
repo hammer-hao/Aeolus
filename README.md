@@ -1,8 +1,11 @@
 # Aeolus
 
 [![Build](https://github.com/cpp-sc2/blank-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/cpp-sc2/blank-bot/actions/workflows/ci.yml)
+[![CMake](https://img.shields.io/badge/CMake-3.15-blue.svg)](https://cmake.org/)
+[![Eigen 3.3.9](https://img.shields.io/badge/Eigen-3.4.0-blue.svg)](https://eigen.tuxfamily.org/)
+[![nanoflann 1.3.3](https://img.shields.io/badge/nanoflann-1.3.3-blue.svg)](https://github.com/jlblancoc/nanoflann)
 
-Starter bot for StarCraft II with integrated cpp-sc2.
+A C++ StarCraft II bot playing Protoss. Built from scratch using cpp-sc2.
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
@@ -17,13 +20,8 @@ Starter bot for StarCraft II with integrated cpp-sc2.
         - [macOS](#macos)
         - [Linux](#linux)
     - [Additional options](#additional-options)
-        - [WSL2 Support](#wsl2-support)
         - [Game client version](#game-client-version)
         - [AIArena ladder build](#aiarena-ladder-build)
-    - [Managing CMake dependencies](#managing-cmake-dependencies)
-    - [Troubleshooting](#troubleshooting)
-        - [CMake options don't take effect](#cmake-options-dont-take-effect)
-        - [Build freezes (Linux or macOS)](#build-freezes-linux-or-macos)
     - [License](#license)
 
 <!-- markdown-toc end -->
@@ -35,9 +33,6 @@ Starter bot for StarCraft II with integrated cpp-sc2.
 
 - **Behavior-Driven Architecture**  
   Aeolus employs a behavior executor system to handle core bot actions such as mining, unit production, and combat. This modular approach simplifies development and encourages clean, reusable code.
-
-- **Optimized Resource Management**  
-  Includes a state-of-the-art mineral mining optimization system, assigning workers perfectly at the start to ensure maximum resource collection efficiency.
 
 - **Advanced Unit Handling**  
   Implements algorithms for unit prioritization, distance sorting, and effective micro-management during combat.
@@ -61,16 +56,12 @@ This project uses the following third-party library:
 
 ### Acknowledgements
 
-Aeolus draws inspiration from [ares-sc2](https://github.com/davechurchill/ares-sc2), an excellent framework by Dave Churchill. Special thanks to the ares-sc2 project for setting the bar for StarCraft II bot development and serving as a foundation for learning and innovation.
-
----
-
-Aeolus is designed for developers who want to build high-performance StarCraft II bots, whether to compete, experiment with AI, or simply learn the intricacies of bot programming. With its focus on clean architecture and strategic flexibility, Aeolus is your gateway to StarCraft II automation.
+Aeolus draws inspiration from [ares-sc2](https://github.com/davechurchill/ares-sc2), an excellent framework by Rasper. Special thanks to the ares-sc2 project for setting the bar for StarCraft II bot development and serving as a foundation for learning and innovation.
 
 
 ## Build instructions
 
-> :construction: This project requires a compiler with C++17 support.
+> This project requires a compiler with C++17 support.
 
 1. Before proceeding further download the [actual map pack](https://aiarena.net/wiki/maps/).
 
@@ -80,8 +71,6 @@ Aeolus is designed for developers who want to build high-performance StarCraft I
    * Linux: anywhere.
 
 ### Windows
-
-For building for Windows under WSL2, see [WSL2 Support](#wsl2-support).
 
 1. Install [CMake](https://cmake.org/download/).
 
@@ -184,10 +173,6 @@ For building for Windows under WSL2, see [WSL2 Support](#wsl2-support).
 
 ## Additional options
 
-### WSL2 Support
-
-Cross compiling for Windows under WSL2 is supported through `cpp-sc2`. See the `cpp-sc2` [documentation](https://github.com/cpp-sc2/cpp-sc2/blob/master/docs/building.md#wsl2-support) for build requirements. The build flag remains the same, setting `-DWSL2_CROSS_COMPILE=ON`.
-
 ### Game client version
 By default, the API assumes the latest version of the game client. The assumed version can be found in cmake's output, e.g.:
 ```bash
@@ -206,40 +191,6 @@ cmake -B build -DSC2_VERSION=4.10.0
 To compile a bot capable to play on [the AIArena ladder](https://aiarena.net), configure the project in the following way:
 ```bash
 cmake -B build -DBUILD_FOR_LADDER=ON -DSC2_VERSION=4.10.0
-```
-
-## Managing CMake dependencies
-
-`Aeolus` uses the CMake `FetchContent` module to manage and collect dependencies including `cpp-sc2`, `eigen`, and `SDL2`. You can also use your own versions of these dependencies. For example, to use a version of `cpp-sc2` outside of the pinned commit, modify the `GIT_REPOSITORY` and/or the `GIT_TAG` in `cmake/cpp_sc2.cmake`:
-```
-...
-FetchContent_Declare(
-    cpp_sc2
-    GIT_REPOSITORY <target-cpp-sc2-git-rep>
-    GIT_TAG <git-commit-hash>
-)
-FetchContent_MakeAvailable(cpp_sc2)
-...
-```
-With the updated configuration, re-run the build configuration and the dependency will be updated to the new configuration:
-```
-cmake -B build
-```
-
-## Troubleshooting
-
-### CMake options don't take effect
-
-If you see that some of cmake options don't take effect
-(e.g. project was configured with `cmake -B build -DBUILD_FOR_LADDER=ON` and a bit later with `cmake -B build`)
-remove the `build` folder or the `CMakeCache.txt` file, or explicitly re-specify the desired default behavior (e.g. `cmake -B build -DBUILD_FOR_LADDER=OFF`).
-
-### Build freezes (Linux or macOS)
-
-If project compilation freezes, decrease nproc to 1 or more, e.g.:
-
-``` bash
-cmake --build build --parallel $(nproc --ignore=1)
 ```
 
 ## License
