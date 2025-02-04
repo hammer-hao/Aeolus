@@ -212,6 +212,30 @@ namespace Aeolus
 			}
 
 			// find optimal pylon for base
+			std::optional<std::pair<float, float>> best_pylon_pos = std::nullopt;
+			int most_three_by_threes = 0;
+			for (const auto& two_by_two : m_expansion_map[i][BuildingTypes::BUILDING_2X2])
+			{
+				if (two_by_two.second.production_pylon)
+				{
+					// is a production pylon
+					// check the number of three by threes in its range
+					int this_three_by_threes = 0;
+					for (const auto& three_by_three : m_expansion_map[i][BuildingTypes::BUILDING_3X3])
+					{
+						if (::sc2::DistanceSquared2D(::sc2::Point2D(two_by_two.first.first, two_by_two.first.second),
+							::sc2::Point2D(three_by_three.first.first, three_by_three.first.second)) < 42.25)
+							this_three_by_threes++;
+					}
+					if (this_three_by_threes > most_three_by_threes)
+					{
+						most_three_by_threes = this_three_by_threes;
+						best_pylon_pos = two_by_two.first;
+					}
+				}
+			}
+			if (best_pylon_pos.has_value()) 
+				m_expansion_map[i][BuildingTypes::BUILDING_2X2][best_pylon_pos.value()].optimal_pylon = true;
 		}
 
 		auto end = std::chrono::high_resolution_clock::now();
@@ -800,9 +824,18 @@ namespace Aeolus
 		{
 			std::vector<::sc2::Point2D> optimal_pylons;
 			for (const auto& position : available_positions)
-			if (!m_expansion_map[base_number][building_type][{position.x, position.y}].is_wall
-				&& m_expansion_map[base_number][building_type][{position.x, position.y}].optimal_pylon)
-				optimal_pylons.push_back(position);
+			if (!m_expansion_map[base_number][building_type][{position.x, position.y}].is_wall)
+			{
+				if (m_expansion_map[base_number][building_type][{position.x, position.y}].optimal_pylon)
+				{
+					optimal_pylons.push_back(position);
+					continue;
+				}
+				else if (m_expansion_map[base_number][building_type][{position.x, position.y}].production_pylon)
+				{
+					optimal_pylons.push_back(position);
+				}
+			}
 			if (!optimal_pylons.empty()) result = utils::GetClosestTo(_findExansionLocations()[base_number], optimal_pylons);
 		}
 
