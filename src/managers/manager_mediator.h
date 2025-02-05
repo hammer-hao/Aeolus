@@ -373,7 +373,7 @@ namespace Aeolus
 
 		::sc2::Point2D FindNextPathingPoint(AeolusBot& aeolusbot, ::sc2::Point2D start,
 			::sc2::Point2D goal, bool sense_danger = true, int danger_distance = 20,
-			float danger_threshold = 5.0f, bool smoothing = false, int sensitivity = 3)
+			float danger_threshold = 5.0f, bool smoothing = false, int sensitivity = 5)
 		{
 			return ManagerRequest<::sc2::Point2D, ::sc2::Point2D, ::sc2::Point2D, bool, int, float, bool, int>(
 				aeolusbot,
