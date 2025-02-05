@@ -82,7 +82,13 @@ namespace Aeolus
 				bool is_position_safe = ManagerMediator::getInstance().IsGroundPositionSafe(aeolusbot, ::sc2::Point2D(worker->pos));
 				if (!is_position_safe) std::cout << "Position is not safe and health critical. escaping..." << std::endl;
 				::sc2::Point2D safe_spot = ManagerMediator::getInstance().FindClosestGroundSafeSpot(aeolusbot, ::sc2::Point2D(worker->pos), 7.0);
-				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::MOVE_MOVE, safe_spot);
+				if (worker->orders.size() == 1)
+				{
+					if (worker->orders.front().ability_id == ::sc2::ABILITY_ID::GENERAL_MOVE
+						&& worker->orders.front().target_pos == safe_spot)
+						continue;
+				}
+				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::GENERAL_MOVE, safe_spot);
 			}
 			else if (!ground_threats.empty() && _workerIsAttacking(aeolusbot, worker, ground_threats, distance_to_resource)) // detected threats near the town hall
 			{
