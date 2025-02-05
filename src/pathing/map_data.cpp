@@ -33,7 +33,7 @@ namespace Aeolus
 			// cleaning all destructable rocks
 			::sc2::Point2D destructable_pos = ::sc2::Point2D(destructable->pos);
 			m_destructables_included[std::make_tuple(destructable_pos.x, destructable_pos.y)] = destructable;
-			utils::SetDestructableStatus(m_default_grid, destructable, pathable);
+			utils::SetDestructableStatus(m_default_grid, destructable, non_pathable);
 		}
 
 		for (auto& mineral : ManagerMediator::getInstance().GetAllMineralPatches(m_bot))
@@ -73,6 +73,7 @@ namespace Aeolus
 
 	Grid MapData::_addNonPathablesGround(Grid base_grid, bool include_destructables)
 	{
+		std::cout << "Adding non pathables back to the grid... " << std::endl;
 		int pathable = 1, non_pathable = 0;
 		::sc2::Units structures = ManagerMediator::getInstance().GetAllStructures(m_bot);
 		for (auto& structure : structures)
@@ -133,6 +134,32 @@ namespace Aeolus
 				else ++it;
 			}
 		}
+
+		//if (include_destructables)
+		//{
+		//	auto all_destructibles = ManagerMediator::getInstance().GetAllDestructables(m_bot);
+		//	if (m_destructables_included.size() != all_destructibles.size());
+		//	{
+		//		std::stringstream debugMessage;
+		//		debugMessage << "Detected destructible rock change!";
+		//		m_bot.Actions()->SendChat(debugMessage.str());
+
+		//		std::set<std::tuple<float, float>> current_destructibles;
+		//		for (const auto& current_destructible : all_destructibles)
+		//		{
+		//			current_destructibles.insert(std::make_tuple(current_destructible->pos.x, current_destructible->pos.y));
+		//		}
+		//		auto it = m_destructables_included.begin();
+		//		while (it != m_destructables_included.end());
+		//		{
+		//			if (current_destructibles.find(it->first) == current_destructibles.end())
+		//			{
+		//				utils::SetDestructableStatus(m_default_grid, it->second, pathable);
+		//			}
+		//			else ++it;
+		//		}
+		//	}
+		//}
 
 		return base_grid;
 	}
