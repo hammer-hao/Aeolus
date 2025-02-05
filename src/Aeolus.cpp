@@ -275,9 +275,17 @@ namespace Aeolus
     ::sc2::Point2D AeolusBot::CalculateTarget()
     {
         auto enemy_structures = ManagerMediator::getInstance().GetAllEnemyStructures(*this);
-        if (!enemy_structures.empty())
+        ::sc2::Units filtered_structures;
+        for (const auto& structure : enemy_structures)
         {
-            return utils::GetClosestUnitTo(Observation()->GetStartLocation(), enemy_structures)->pos;
+            if (structure->unit_type != ::sc2::UNIT_TYPEID::ZERG_CREEPTUMOR
+                && structure->unit_type != ::sc2::UNIT_TYPEID::ZERG_CREEPTUMORBURROWED
+                && structure->unit_type != ::sc2::UNIT_TYPEID::ZERG_CREEPTUMORQUEEN)
+                filtered_structures.push_back(structure);
+        }
+        if (!filtered_structures.empty())
+        {
+            return utils::GetClosestUnitTo(Observation()->GetStartLocation(), filtered_structures)->pos;
         }
         else if (Observation()->GetGameLoop() / 22.4f < 240.0f) 
             return ManagerMediator::getInstance().GetExpansionLocations(*this).back();
