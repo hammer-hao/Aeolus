@@ -16,11 +16,11 @@ namespace Aeolus
 
 		::sc2::Point2D move_to = ManagerMediator::getInstance().FindNextPathingPoint(aeolusbot, unit->pos, m_target);
 
-		aeolusbot.Actions()->UnitCommand(unit, ::sc2::ABILITY_ID::MOVE_MOVE, m_target);
-		return true;
+		//aeolusbot.Actions()->UnitCommand(unit, ::sc2::ABILITY_ID::MOVE_MOVE, m_target);
+		//return true;
 
-		//Move move = Move(move_to);
+		Move move = Move(move_to);
 
-		//return move.execute(aeolusbot, unit);
+		return move.execute(aeolusbot, unit);
 	}
 }
