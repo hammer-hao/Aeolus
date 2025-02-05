@@ -187,6 +187,20 @@ namespace Aeolus
 				int nr = current.row + dir.first;
 				int nc = current.col + dir.second;
 
+				// If the move is diagonal.
+				if (std::abs(dir.first) == 1 && std::abs(dir.second) == 1)
+				{
+					// Check the two adjacent cardinal neighbors:
+					// For example, for {-1, 1}: check up (current.row - 1, current.col)
+					// and right (current.row, current.col + 1)
+					if (!isValid(grid, current.row + dir.first, current.col) &&
+						!isValid(grid, current.row, current.col + dir.second))
+					{
+						// Both adjacent cells are blocked, so skip this diagonal move.
+						continue;
+					}
+				}
+
 				if (!isValid(grid, nr, nc))
 				{
 					continue;
