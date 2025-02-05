@@ -11,7 +11,7 @@ namespace Aeolus
 {
 	bool Move::execute(AeolusBot& aeolusbot, const ::sc2::Unit* unit)
 	{
-		std::cout << "Existing order size: " << unit->orders.size() << std::endl;
+		// std::cout << "Existing order size: " << unit->orders.size() << std::endl;
 		if (unit->orders.size() == 1)
 		{
 			// std::cout << "Existing order: " << ::sc2::AbilityTypeToName(unit->orders.front().ability_id) << std::endl;

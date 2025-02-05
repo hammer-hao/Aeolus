@@ -209,7 +209,8 @@ namespace Aeolus
 				{
 					for (int x = 0; x < cost_grid.cols(); ++x)
 					{
-						if (cost_grid(y, x) > danger_threshold) dangers.emplace_back(x, y);
+						if (cost_grid(y, x) > danger_threshold && cost_grid(y, x) != std::numeric_limits<double>::infinity()) 
+							dangers.emplace_back(x, y);
 					}
 				}
 				m_danger_tiles_is_cached = true;
@@ -220,6 +221,7 @@ namespace Aeolus
 				double closest_danger_distance = std::numeric_limits<double>::infinity();
 				for (const auto& danger : dangers)
 				{
+					// std::cout << "Danger at: " << danger.first << " " << danger.second << std::endl;
 					closest_danger_distance = std::min(
 						(std::pow(danger.first - start.x, 2) + std::pow(danger.second - start.y, 2)),
 						closest_danger_distance);
@@ -229,6 +231,7 @@ namespace Aeolus
 			}
 			else return goal;
 		}
+
 
 		// sensed danger and danger is within distance, perform custom pathfinding.
 		auto path = AStarPathFind(start, goal, cost_grid, smoothing, sensitivity);

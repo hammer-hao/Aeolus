@@ -73,7 +73,7 @@ namespace Aeolus
 
 	Grid MapData::_addNonPathablesGround(Grid base_grid, bool include_destructables)
 	{
-		std::cout << "Adding non pathables back to the grid... " << std::endl;
+		// std::cout << "Adding non pathables back to the grid... " << std::endl;
 		int pathable = 1, non_pathable = 0;
 		::sc2::Units structures = ManagerMediator::getInstance().GetAllStructures(m_bot);
 		for (auto& structure : structures)
