@@ -35,6 +35,8 @@ namespace Aeolus
 
 		void ClearAssignment(const ::sc2::Unit* worker);
 
+		void ClearGasAssignment(const ::sc2::Unit* worker);
+
 		void AssignInitialWorkers();
 
 		void OnUnitDestroyed(const ::sc2::Unit* unit);

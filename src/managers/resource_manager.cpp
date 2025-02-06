@@ -160,6 +160,19 @@ namespace Aeolus
 		}
 	}
 
+	void ResourceManager::ClearGasAssignment(const ::sc2::Unit* worker)
+	{
+		auto it = m_worker_to_geyser.find(worker);
+		if (it != m_worker_to_geyser.end())
+		{
+			const ::sc2::Unit* geyser = it->second;
+			auto& workers = m_geyser_to_workers[geyser];
+			workers.erase(std::remove(workers.begin(), workers.end(), worker), workers.end());
+
+			m_worker_to_geyser.erase(it);
+		}
+	}
+
 	void ResourceManager::AssignInitialWorkers()
 	{
 		::sc2::Point2D start_location_2d = utils::ConvertTo2D(m_bot.Observation()->GetStartLocation());
@@ -315,11 +328,8 @@ namespace Aeolus
 
 	void ResourceManager::OnUnitDestroyed(const ::sc2::Unit* unit)
 	{
-		auto it = m_worker_to_patch.find(unit);
-		if (it != m_worker_to_patch.end())
-		{
-			ClearAssignment(unit);
-		}
+		ClearAssignment(unit);
+		ClearGasAssignment(unit);
 	}
 
 	void ResourceManager::_assignWorkersToGasBuildings(const ::sc2::Units& workers, const ::sc2::Units& gas_buildings)
