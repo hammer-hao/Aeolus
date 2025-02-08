@@ -79,8 +79,8 @@ namespace Aeolus
 		::sc2::UNIT_TYPEID production_structure_id,
 		float target_proportion)
 	{
-		std::cout << "Our current mineral income is: " << mineral_collection_rate << std::endl;
-		std::cout << "Our current gas income is:" << gas_collection_rate << std::endl;
+		// std::cout << "Our current mineral income is: " << mineral_collection_rate << std::endl;
+		// std::cout << "Our current gas income is:" << gas_collection_rate << std::endl;
 
 		auto& mediator = ManagerMediator::getInstance();
 		auto unit_cost = mediator.GetUnitCost(aeolusbot, unit_type);
