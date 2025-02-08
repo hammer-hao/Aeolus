@@ -34,9 +34,17 @@ namespace Aeolus
 		{
 			return m_own_workers;
 		}
+		case (constants::ManagerRequestType::GET_OWN_NON_WORKERS):
+		{
+			return m_own_non_workers;
+		}
 		case (constants::ManagerRequestType::GET_OWN_TOWN_HALLS):
 		{
 			return m_own_townhalls;
+		}
+		case (constants::ManagerRequestType::GET_OWN_READY_TOWN_HALLS):
+		{
+			return m_own_ready_townhalls;
 		}
 		case (constants::ManagerRequestType::GET_ALL_MINERAL_PATCHES):
 		{
@@ -77,7 +85,9 @@ namespace Aeolus
 		m_own_units.clear();
 		m_own_structures.clear();
 		m_own_townhalls.clear();
+		m_own_ready_townhalls.clear();
 		m_own_workers.clear();
+		m_own_non_workers.clear();
 		m_all_own_units.clear();
 		m_own_gas_buildings.clear();
 		m_gas_buildings.clear();
@@ -132,6 +142,7 @@ namespace Aeolus
 					if (unit_type == static_cast<int>(::sc2::UNIT_TYPEID::PROTOSS_NEXUS))
 					{
 						m_own_townhalls.push_back(unit);
+						if (unit->build_progress >= 0.8f) m_own_ready_townhalls.push_back(unit);
 					}
 					if (unit_type == static_cast<int>(::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR) ||
 						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATORRICH))
@@ -145,6 +156,10 @@ namespace Aeolus
 					if (constants::WORKER_TYPES.find(unit->unit_type) != constants::WORKER_TYPES.end())
 					{
 						m_own_workers.push_back(unit);
+					}
+					else
+					{
+						m_own_non_workers.push_back(unit);
 					}
 				}
 				break;

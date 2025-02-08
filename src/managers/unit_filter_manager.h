@@ -44,8 +44,10 @@ namespace Aeolus
 		::sc2::Units m_own_units;
 		::sc2::Units m_own_structures;
 		::sc2::Units m_own_townhalls;
+		::sc2::Units m_own_ready_townhalls;
 		::sc2::Units m_own_gas_buildings;
 		::sc2::Units m_own_workers;
+		::sc2::Units m_own_non_workers;
 		::sc2::Units m_all_own_units;
 		::sc2::Units m_gas_buildings;
 		::sc2::Units m_enemy_units;
