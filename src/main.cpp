@@ -89,6 +89,7 @@ int main(int argc, char* argv[])
 
     sc2::Coordinator coordinator;
     Aeolus::AeolusBot aeolus_bot;
+    aeolus_bot.setOpponentID(options.OpponentId);
 
     size_t num_agents = 2;
     coordinator.SetParticipants({ CreateParticipant(sc2::Race::Protoss, &aeolus_bot, "Aeolus") });
