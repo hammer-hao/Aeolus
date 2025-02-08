@@ -7,6 +7,7 @@
 #include <sc2lib/sc2_search.h>
 
 #include <iostream>
+#include <random>
 
 #include "Aeolus.h"  // Include the header file
 #include "managers/hub.h"
@@ -58,7 +59,10 @@ namespace Aeolus
 
     BuildOrderEnum AeolusBot::_chooseBuildOrder()
     {
-        BuildOrderEnum result = BuildOrderEnum::STALKER_IMMORTAL;
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        std::uniform_int_distribution<int> dist(0, static_cast<int>(BuildOrderEnum::COUNT) - 1);
+        BuildOrderEnum result = static_cast<BuildOrderEnum>(dist(gen));
         m_build_order = result;
         return result;
     }
