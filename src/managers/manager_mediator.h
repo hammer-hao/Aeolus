@@ -216,12 +216,32 @@ namespace Aeolus
 			);
 		}
 
+		::sc2::Units GetOwnNonWorkers(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_OWN_NON_WORKERS,
+				0
+			);
+		}
+
 		::sc2::Units GetOwnTownHalls(AeolusBot& aeolusbot)
 		{
 			return ManagerRequest<::sc2::Units, int>(
 				aeolusbot,
 				constants::ManagerName::UNIT_FILTER_MANAGER,
 				constants::ManagerRequestType::GET_OWN_TOWN_HALLS,
+				0
+			);
+		}
+
+		::sc2::Units GetOwnReadyTownHalls(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_OWN_READY_TOWN_HALLS,
 				0
 			);
 		}
