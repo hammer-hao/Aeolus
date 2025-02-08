@@ -18,28 +18,84 @@ namespace Aeolus
 	{
 		auto* observation = aeolusbot.Observation();
 		auto& mediator = ManagerMediator::getInstance();
+		float proportion_sum = 0.0f;
 		std::vector<std::pair<::sc2::UNIT_TYPEID, ::sc2::UNIT_TYPEID>> tech_ready_for;
+
+		// calculate the total number of units
+		int num_total_units = 0;
+		::sc2::Units all_own = mediator.GetOwnNonWorkers(aeolusbot);
+		for (const auto& spawn_type : m_army_composition_map)
+		{
+			for (const auto& unit : all_own) if (unit->unit_type == spawn_type.first) num_total_units++;
+		}
+
+		// calculate the current proportions
+		std::map<::sc2::UNIT_TYPEID, float> current_proportions;
+		for (const auto& spawn_type : m_army_composition_map)
+		{
+			int num_this_unit = 0;
+			for (const auto& unit : all_own) 
+				if (unit->unit_type == spawn_type.first) 
+					num_this_unit++;
+			current_proportions.insert({ spawn_type.first, num_this_unit / (num_total_units + 1e-7) });
+		}
 
 		for (const auto& spawn_type : m_army_composition_map)
 		{
 			::sc2::UNIT_TYPEID unit_type = spawn_type.first;
 
+			float proportion = spawn_type.second;
+			proportion_sum += proportion;
+
 			::sc2::UNIT_TYPEID required_tech = mediator.GetRequiredTech(aeolusbot, unit_type);
-			
+			::sc2::UNIT_TYPEID trained_from{};
+
+			bool tech_ready = false; // start false
 			for (const auto& structure : mediator.GetAllOwnStructures(aeolusbot))
 			{
 				if (structure->unit_type == required_tech && structure->build_progress >= 1.0f)
 				{
 					auto prod = utils::_isTrainedFrom(unit_type).value();
+					trained_from = prod;
 					tech_ready_for.push_back({ unit_type, prod });
+					tech_ready = true;
 					break;
 				}
 			}
-		}
+			if (!tech_ready) continue;
 
-		// If we can only build one type of unit:
-		if (observation->GetGameLoop() % 200 == 50)
-			std::cout << "tech ready for: " << tech_ready_for.size() << std::endl;
+			::sc2::Units build_structures = _getBuildStructures(aeolusbot, trained_from, unit_type); 
+			if (build_structures.empty()) continue;
+
+			// already have enough of this unit, continue
+			// if (current_proportions[spawn_type.first] > proportion) continue;
+			
+			// not enough of this unit, build it
+			int supply_left = observation->GetFoodCap() - observation->GetFoodUsed();
+			int mineral_cost = 0;
+			int vespene_cost = 0;
+			int supply_cost = 0;
+
+			int spawn_amount = _calculateBuildAmount(
+				aeolusbot,
+				unit_type,
+				build_structures,
+				supply_left,
+				20,
+				supply_cost,
+				mineral_cost,
+				vespene_cost
+			);
+
+			std::cout << "Spawn controller: we want to build " << spawn_amount << " " << ::sc2::UnitTypeToName(unit_type) << std::endl;
+
+			while (spawn_amount > 0)
+			{
+				if (build_structures.empty()) break;
+				m_production_to_unit_map[build_structures.back()] = unit_type;
+				build_structures.pop_back();
+			}
+		}
 
 		if (tech_ready_for.size() == 1)
 		{
