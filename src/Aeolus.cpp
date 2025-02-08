@@ -31,8 +31,10 @@
 #include "behaviors/micro_behaviors/stutter_unit_back.h"
 
 #include "build_order_executor.h"
+#include "build_order_enum.h"
 #include "utils/unit_utils.h"
 #include "utils/position_utils.h"
+#include "utils/file_io_utils.h"
 
 #ifdef BUILD_WITH_RENDERER
 
@@ -47,7 +49,7 @@ namespace Aeolus
 {
 
     // Constructor
-    AeolusBot::AeolusBot() : m_build_order_executor(_chooseBuildOrder()) {
+    AeolusBot::AeolusBot() : m_build_order_executor(_chooseBuildOrder()), m_won_game(true) {
         std::cout << "Aeolus bot initialized!" << std::endl;
         m_current_base_target = 0;
     }
@@ -108,6 +110,12 @@ namespace Aeolus
     void AeolusBot::OnGameEnd() {
         std::cout << "Aeolus: Game ended!" << std::endl;
         // Clean up or log stats
+#ifdef BUILD_FOR_LADDER
+        std::string opponent = m_opponent_id;
+#else
+        std::string opponent = Observation()->GetGameInfo().player_info.back().player_name;
+#endif // BUILD_FOR_LADDER
+        utils::recordMatchResult(opponent, buildOrderToString(m_build_order), m_won_game);
     }
 
     // Called every game step

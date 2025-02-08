@@ -21,6 +21,11 @@ namespace Aeolus
 
         void RegisterBehavior(std::unique_ptr<Behavior> behavior);
 
+        void setOpponentID(const std::string& opponent_id)
+        {
+            m_opponent_id = opponent_id;
+        }
+
     private:
 
         BuildOrderExecutor m_build_order_executor;
@@ -39,6 +44,11 @@ namespace Aeolus
 
         // based on the strategy, select the army comp
         std::map<::sc2::UNIT_TYPEID, float> _chooseArmyComp();
+
+        std::string m_opponent_id;
+
+        // keep track of lose condition
+        bool m_won_game;
 
         // Override Bot's methods to implement your custom behavior
         void OnGameStart() final override;
