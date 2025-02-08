@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <queue>
 #include <string>
+#include "build_order_enum.h"
 
 namespace Aeolus
 {
@@ -12,13 +13,6 @@ namespace Aeolus
 	* @brief The build order executor in charge of converting build orders into
 	* macro behaviors and register them for execution.
 	*/
-
-	enum class BuildOrderEnum
-	{
-		MACRO_STALKERS,
-		STALKER_IMMORTAL,
-		COUNT // helper for randomization, do not use!
-	};
 
 	struct BuildOrderStep {
 		int supply_threshold;
@@ -45,9 +39,8 @@ namespace Aeolus
 			{
 				_addStep(13, ::sc2::UNIT_TYPEID::PROTOSS_PYLON, true);
 				_addStep(15, ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, true);
-				_addStep(16, ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, true);
+				_addStep(15, ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, true);
 				_addStep(16, ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR, false);
-				_addStep(17, ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR, false);
 				_addStep(19, ::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE, false);
 			}
 
