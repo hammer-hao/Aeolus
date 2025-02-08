@@ -7,7 +7,7 @@ namespace Aeolus
 {
 	namespace utils
 	{
-		inline void recordMatchResult(std::string& opponent, std::string& strategy, bool isWin)
+		inline void recordMatchResult(const std::string& opponent, const std::string& strategy, bool isWin)
 		{
 			// create the data directory if it does not exist
 			namespace fs = std::filesystem;
