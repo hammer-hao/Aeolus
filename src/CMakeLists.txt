@@ -9,7 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Group files into folders
 
 source_group("Source Files" FILES main.cpp bot.cpp constants.cpp behavior_executor.cpp Aeolus.cpp build_order_executor.cpp)
-source_group("Header Files" FILES Bot.h constants.h behavior_executor.h Aeolus.h thirdparty/nanoflann.hpp build_order_executor.h)
+source_group("Header Files" FILES Bot.h constants.h behavior_executor.h Aeolus.h thirdparty/nanoflann.hpp build_order_executor.h build_order_enum.h)
 
 source_group("Source Files\\behaviors\\macro_behaviors" FILES 
 behaviors/macro_behaviors/mining.cpp
@@ -103,6 +103,7 @@ source_group("Header Files\\utils" FILES
     utils/position_utils.h
     utils/unit_utils.h
     utils/kdtree_utils.h
+    utils/file_io_utils.h
     utils/Astar.hpp)
 
 set(bot_sources
@@ -152,6 +153,7 @@ set(bot_headers
     constants.h
     behavior_executor.h
     build_order_executor.h
+    build_order_enum.h
     behaviors/macro_behaviors/macro_behavior.h 
     behaviors/macro_behaviors/mining.h
     behaviors/macro_behaviors/build_workers.h
@@ -191,6 +193,7 @@ set(bot_headers
     utils/position_utils.h
     utils/unit_utils.h
     utils/kdtree_utils.h
+    utils/file_io_utils.h
     utils/Astar.hpp
     thirdparty/nanoflann.hpp)
 
