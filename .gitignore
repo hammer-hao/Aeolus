@@ -1,6 +1,9 @@
 # OS X trash
 .DS_Store
 
+# match history
+data/
+
 # Build sandbox
 build/
 
