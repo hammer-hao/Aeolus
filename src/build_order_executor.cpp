@@ -4,39 +4,26 @@
 
 namespace Aeolus
 {
-	BuildOrderExecutor& BuildOrderExecutor::GetInstance()
-	{
-		static BuildOrderExecutor buildorderexecutor;
-		return buildorderexecutor;
-	}
 
-	void BuildOrderExecutor::execute(AeolusBot& aeolusbot, BuildOrderEnum build_order)
+	void BuildOrderExecutor::execute(AeolusBot& aeolusbot)
 	{
 		auto* observations = aeolusbot.Observation();
 		int supply_count = observations->GetFoodUsed();
 
-		if (build_order == BuildOrderEnum::MACRO_STALKERS)
+		if (m_build_order_steps.empty()) return;
+
+		if (supply_count >= m_build_order_steps.front().supply_threshold)
 		{
-			if (supply_count >= 14 && build_order_step == 0)
-			{
-				build_order_step++;
-				std::make_unique<BuildStructure>(::sc2::UNIT_TYPEID::PROTOSS_PYLON, 0, true).get()->execute(aeolusbot);
-			}
-			if (supply_count >= 16 && build_order_step == 1)
-			{
-				build_order_step++;
-				std::make_unique<BuildStructure>(::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, 0, true).get()->execute(aeolusbot);
-			}
-			if (supply_count >= 17 && build_order_step == 2)
-			{
-				build_order_step++;
-				std::make_unique<BuildStructure>(::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, 0, true).get()->execute(aeolusbot);
-			}
-			if (supply_count >= 20 && build_order_step == 3)
-			{
-				build_order_step++;
-				std::make_unique<BuildStructure>(::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE, 0, false).get()->execute(aeolusbot);
-			}
+			::sc2::UNIT_TYPEID to_build = m_build_order_steps.front().unit_type;
+			bool is_wall = m_build_order_steps.front().is_wall;
+			std::make_unique<BuildStructure>(to_build, 0, is_wall).get()->execute(aeolusbot);
+			m_build_order_steps.pop();
 		}
+	}
+
+	std::string_view BuildOrderExecutor::getCurrentStep()
+	{
+		if (m_build_order_steps.empty()) return "Build finished.";
+		return (::sc2::UnitTypeToName(m_build_order_steps.front().unit_type));
 	}
 }

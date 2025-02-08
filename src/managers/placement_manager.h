@@ -110,7 +110,7 @@ namespace Aeolus
 			bool find_alternative = true,
 			bool reserve_placement = true,
 			bool within_power_field = true,
-			float pylon_build_progress = 1.0,
+			float pylon_build_progress = 0.8f,
 			bool build_close_to = false,
 			::sc2::Point2D close_to = { 0, 0 });
 
