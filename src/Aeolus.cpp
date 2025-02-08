@@ -37,6 +37,7 @@
 
 #include "utils/feature_layer_utils.h"
 #include <sc2renderer/sc2_renderer.h>
+#include "build_order_executor.h"
 
 #endif // BUILD_WITH_RENDERER
 
@@ -45,16 +46,40 @@ namespace Aeolus
 {
 
     // Constructor
-    AeolusBot::AeolusBot() {
+    AeolusBot::AeolusBot() : m_build_order_executor(_chooseBuildOrder()) {
         std::cout << "Aeolus bot initialized!" << std::endl;
-        build_order_step = 0;
         m_current_base_target = 0;
-        m_build_order = BuildOrderEnum::MACRO_STALKERS;
     }
 
     // Destructor (optional)
     AeolusBot::~AeolusBot() {
         std::cout << "Aeolus bot terminated!" << std::endl;
+    }
+
+    BuildOrderEnum AeolusBot::_chooseBuildOrder()
+    {
+        BuildOrderEnum result = BuildOrderEnum::STALKER_IMMORTAL;
+        m_build_order = result;
+        return result;
+    }
+
+    std::map<::sc2::UNIT_TYPEID, float> AeolusBot::_chooseArmyComp()
+    {
+        switch (m_build_order)
+        {
+        case (BuildOrderEnum::MACRO_STALKERS):
+        {
+            return std::map<::sc2::UNIT_TYPEID, float>{{::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.0f}};
+        }
+        case (BuildOrderEnum::STALKER_IMMORTAL):
+        {
+            return std::map < ::sc2::UNIT_TYPEID, float>
+            {
+                {::sc2::UNIT_TYPEID::PROTOSS_STALKER, 0.7f},
+                {::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL, 0.3f }
+            };
+        }
+        }
     }
 
     // Game start logic
@@ -66,6 +91,13 @@ namespace Aeolus
         #endif
         manager_hub_ = Hub(*this);
         manager_hub_.Initialize();
+
+        // tag the replay with chosen build:
+        std::stringstream buildOrderTag;
+        buildOrderTag << "tag: ";
+        if (m_build_order == BuildOrderEnum::MACRO_STALKERS) buildOrderTag << "MACRO_STALKERS";
+        if (m_build_order == BuildOrderEnum::STALKER_IMMORTAL) buildOrderTag << "STALKER_IMMORTAL";
+        Actions()->SendChat(buildOrderTag.str());
     }
 
     // Game end logic
@@ -125,7 +157,8 @@ namespace Aeolus
         std::cout << "Aeolus:" << sc2::UnitTypeToName(unit_->unit_type) 
             << "(" << unit_->tag << ") was created" << std::endl;
         // Assign role based on unit type
-        if (unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER)
+        if (unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER
+            || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL)
         {
             ManagerMediator::getInstance().AssignRole(*this, unit_, constants::UnitRole::ATTACKING);
         }
@@ -173,19 +206,17 @@ namespace Aeolus
         ExecuteBuildOrder();
         RegisterBehavior(std::make_unique<Mining>());
         RegisterBehavior(std::make_unique<BuildWorkers>(
-            std::min(ManagerMediator::getInstance().GetOwnTownHalls(*this).size() * 22, static_cast<size_t>(86))
+            std::min(ManagerMediator::getInstance().GetOwnReadyTownHalls(*this).size() * 22, static_cast<size_t>(86))
         ));
         RegisterBehavior(std::make_unique<Expand>());
-        RegisterBehavior(std::make_unique<BuildGeysers>());
         RegisterBehavior(std::make_unique<AutoSupply>());
-        RegisterBehavior(std::make_unique<ProductionController>(
-            std::map<::sc2::UNIT_TYPEID, float>{{::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.0f}}
-        )
-        );
-        RegisterBehavior(std::make_unique<SpawnController>(
-            std::map<::sc2::UNIT_TYPEID, float>{{::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.0f}}
-        )
-        );
+        RegisterBehavior(std::make_unique<ProductionController>(_chooseArmyComp()));
+        RegisterBehavior(std::make_unique<SpawnController>(_chooseArmyComp()));
+
+        if (m_build_order_executor.isDone())
+        {
+            RegisterBehavior(std::make_unique<BuildGeysers>());
+        }
 
         if (Observation()->GetGameLoop() % 50 == 0)
         std::cout << "current gameloop: " << Observation()->GetGameLoop() << std::endl;
@@ -359,6 +390,6 @@ namespace Aeolus
 
     void AeolusBot::ExecuteBuildOrder()
     {
-        BuildOrderExecutor::GetInstance().execute(*this, m_build_order);
+        m_build_order_executor.execute(*this);
     }
 }

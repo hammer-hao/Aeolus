@@ -21,20 +21,24 @@ namespace Aeolus
 
         void RegisterBehavior(std::unique_ptr<Behavior> behavior);
 
-        void incrementBuild() { build_order_step++; }
-
-        size_t getBuildOrderStep() { return build_order_step; }
-
     private:
 
-        size_t build_order_step;
+        BuildOrderExecutor m_build_order_executor;
 
         std::vector<::sc2::Point3D> m_expansion_locations;
+
+        BuildOrderEnum m_build_order;
 
         // Executor for the bot's registered behaviors
         // Aeolus::BehaviorExecutor behavior_executor{};
 
         Hub manager_hub_;
+
+        // select the strategy
+        BuildOrderEnum _chooseBuildOrder();
+
+        // based on the strategy, select the army comp
+        std::map<::sc2::UNIT_TYPEID, float> _chooseArmyComp();
 
         // Override Bot's methods to implement your custom behavior
         void OnGameStart() final override;
@@ -60,7 +64,6 @@ namespace Aeolus
         void PrepareUnits();
 
         // implement the build runner
-        BuildOrderEnum m_build_order;
         void ExecuteBuildOrder();
 
         // micro units
