@@ -167,27 +167,31 @@ namespace Aeolus
 			double alpha = 0.2,
 			double decay = 0.99)
 		{
-			std::set<BuildOrderEnum> unique_strategies;
-
-			// parse the input string line by line.
-			for (const auto& line : records)
+			std::set<BuildOrderEnum> unique_strategies
 			{
-				if (line.empty()) continue;
+				BuildOrderEnum::MACRO_STALKERS, 
+				BuildOrderEnum::STALKER_IMMORTAL
+			};
 
-				// Extract the strategy fro meach record.
-				size_t first_comma = line.find(',');
-				if (first_comma == std::string::npos)
-					continue;
-				size_t second_comma = line.find(',', first_comma + 1);
-				if (second_comma == std::string::npos)
-					continue;
+			//// parse the input string line by line.
+			//for (const auto& line : records)
+			//{
+			//	if (line.empty()) continue;
 
-				// Extract the strategy
-				auto strategy = stringToBuildOrder(line.substr(first_comma + 1,
-					second_comma - first_comma - 1));
-				if (strategy.has_value())
-					unique_strategies.insert(strategy.value());
-			}
+			//	// Extract the strategy fro meach record.
+			//	size_t first_comma = line.find(',');
+			//	if (first_comma == std::string::npos)
+			//		continue;
+			//	size_t second_comma = line.find(',', first_comma + 1);
+			//	if (second_comma == std::string::npos)
+			//		continue;
+
+			//	// Extract the strategy
+			//	auto strategy = stringToBuildOrder(line.substr(first_comma + 1,
+			//		second_comma - first_comma - 1));
+			//	if (strategy.has_value())
+			//		unique_strategies.insert(strategy.value());
+			//}
 
 			if (unique_strategies.empty())
 			{
