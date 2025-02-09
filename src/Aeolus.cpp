@@ -100,10 +100,17 @@ namespace Aeolus
 
         // tag the replay with chosen build:
         std::stringstream buildOrderTag;
-        buildOrderTag << "tag: ";
+        buildOrderTag << "Tag:";
         if (m_build_order == BuildOrderEnum::MACRO_STALKERS) buildOrderTag << "MACRO_STALKERS";
         if (m_build_order == BuildOrderEnum::STALKER_IMMORTAL) buildOrderTag << "STALKER_IMMORTAL";
         Actions()->SendChat(buildOrderTag.str());
+
+#ifdef BUILD_FOR_LADDER
+        std::string opponent = m_opponent_id;
+#else
+        std::string opponent = Observation()->GetGameInfo().player_info.back().player_name;
+#endif // BUILD_FOR_LADDER
+        utils::recordMatchResult(opponent, buildOrderToString(m_build_order), m_won_game);
     }
 
     // Game end logic
