@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <optional>
 
 namespace Aeolus
 {
@@ -24,5 +25,13 @@ namespace Aeolus
 			return "STALKER_IMMORTAL";
 		}
 		}
+	}
+
+	inline std::optional<BuildOrderEnum> stringToBuildOrder(const std::string& string)
+	{
+		if (string == "MACRO_STALKERS") return BuildOrderEnum::MACRO_STALKERS;
+		if (string == "STALKER_IMMORTAL") return BuildOrderEnum::STALKER_IMMORTAL;
+		std::cout << "Invalid build order name:" << string << std::endl;
+		return std::nullopt;
 	}
 }

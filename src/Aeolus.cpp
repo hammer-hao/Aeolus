@@ -35,6 +35,7 @@
 #include "utils/unit_utils.h"
 #include "utils/position_utils.h"
 #include "utils/file_io_utils.h"
+#include "utils/strategy_utils.h"
 
 #ifdef BUILD_WITH_RENDERER
 
@@ -61,10 +62,16 @@ namespace Aeolus
 
     BuildOrderEnum AeolusBot::_chooseBuildOrder()
     {
-        static std::random_device rd;
-        static std::mt19937 gen(rd());
-        std::uniform_int_distribution<int> dist(0, static_cast<int>(BuildOrderEnum::COUNT) - 1);
-        BuildOrderEnum result = static_cast<BuildOrderEnum>(dist(gen));
+        std::cout << "Aeolust: choosing build order..." << std::endl;
+        //static std::random_device rd;
+        //static std::mt19937 gen(rd());
+        //std::uniform_int_distribution<int> dist(0, static_cast<int>(BuildOrderEnum::COUNT) - 1);
+#ifdef BUILD_FOR_LADDER
+        std::string opponent = m_opponent_id;
+#else
+        std::string opponent = "";
+#endif // BUILD_FOR_LADDER
+        BuildOrderEnum result = utils::chooseBestStrateGyFromHistory(utils::getMatchesForOpponent(opponent));
         m_build_order = result;
         return result;
     }
@@ -116,15 +123,7 @@ namespace Aeolus
     // Game end logic
     void AeolusBot::OnGameEnd() {
         std::cout << "Aeolus: Game ended!" << std::endl;
-        // Clean up or log stats
-#ifdef BUILD_FOR_LADDER
-        std::string opponent = m_opponent_id;
-#else
-        std::string opponent = Observation()->GetGameInfo().player_info.back().player_name;
-#endif // BUILD_FOR_LADDER
-        utils::recordMatchResult(opponent, buildOrderToString(m_build_order), m_won_game);
     }
-
     // Called every game step
     void AeolusBot::OnStep() {
 
