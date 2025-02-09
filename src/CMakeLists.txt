@@ -104,6 +104,7 @@ source_group("Header Files\\utils" FILES
     utils/unit_utils.h
     utils/kdtree_utils.h
     utils/file_io_utils.h
+    utils/strategy_utils.h
     utils/Astar.hpp)
 
 set(bot_sources
@@ -194,6 +195,7 @@ set(bot_headers
     utils/unit_utils.h
     utils/kdtree_utils.h
     utils/file_io_utils.h
+    utils/strategy_utils.h
     utils/Astar.hpp
     thirdparty/nanoflann.hpp)
 
