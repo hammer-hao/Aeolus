@@ -199,6 +199,18 @@ namespace Aeolus
     void AeolusBot::OnUnitDestroyed(const ::sc2::Unit* unit_) {
         std::cout << "Aeolus: Unit destroyed!" << std::endl;
         manager_hub_.OnUnitDestroyed(unit_);
+
+        // if we have only one building left, record as loss:
+        if (ManagerMediator::getInstance().GetAllOwnStructures(*this).size() <= 1)
+        {
+            m_won_game = false;
+#ifdef BUILD_FOR_LADDER
+            utils::recordMatchResult(m_opponent_id, buildOrderToString(m_build_order), m_won_game, true);
+#else
+            utils::recordMatchResult(Observation()->GetGameInfo().player_info.back().player_name, 
+                buildOrderToString(m_build_order), m_won_game, true);
+#endif // BUILD_FOR_LADDER
+        }
     }
 
     // Handle upgrade completion
