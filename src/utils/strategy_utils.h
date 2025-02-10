@@ -35,7 +35,7 @@ namespace Aeolus
 				std::cout << "MAB: initializing Q-table... " << std::endl;
 				for (const auto& strategy : m_strategies)
 				{
-					m_Q_table[strategy] = 0.0f;
+					m_Q_table[strategy] = 0.5;
 				}
 				std::cout << "MAB: seeding random number..." << std::endl;
 				std::srand(static_cast<unsigned int>(std::time(nullptr)));
