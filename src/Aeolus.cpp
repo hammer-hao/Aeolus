@@ -50,8 +50,7 @@ namespace Aeolus
 {
 
     // Constructor
-    AeolusBot::AeolusBot(std::string opponent_id) : m_build_order_executor(_chooseBuildOrder()), m_won_game(true),
-    m_opponent_id(opponent_id)
+    AeolusBot::AeolusBot(std::string opponent_id) : m_opponent_id(opponent_id), m_build_order_executor(_chooseBuildOrder()), m_won_game(true)
     {
         std::cout << "Aeolus bot initialized!" << std::endl;
         m_current_base_target = 0;
