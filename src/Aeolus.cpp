@@ -50,7 +50,9 @@ namespace Aeolus
 {
 
     // Constructor
-    AeolusBot::AeolusBot() : m_build_order_executor(_chooseBuildOrder()), m_won_game(true) {
+    AeolusBot::AeolusBot(std::string opponent_id) : m_build_order_executor(_chooseBuildOrder()), m_won_game(true),
+    m_opponent_id(opponent_id)
+    {
         std::cout << "Aeolus bot initialized!" << std::endl;
         m_current_base_target = 0;
     }
@@ -58,12 +60,7 @@ namespace Aeolus
     // Destructor (optional)
     AeolusBot::~AeolusBot() {
         std::cout << "Aeolus bot terminated!" << std::endl;
-#ifdef BUILD_FOR_LADDER
-        std::string opponent = m_opponent_id;
-#else
-        std::string opponent = Observation()->GetGameInfo().player_info.back().player_name;
-#endif // BUILD_FOR_LADDER
-        utils::recordMatchResult(opponent, buildOrderToString(m_build_order), m_won_game);
+        utils::recordMatchResult(m_opponent_id, buildOrderToString(m_build_order), m_won_game);
     }
 
     BuildOrderEnum AeolusBot::_chooseBuildOrder()

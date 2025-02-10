@@ -5,6 +5,7 @@
 #include "managers/hub.h"
 #include "behavior_executor.h"
 #include "build_order_executor.h"
+#include <string>
 
 namespace Aeolus
 {
@@ -14,7 +15,7 @@ namespace Aeolus
     class AeolusBot : public ::Bot {
     public:
         // Constructor
-        AeolusBot();
+        AeolusBot(std::string opponent_id = "");
 
         // Destructor (optional, if you have cleanup tasks)
         ~AeolusBot();
