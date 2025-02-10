@@ -58,6 +58,12 @@ namespace Aeolus
     // Destructor (optional)
     AeolusBot::~AeolusBot() {
         std::cout << "Aeolus bot terminated!" << std::endl;
+#ifdef BUILD_FOR_LADDER
+        std::string opponent = m_opponent_id;
+#else
+        std::string opponent = Observation()->GetGameInfo().player_info.back().player_name;
+#endif // BUILD_FOR_LADDER
+        utils::recordMatchResult(opponent, buildOrderToString(m_build_order), m_won_game);
     }
 
     BuildOrderEnum AeolusBot::_chooseBuildOrder()
@@ -111,13 +117,6 @@ namespace Aeolus
         if (m_build_order == BuildOrderEnum::MACRO_STALKERS) buildOrderTag << "MACRO_STALKERS";
         if (m_build_order == BuildOrderEnum::STALKER_IMMORTAL) buildOrderTag << "STALKER_IMMORTAL";
         Actions()->SendChat(buildOrderTag.str());
-
-#ifdef BUILD_FOR_LADDER
-        std::string opponent = m_opponent_id;
-#else
-        std::string opponent = Observation()->GetGameInfo().player_info.back().player_name;
-#endif // BUILD_FOR_LADDER
-        utils::recordMatchResult(opponent, buildOrderToString(m_build_order), m_won_game);
     }
 
     // Game end logic
@@ -206,12 +205,6 @@ namespace Aeolus
         if (buildings_left <= 2)
         {
             m_won_game = false;
-#ifdef BUILD_FOR_LADDER
-            utils::recordMatchResult(m_opponent_id, buildOrderToString(m_build_order), m_won_game, true);
-#else
-            utils::recordMatchResult(Observation()->GetGameInfo().player_info.back().player_name, 
-                buildOrderToString(m_build_order), m_won_game, true);
-#endif // BUILD_FOR_LADDER
         }
     }
 
