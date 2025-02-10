@@ -88,6 +88,7 @@ int main(int argc, char* argv[])
     ParseArguments(argc, argv, &options);
 
     sc2::Coordinator coordinator;
+    std::cout << "Creating Aeolus Bot with opponent id: " << options.OpponentId << std::endl;
     Aeolus::AeolusBot aeolus_bot(options.OpponentId);
 
     size_t num_agents = 2;
