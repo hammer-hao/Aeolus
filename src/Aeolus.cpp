@@ -200,7 +200,10 @@ namespace Aeolus
         manager_hub_.OnUnitDestroyed(unit_);
 
         // if we have only one building left, record as loss:
-        if (ManagerMediator::getInstance().GetAllOwnStructures(*this).size() <= 1)
+        int buildings_left = ManagerMediator::getInstance().GetAllOwnStructures(*this).size();
+
+        std::cout << "Aeolus: there are " << buildings_left << " buildings left" << std::endl;
+        if (buildings_left <= 2)
         {
             m_won_game = false;
 #ifdef BUILD_FOR_LADDER
