@@ -28,6 +28,7 @@ namespace Aeolus
         }
 
     private:
+        std::string m_opponent_id;
 
         BuildOrderExecutor m_build_order_executor;
 
@@ -45,8 +46,6 @@ namespace Aeolus
 
         // based on the strategy, select the army comp
         std::map<::sc2::UNIT_TYPEID, float> _chooseArmyComp();
-
-        std::string m_opponent_id;
 
         // keep track of lose condition
         bool m_won_game;
