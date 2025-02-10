@@ -77,6 +77,7 @@ namespace Aeolus
 #else
         std::string opponent = "";
 #endif // BUILD_FOR_LADDER
+        std::cout << "Opponent id: " << opponent << std::endl;
         BuildOrderEnum result = utils::chooseBestStrateGyFromHistory(utils::getMatchesForOpponent(opponent));
         m_build_order = result;
         return result;

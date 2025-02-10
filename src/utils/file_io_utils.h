@@ -62,6 +62,7 @@ namespace Aeolus
 
         inline std::vector<std::string> getMatchesForOpponent(const std::string& opponent)
         {
+            std::cout << "Getting matches for opponent id " << opponent << "... " << std::endl;
             namespace fs = std::filesystem;
             const std::string filePath = "data/match_history.csv";
             std::vector<std::string> matches;
