@@ -71,6 +71,7 @@ namespace Aeolus
             if (!inFile)
             {
                 // file cannot be opened or does not exist, return empty vector
+                std::cout << "Filed cannot be openned or does not exist! " << std::endl;
                 return matches;
             }
 
@@ -90,6 +91,8 @@ namespace Aeolus
                     }
                 }
             }
+
+            std::cout << "Matches on record against this opponent: " << matches.size() << std::endl;
 
             return matches;
         }

@@ -32,12 +32,14 @@ namespace Aeolus
 				double alpha,
 				double decay) : m_strategies(strategies), m_epsilon(epsilon), m_alpha(alpha), m_decay(decay)
 			{
-				// Seed the random number generator
+				std::cout << "MAB: initializing Q-table... " << std::endl;
 				for (const auto& strategy : m_strategies)
 				{
 					m_Q_table[strategy] = 0.0f;
 				}
+				std::cout << "MAB: seeding random number..." << std::endl;
 				std::srand(static_cast<unsigned int>(std::time(nullptr)));
+				std::cout << "MAB: initialization complete." << std::endl;
 			}
 
 			/**
@@ -45,17 +47,20 @@ namespace Aeolus
 			*/
 			BuildOrderEnum chooseStrategy()
 			{
+				std::cout << "MAB: all matches recorded. now choosing a strategy... " << std::endl;
 				double rand_val = static_cast<double>(std::rand()) / RAND_MAX; // random value between 0 and 1
 				BuildOrderEnum chosenStrategy;
 
 				if (rand_val < m_epsilon)
 				{
 					// exploration: choose a random strategy
+					std::cout << "MAB: choosing a random strategy... " << std::endl;
 					int idx = std::rand() % m_strategies.size();
 					chosenStrategy = m_strategies[idx];
 				}
 				else
 				{
+					std::cout << "MAB: choosing a strategy with maximum q-value... " << std::endl;
 					auto max_it = std::max_element(
 						m_Q_table.begin(), m_Q_table.end(),
 						[](const std::pair<const BuildOrderEnum, double>& a,
@@ -68,11 +73,13 @@ namespace Aeolus
 					if (max_it != m_Q_table.end())
 					{
 						// found best strategy, return it
+						std::cout << "MAB: found best strategy: " << buildOrderToString(max_it->first) << std::endl;
 						chosenStrategy = max_it->first;
 					}
 					else
 					{
 						// somehow no best strategy, return the first one
+						std::cout << "MAB: no best strategy found. " << std::endl;
 						chosenStrategy = m_strategies.front();
 					}
 				}
@@ -200,14 +207,17 @@ namespace Aeolus
 			}
 
 			// found a set of strategies, build a vector if them
+			std::cout << "Initializing strategy vector... " << std::endl;
 			std::vector<BuildOrderEnum> strategies(unique_strategies.begin(), unique_strategies.end());
 
 			// Create the MAB model.
+			std::cout << "Creating the MAB model" << std::endl;
 			EpsilonGreedyMAB mab(strategies, epsilon, alpha, decay);
 
 			// with each record, update the model.
 			for (const auto& rec : records)
 			{
+				std::cout << "updating the MAB with: \n" << rec << std::endl;
 				mab.updateFromRecord(rec);
 			}
 
