@@ -54,6 +54,7 @@ namespace Aeolus
     {
         std::cout << "Aeolus bot initialized!" << std::endl;
         m_current_base_target = 0;
+        m_move_out_supply = _getMoveOutTiming();
     }
 
     // Destructor (optional)
@@ -94,6 +95,22 @@ namespace Aeolus
                 {::sc2::UNIT_TYPEID::PROTOSS_STALKER, 0.7f},
                 {::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL, 0.3f }
             };
+        }
+        }
+    }
+
+    // get move out time from strategy (number of units needed for move-out)
+    int AeolusBot::_getMoveOutTiming()
+    {
+        switch (m_build_order)
+        {
+        case (BuildOrderEnum::MACRO_STALKERS):
+        {
+            return 2;
+        }
+        case (BuildOrderEnum::STALKER_IMMORTAL):
+        {
+            return 3;
         }
         }
     }
@@ -328,6 +345,13 @@ namespace Aeolus
     // calculate the next target to attack
     ::sc2::Point2D AeolusBot::CalculateTarget()
     {
+        // if less than move out supply, stay home
+        if (ManagerMediator::getInstance().GetUnitsFromRole(*this, constants::UnitRole::ATTACKING).size()
+            < m_move_out_supply)
+        {
+            return ManagerMediator::getInstance().GetExpansionLocations(*this)[1];
+        }
+
         auto enemy_structures = ManagerMediator::getInstance().GetAllEnemyStructures(*this);
         ::sc2::Units filtered_structures;
         for (const auto& structure : enemy_structures)

@@ -47,6 +47,12 @@ namespace Aeolus
         // based on the strategy, select the army comp
         std::map<::sc2::UNIT_TYPEID, float> _chooseArmyComp();
 
+        // based on the strategy, select the move out supply
+        int _getMoveOutTiming();
+
+        // move out timing
+        int m_move_out_supply;
+
         // keep track of lose condition
         bool m_won_game;
 
