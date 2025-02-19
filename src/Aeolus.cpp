@@ -253,9 +253,18 @@ namespace Aeolus
         RegisterBehavior(std::make_unique<ProductionController>(_chooseArmyComp()));
         RegisterBehavior(std::make_unique<SpawnController>(_chooseArmyComp()));
 
+        if (!m_build_order_executor.isDone())
+        {
+            if (m_build_order_executor.AutoExpand())
+            {
+                RegisterBehavior(std::make_unique<Expand>());
+            }
+        }
+
         if (m_build_order_executor.isDone())
         {
             RegisterBehavior(std::make_unique<BuildGeysers>());
+            RegisterBehavior(std::make_unique<Expand>());
         }
 
         if (Observation()->GetGameLoop() % 50 == 0)
