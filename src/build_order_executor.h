@@ -5,6 +5,7 @@
 #include <queue>
 #include <string>
 #include "build_order_enum.h"
+#include "build_order.h"
 
 namespace Aeolus
 {
@@ -14,26 +15,19 @@ namespace Aeolus
 	* macro behaviors and register them for execution.
 	*/
 
-	struct BuildOrderStep {
-		int supply_threshold;
-		::sc2::UNIT_TYPEID unit_type;
-		bool is_wall;
-
-		BuildOrderStep(int supp, ::sc2::UNIT_TYPEID unit, bool wall) :
-			supply_threshold(supp), unit_type(unit), is_wall(wall) {}
-	};
-
 	class BuildOrderExecutor
 	{
 	public:
 		void execute(AeolusBot& aeolusbot);
 
-		bool isDone() const { return m_build_order_steps.empty(); }
+		bool isDone() const { return m_build_order.IsEmpty(); }
+
+		bool AutoExpand() const { return m_build_order.GetAutoExpand(); }
 
 		std::string_view getCurrentStep();
 
 		//constructor
-		BuildOrderExecutor(BuildOrderEnum build_order) : m_build_order_steps()
+		BuildOrderExecutor(BuildOrderEnum build_order) : m_build_order()
 		{
 			if (build_order == BuildOrderEnum::MACRO_STALKERS)
 			{
@@ -58,11 +52,11 @@ namespace Aeolus
 
 	private:
 
-		std::queue<BuildOrderStep> m_build_order_steps;
+		BuildOrder m_build_order;
 
 		void _addStep(int supply, ::sc2::UNIT_TYPEID to_build, bool is_wall)
 		{
-			m_build_order_steps.push(BuildOrderStep(supply, to_build, is_wall));
+			m_build_order.AddStep(BuildOrderStep(supply, to_build, is_wall));
 		}
 	};
 }

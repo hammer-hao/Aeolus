@@ -10,20 +10,19 @@ namespace Aeolus
 		auto* observations = aeolusbot.Observation();
 		int supply_count = observations->GetFoodUsed();
 
-		if (m_build_order_steps.empty()) return;
+		if (m_build_order.IsEmpty()) return;
 
-		if (supply_count >= m_build_order_steps.front().supply_threshold)
+		if (supply_count >= m_build_order.PeekNextStep().supply_threshold)
 		{
-			::sc2::UNIT_TYPEID to_build = m_build_order_steps.front().unit_type;
-			bool is_wall = m_build_order_steps.front().is_wall;
+			::sc2::UNIT_TYPEID to_build = m_build_order.PeekNextStep().unit_type;
+			bool is_wall = m_build_order.PeekNextStep().is_wall;
 			std::make_unique<BuildStructure>(to_build, 0, is_wall).get()->execute(aeolusbot);
-			m_build_order_steps.pop();
+			m_build_order.PopNextStep();
 		}
 	}
 
 	std::string_view BuildOrderExecutor::getCurrentStep()
 	{
-		if (m_build_order_steps.empty()) return "Build finished.";
-		return (::sc2::UnitTypeToName(m_build_order_steps.front().unit_type));
+		return m_build_order.getCurrentStep();
 	}
 }
