@@ -1,0 +1,38 @@
+#pragma once
+
+#include "buildorderenum.h"
+#include "buildorder.h"
+#include "buildorderstep.h"
+#include "structurebuildorderstep.h"
+#include <stdexcept>
+
+#include <sc2api/sc2_unit.h>
+
+namespace Aeolus
+{
+	class BuildOrderFactory
+	{
+	public:
+		inline static std::unique_ptr<BuildOrder> makeBuildOrder(BuildOrderEnum buildOrderEnum)
+		{
+			std::vector<std::unique_ptr<BuildOrderStep>> toAdd;
+			if (buildOrderEnum == BuildOrderEnum::MACRO_STALKERS)
+			{
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(13, ::sc2::UNIT_TYPEID::PROTOSS_PYLON, true));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(15, ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, true));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(15, ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, true));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(16, ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR, false));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(19, ::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE, false));
+			}
+			else if (buildOrderEnum == BuildOrderEnum::STALKER_IMMORTAL)
+			{
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(13, ::sc2::UNIT_TYPEID::PROTOSS_PYLON, true));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(15, ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, true));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(16, ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR, false));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(19, ::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE, true));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(22, ::sc2::UNIT_TYPEID::PROTOSS_ROBOTICSFACILITY, false));
+			}
+			return std::make_unique<BuildOrder>(std::move(toAdd));
+		}
+	};
+}
