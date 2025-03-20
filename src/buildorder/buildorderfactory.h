@@ -13,7 +13,7 @@ namespace Aeolus
 	class BuildOrderFactory
 	{
 	public:
-		inline static std::unique_ptr<BuildOrder> makeBuildOrder(BuildOrderEnum buildOrderEnum)
+		inline static std::unique_ptr<BuildOrder> makeBuildOrder(AeolusBot& aeolusbot, BuildOrderEnum buildOrderEnum)
 		{
 			std::vector<std::unique_ptr<BuildOrderStep>> toAdd;
 			if (buildOrderEnum == BuildOrderEnum::MACRO_STALKERS)
@@ -32,7 +32,7 @@ namespace Aeolus
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(19, ::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE, true));
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(22, ::sc2::UNIT_TYPEID::PROTOSS_ROBOTICSFACILITY, false));
 			}
-			return std::make_unique<BuildOrder>(std::move(toAdd));
+			return std::make_unique<BuildOrder>(aeolusbot, std::move(toAdd));
 		}
 	};
 }

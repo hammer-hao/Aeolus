@@ -12,7 +12,8 @@
 
 namespace Aeolus
 {
-	BuildOrder::BuildOrder(std::vector<std::unique_ptr<BuildOrderStep>>&& buildOrderSteps)
+	BuildOrder::BuildOrder(AeolusBot& aeolusbot, 
+		std::vector<std::unique_ptr<BuildOrderStep>>&& buildOrderSteps) : m_aeolusbot(aeolusbot)
 	{
 		for (auto& step : buildOrderSteps)
 		{
@@ -36,13 +37,13 @@ namespace Aeolus
 		return m_build_order_queue.empty();
 	}
 
-	bool BuildOrder::execute(AeolusBot& aeolusbot)
+	bool BuildOrder::execute()
 	{
 		// no build instructions left, return false
 		if (m_build_order_queue.empty()) return false;
 
 		// else, execute the build order
-		if (m_build_order_queue.front()->execute(aeolusbot))
+		if (m_build_order_queue.front()->execute(m_aeolusbot))
 		{
 			m_build_order_queue.pop();
 			return true;

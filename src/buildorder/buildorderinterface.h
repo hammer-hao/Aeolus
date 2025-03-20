@@ -37,7 +37,7 @@ namespace Aeolus
 		* @brief attempt to execute the current step. Returns whether the step
 		* has been successfully executed.
 		*/
-		virtual bool execute(AeolusBot& aeolusbot) = 0;
+		virtual bool execute() = 0;
 
 		/**
 		* @brief returns whether this build order is finished.

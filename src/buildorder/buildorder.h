@@ -17,7 +17,7 @@ namespace Aeolus
 		/**
 		* create a build order from a vector of unique pointers to BuildOrderStep.
 		*/
-		BuildOrder(std::vector<std::unique_ptr<BuildOrderStep>>&& buildOrderSteps);
+		BuildOrder(AeolusBot& aeolusbot, std::vector<std::unique_ptr<BuildOrderStep>>&& buildOrderSteps);
 
 		/**
 		* @brief returns the next step in the build order without modifying it.
@@ -38,7 +38,7 @@ namespace Aeolus
 		* @brief attempt to execute the current step. Returns whether the step
 		* has been successfully executed.
 		*/
-		bool execute(AeolusBot& aeolusbot) override;
+		bool execute() override;
 
 		/**
 		* @brief returns whether this build order is finished.
@@ -53,5 +53,6 @@ namespace Aeolus
 	private:
 		std::queue<std::unique_ptr<BuildOrderStep>> m_build_order_queue;
 		bool m_auto_expand;
+		AeolusBot& m_aeolusbot;
 	};
 }

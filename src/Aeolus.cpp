@@ -51,7 +51,7 @@ namespace Aeolus
 
     // Constructor
     AeolusBot::AeolusBot(std::string opponent_id) : m_opponent_id(opponent_id), 
-        m_build_order(BuildOrderFactory::makeBuildOrder(_chooseBuildOrder())), m_won_game(true)
+        m_build_order(BuildOrderFactory::makeBuildOrder(*this, _chooseBuildOrder())), m_won_game(true)
     {
         std::cout << "Aeolus bot initialized!" << std::endl;
         m_current_base_target = 0;
@@ -442,6 +442,6 @@ namespace Aeolus
 
     void AeolusBot::ExecuteBuildOrder()
     {
-        m_build_order->execute(*this);
+        m_build_order->execute();
     }
 }
