@@ -107,13 +107,24 @@ source_group("Header Files\\utils" FILES
     utils/strategy_utils.h
     utils/Astar.hpp)
 
+source_group("Header Files\\buildorder" FILES 
+    buildorder/buildorder.h
+    buildorder/buildorderenum.h
+    buildorder/buildorderfactory.h
+    buildorder/buildorderinterface.h
+    buildorder/buildorderstep.h
+    buildorder/structurebuildorderstep.h)
+
+source_group("Source Files\\buildorder" FILES 
+    buildorder/buildorder.cpp
+    buildorder/structurebuildorderstep.cpp)
+
 set(bot_sources
     Aeolus.cpp
     main.cpp
     Bot.cpp
     constants.cpp
     behavior_executor.cpp
-    build_order_executor.cpp
     behaviors/macro_behaviors/mining.cpp
     behaviors/macro_behaviors/build_workers.cpp
     behaviors/macro_behaviors/build_structure.cpp
@@ -146,15 +157,16 @@ set(bot_sources
     utils/grid_utils.cpp
     utils/position_utils.cpp
     utils/unit_utils.cpp
-    utils/kdtree_utils.cpp)
+    utils/kdtree_utils.cpp
+    buildorder/buildorder.cpp
+    buildorder/structurebuildorderstep.cpp
+)
 
 set(bot_headers
     Aeolus.h
     Bot.h
     constants.h
     behavior_executor.h
-    build_order_executor.h
-    build_order_enum.h
     behaviors/macro_behaviors/macro_behavior.h 
     behaviors/macro_behaviors/mining.h
     behaviors/macro_behaviors/build_workers.h
@@ -197,7 +209,13 @@ set(bot_headers
     utils/file_io_utils.h
     utils/strategy_utils.h
     utils/Astar.hpp
-    thirdparty/nanoflann.hpp)
+    thirdparty/nanoflann.hpp
+    buildorder/buildorder.h
+    buildorder/buildorderenum.h
+    buildorder/buildorderfactory.h
+    buildorder/buildorderinterface.h
+    buildorder/buildorderstep.h
+    buildorder/structurebuildorderstep.h)
 
 include(FetchContent)
 
