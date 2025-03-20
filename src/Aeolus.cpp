@@ -10,6 +10,7 @@
 #include <random>
 
 #include "Aeolus.h"  // Include the header file
+
 #include "managers/hub.h"
 
 #include "managers/manager_mediator.h"
@@ -35,11 +36,12 @@
 #include "utils/file_io_utils.h"
 #include "utils/strategy_utils.h"
 
+#include "buildorder/buildorderfactory.h"
+
 #ifdef BUILD_WITH_RENDERER
 
 #include "utils/feature_layer_utils.h"
 #include <sc2renderer/sc2_renderer.h>
-#include "buildorder/buildorderfactory.h"
 
 #endif // BUILD_WITH_RENDERER
 
