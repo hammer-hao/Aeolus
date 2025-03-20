@@ -1,7 +1,7 @@
 #pragma once
 
 #include "file_io_utils.h"
-#include "../build_order_enum.h"
+#include "../buildorder/buildorderenum.h"
 #include <iostream>
 #include <map>
 #include <sstream>

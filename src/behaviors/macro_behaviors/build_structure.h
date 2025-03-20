@@ -8,7 +8,7 @@ namespace Aeolus
 {
 	class AeolusBot;
 	/*
-	* @brief Builds a structure at a requested location
+	* @brief Builds a structure at a requested location. Arguments: structure id, base-index (starts from 0), is-wall
 	*/
 	class BuildStructure : public MacroBehavior
 	{

@@ -4,8 +4,9 @@
 #include "Bot.h"  // Include the base Bot class
 #include "managers/hub.h"
 #include "behavior_executor.h"
-#include "build_order_executor.h"
 #include <string>
+
+#include "buildorder/buildorder.h"
 
 namespace Aeolus
 {
@@ -30,11 +31,11 @@ namespace Aeolus
     private:
         std::string m_opponent_id;
 
-        BuildOrderExecutor m_build_order_executor;
+        std::unique_ptr<BuildOrderInterface> m_build_order;
 
         std::vector<::sc2::Point3D> m_expansion_locations;
 
-        BuildOrderEnum m_build_order;
+        BuildOrderEnum m_build_order_enum;
 
         // Executor for the bot's registered behaviors
         // Aeolus::BehaviorExecutor behavior_executor{};

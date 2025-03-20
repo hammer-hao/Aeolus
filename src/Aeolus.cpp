@@ -30,8 +30,6 @@
 #include "behaviors/micro_behaviors/a_move.h"
 #include "behaviors/micro_behaviors/stutter_unit_back.h"
 
-#include "build_order_executor.h"
-#include "build_order_enum.h"
 #include "utils/unit_utils.h"
 #include "utils/position_utils.h"
 #include "utils/file_io_utils.h"
@@ -41,7 +39,7 @@
 
 #include "utils/feature_layer_utils.h"
 #include <sc2renderer/sc2_renderer.h>
-#include "build_order_executor.h"
+#include "buildorder/buildorderfactory.h"
 
 #endif // BUILD_WITH_RENDERER
 
@@ -50,7 +48,8 @@ namespace Aeolus
 {
 
     // Constructor
-    AeolusBot::AeolusBot(std::string opponent_id) : m_opponent_id(opponent_id), m_build_order_executor(_chooseBuildOrder()), m_won_game(true)
+    AeolusBot::AeolusBot(std::string opponent_id) : m_opponent_id(opponent_id), 
+        m_build_order(BuildOrderFactory::makeBuildOrder(_chooseBuildOrder())), m_won_game(true)
     {
         std::cout << "Aeolus bot initialized!" << std::endl;
         m_current_base_target = 0;
@@ -60,7 +59,7 @@ namespace Aeolus
     // Destructor (optional)
     AeolusBot::~AeolusBot() {
         std::cout << "Aeolus bot terminated!" << std::endl;
-        utils::recordMatchResult(m_opponent_id, buildOrderToString(m_build_order), m_won_game);
+        utils::recordMatchResult(m_opponent_id, buildOrderToString(m_build_order_enum), m_won_game);
     }
 
     BuildOrderEnum AeolusBot::_chooseBuildOrder()
@@ -76,13 +75,13 @@ namespace Aeolus
 #endif // BUILD_FOR_LADDER
         std::cout << "Opponent id: " << opponent << std::endl;
         BuildOrderEnum result = utils::chooseBestStrateGyFromHistory(utils::getMatchesForOpponent(opponent));
-        m_build_order = result;
+        m_build_order_enum = result;
         return result;
     }
 
     std::map<::sc2::UNIT_TYPEID, float> AeolusBot::_chooseArmyComp()
     {
-        switch (m_build_order)
+        switch (m_build_order_enum)
         {
         case (BuildOrderEnum::MACRO_STALKERS):
         {
@@ -102,7 +101,7 @@ namespace Aeolus
     // get move out time from strategy (number of units needed for move-out)
     int AeolusBot::_getMoveOutTiming()
     {
-        switch (m_build_order)
+        switch (m_build_order_enum)
         {
         case (BuildOrderEnum::MACRO_STALKERS):
         {
@@ -128,8 +127,8 @@ namespace Aeolus
         // tag the replay with chosen build:
         std::stringstream buildOrderTag;
         buildOrderTag << "Tag:";
-        if (m_build_order == BuildOrderEnum::MACRO_STALKERS) buildOrderTag << "MACRO_STALKERS";
-        if (m_build_order == BuildOrderEnum::STALKER_IMMORTAL) buildOrderTag << "STALKER_IMMORTAL";
+        if (m_build_order_enum == BuildOrderEnum::MACRO_STALKERS) buildOrderTag << "MACRO_STALKERS";
+        if (m_build_order_enum == BuildOrderEnum::STALKER_IMMORTAL) buildOrderTag << "STALKER_IMMORTAL";
         Actions()->SendChat(buildOrderTag.str());
     }
 
@@ -253,18 +252,13 @@ namespace Aeolus
         RegisterBehavior(std::make_unique<ProductionController>(_chooseArmyComp()));
         RegisterBehavior(std::make_unique<SpawnController>(_chooseArmyComp()));
 
-        if (!m_build_order_executor.isDone())
+        if (!m_build_order->isFinished())
         {
-            if (m_build_order_executor.AutoExpand())
+            if (m_build_order->autoExpand())
             {
                 RegisterBehavior(std::make_unique<Expand>());
             }
-        }
-
-        if (m_build_order_executor.isDone())
-        {
             RegisterBehavior(std::make_unique<BuildGeysers>());
-            RegisterBehavior(std::make_unique<Expand>());
         }
 
         if (Observation()->GetGameLoop() % 50 == 0)
@@ -446,6 +440,6 @@ namespace Aeolus
 
     void AeolusBot::ExecuteBuildOrder()
     {
-        m_build_order_executor.execute(*this);
+        m_build_order->execute(*this);
     }
 }
