@@ -113,11 +113,15 @@ source_group("Header Files\\buildorder" FILES
     buildorder/buildorderfactory.h
     buildorder/buildorderinterface.h
     buildorder/buildorderstep.h
-    buildorder/structurebuildorderstep.h)
+    buildorder/structurebuildorderstep.h
+    buildorder/unitbuildorderstep.h
+    buildorder/upgradebuildorderstep.h)
 
 source_group("Source Files\\buildorder" FILES 
     buildorder/buildorder.cpp
-    buildorder/structurebuildorderstep.cpp)
+    buildorder/structurebuildorderstep.cpp
+    buildorder/unitbuildorderstep.cpp
+    buildorder/upgradebuildorderstep.cpp)
 
 set(bot_sources
     Aeolus.cpp
@@ -160,6 +164,8 @@ set(bot_sources
     utils/kdtree_utils.cpp
     buildorder/buildorder.cpp
     buildorder/structurebuildorderstep.cpp
+    buildorder/unitbuildorderstep.cpp
+    buildorder/upgradebuildorderstep.cpp
 )
 
 set(bot_headers
@@ -215,7 +221,9 @@ set(bot_headers
     buildorder/buildorderfactory.h
     buildorder/buildorderinterface.h
     buildorder/buildorderstep.h
-    buildorder/structurebuildorderstep.h)
+    buildorder/structurebuildorderstep.h
+    buildorder/unitbuildorderstep.h
+    buildorder/upgradebuildorderstep.h)
 
 include(FetchContent)
 

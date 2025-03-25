@@ -54,6 +54,10 @@ namespace Aeolus
 
 		std::unordered_map<uint64_t, ::sc2::ABILITY_ID> m_creation_ability_cache;
 
+		::sc2::ABILITY_ID UpgradeCreationAbility(::sc2::UPGRADE_ID upgrade_id);
+
+		std::unordered_map<uint64_t, ::sc2::ABILITY_ID> m_upgrade_creation_ability_cache;
+
 		std::pair<int, int> GetCost(::sc2::UNIT_TYPEID unit_type);
 
 		std::unordered_map<uint64_t, std::pair<int, int>> m_cost_cache;
@@ -73,6 +77,8 @@ namespace Aeolus
 		::sc2::Units InAttackRange(const ::sc2::Unit* unit, ::sc2::Units targets);
 
 		::sc2::UnitTypes m_unit_data_cache;
+
+		::sc2::Upgrades m_upgrade_data_cache;
 
 		AeolusBot& m_bot;
 	};

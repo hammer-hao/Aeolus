@@ -71,6 +71,7 @@ namespace Aeolus {
 			AIR_DPS,
 			UNITS_IN_ATTACK_RANGE,
 			GET_CREATION_ABILITY,
+			GET_UPGRADE_CREATION_ABILITY,
 			GET_UNIT_COST,
 			GET_REQUIRED_TECH,
 			GET_UNIT_SUPPLY_COST,
@@ -445,6 +446,12 @@ namespace Aeolus {
 			BUILDINGS_.insert(BUILDING_5X5.begin(), BUILDING_5X5.end());
 			return BUILDINGS_;
 		}();
+
+		/**
+		* @brief Given a upgrade ID, return the unit id for the protoss 
+		* structure that can research this upgrade.
+		*/
+		const ::sc2::UNIT_TYPEID isResearchedFrom(::sc2::UPGRADE_ID upgrade_id);
 	}
 
 	namespace Config

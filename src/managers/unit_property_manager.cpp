@@ -14,7 +14,10 @@ namespace Aeolus
 
 	void UnitPropertyManager::update(int iteration)
 	{
-		if (iteration == 0) m_unit_data_cache = m_bot.Observation()->GetUnitTypeData();
+		if (iteration == 0) {
+			m_unit_data_cache = m_bot.Observation()->GetUnitTypeData();
+			m_upgrade_data_cache = m_bot.Observation()->GetUpgradeData();
+		}
 		// std::cout << "Unit Type Data Size: " << m_unit_data_cache.size() << std::endl;
 
 		if (iteration == 0)
@@ -81,6 +84,12 @@ namespace Aeolus
 			auto params = std::any_cast<std::tuple<::sc2::UNIT_TYPEID>>(args);
 			::sc2::UNIT_TYPEID unit_id = std::get<0>(params);
 			return CreationAbility(unit_id);
+		}
+		case constants::ManagerRequestType::GET_UPGRADE_CREATION_ABILITY:
+		{
+			auto params = std::any_cast<std::tuple<::sc2::UPGRADE_ID>>(args);
+			::sc2::UPGRADE_ID upgrade_id = std::get<0>(params);
+			return UpgradeCreationAbility(upgrade_id);
 		}
 		case constants::ManagerRequestType::GET_UNIT_COST:
 		{
@@ -295,6 +304,17 @@ namespace Aeolus
 		if (it != m_creation_ability_cache.end()) return m_creation_ability_cache[id];
 
 		::sc2::ABILITY_ID result = m_unit_data_cache[id].ability_id;
+		m_creation_ability_cache[id] = result;
+		return result;
+	}
+
+	::sc2::ABILITY_ID UnitPropertyManager::UpgradeCreationAbility(::sc2::UPGRADE_ID upgrade_id)
+	{
+		uint64_t id = static_cast<uint64_t>(upgrade_id);
+		auto it = m_upgrade_creation_ability_cache.find(id);
+		if (it != m_upgrade_creation_ability_cache.end()) return m_upgrade_creation_ability_cache[id];
+
+		::sc2::ABILITY_ID result = m_upgrade_data_cache[id].ability_id;
 		m_creation_ability_cache[id] = result;
 		return result;
 	}
