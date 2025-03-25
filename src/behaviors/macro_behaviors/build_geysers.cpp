@@ -60,7 +60,6 @@ namespace Aeolus
 
 		if (available_gas_springs.empty())
 		{
-			std::cout << "No geyser position available!" << std::endl;
 			return false;
 		}
 		::sc2::Point2D build_target = utils::SortByDistanceTo(available_gas_springs, observation->GetStartLocation())[0]->pos;
