@@ -89,6 +89,10 @@ namespace Aeolus
         {
             return std::map<::sc2::UNIT_TYPEID, float>{{::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.0f}};
         }
+        case (BuildOrderEnum::BLINK_STALKERS):
+        {
+            return std::map<::sc2::UNIT_TYPEID, float>{{::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.0f}};
+        }
         case (BuildOrderEnum::STALKER_IMMORTAL):
         {
             return std::map < ::sc2::UNIT_TYPEID, float>
@@ -113,6 +117,10 @@ namespace Aeolus
         {
             return 3;
         }
+        case (BuildOrderEnum::BLINK_STALKERS):
+        {
+            return 6;
+        }
         }
     }
 
@@ -129,8 +137,7 @@ namespace Aeolus
         // tag the replay with chosen build:
         std::stringstream buildOrderTag;
         buildOrderTag << "Tag:";
-        if (m_build_order_enum == BuildOrderEnum::MACRO_STALKERS) buildOrderTag << "MACRO_STALKERS";
-        if (m_build_order_enum == BuildOrderEnum::STALKER_IMMORTAL) buildOrderTag << "STALKER_IMMORTAL";
+        buildOrderTag << buildOrderToString(m_build_order_enum);
         Actions()->SendChat(buildOrderTag.str());
     }
 
@@ -354,7 +361,8 @@ namespace Aeolus
         if (ManagerMediator::getInstance().GetUnitsFromRole(*this, constants::UnitRole::ATTACKING).size()
             < m_move_out_supply)
         {
-            return ManagerMediator::getInstance().GetExpansionLocations(*this)[1];
+            return utils::GetPositionTowards(ManagerMediator::getInstance().GetExpansionLocations(*this)[1],
+                ManagerMediator::getInstance().GetExpansionLocations(*this).back(), 9);
         }
 
         auto enemy_structures = ManagerMediator::getInstance().GetAllEnemyStructures(*this);
