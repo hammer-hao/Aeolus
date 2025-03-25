@@ -7,10 +7,13 @@
 #include <map>
 #include <vector>
 #include <optional>
+#include <algorithm>
+#include <iterator>
 
 #include "../../Aeolus.h"
 #include "../../managers/manager_mediator.h"
 #include "../../utils/unit_utils.h"
+#include "../../utils/position_utils.h"
 
 namespace Aeolus
 {
@@ -18,6 +21,23 @@ namespace Aeolus
 	{
 		auto* observation = aeolusbot.Observation();
 		auto& mediator = ManagerMediator::getInstance();
+
+		// if warp gate ready, wait for gateway to morph
+		for (auto& upgradeId : observation->GetUpgrades())
+		{
+			if (upgradeId == ::sc2::UPGRADE_ID::WARPGATERESEARCH)
+			{
+				for (const auto& structure : mediator.GetAllOwnStructures(aeolusbot))
+				{
+					if (structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY
+						&& structure->build_progress >= 1.0
+						&& structure->orders.empty())
+						return false;
+				}
+				break;
+			}
+		}
+
 		float proportion_sum = 0.0f;
 		std::vector<std::pair<::sc2::UNIT_TYPEID, ::sc2::UNIT_TYPEID>> tech_ready_for;
 
@@ -56,6 +76,14 @@ namespace Aeolus
 				if (structure->unit_type == required_tech && structure->build_progress >= 1.0f)
 				{
 					auto prod = utils::_isTrainedFrom(unit_type).value();
+					
+					// if warpgate is ready, change prod to warpgate
+					auto upgrades = observation->GetUpgrades();
+					if (prod == ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY &&
+						std::find(upgrades.begin(), upgrades.end(), ::sc2::UPGRADE_ID::WARPGATERESEARCH)
+						!= upgrades.end())
+						prod = ::sc2::UNIT_TYPEID::PROTOSS_WARPGATE;
+
 					trained_from = prod;
 					tech_ready_for.push_back({ unit_type, prod });
 					tech_ready = true;
@@ -87,7 +115,7 @@ namespace Aeolus
 				vespene_cost
 			);
 
-			std::cout << "Spawn controller: we want to build " << spawn_amount << " " << ::sc2::UnitTypeToName(unit_type) << std::endl;
+			// std::cout << "Spawn controller: we want to build " << spawn_amount << " " << ::sc2::UnitTypeToName(unit_type) << std::endl;
 
 			while (spawn_amount > 0)
 			{
@@ -206,6 +234,60 @@ namespace Aeolus
 		return amount;
 	}
 
+	::sc2::Point2D SpawnController::_calculateWarpInSpot(AeolusBot& aeolusbot, ::sc2::Point2D target)
+	{
+		auto allStructures = ManagerMediator::getInstance().GetAllOwnStructures(aeolusbot);
+		::sc2::Units allPylons;
+		std::copy_if(allStructures.begin(), allStructures.end(), std::back_inserter(allPylons),
+			[](const ::sc2::Unit* structure) {return structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_PYLON; });
+
+		if (allPylons.empty()) return target; // no pylons left, we lost anyways!
+		
+		// use the cloest pylon to target
+		auto sortedPylons = utils::SortByDistanceTo(allPylons, target);
+		const ::sc2::Unit* warpPylon = sortedPylons.front();
+
+		// simulate a circular disk dimilar to the pylon coverage
+		std::vector<::sc2::Point2D> warpPositions;
+		for (int x = -5; x <= 5; ++x)
+		{
+			for (int y = -5; y <= 5; ++y)
+			{
+				if (x * x + y * y <= 25)
+				{
+					warpPositions.push_back({ warpPylon->pos.x + x, warpPylon->pos.y + y });
+				}
+			}
+		}
+
+		::sc2::Units nearUnits = ManagerMediator::getInstance().GetUnitsInRange(aeolusbot,
+			warpPositions, 1.75);
+
+		::sc2::PlacementGrid placementGrid(aeolusbot.Observation()->GetGameInfo());
+
+		for (const auto& position : warpPositions)
+		{
+			bool blocked = false;
+			for (const auto& unit : nearUnits)
+			{
+				if (::sc2::DistanceSquared2D(position, unit->pos) < 2.25)
+				{
+					blocked = true;
+					break;
+				}
+			}
+			if (blocked) continue;
+
+			if (utils::canPlaceStructure(static_cast<int>(position.x - 0.5), static_cast<int>(position.y - 0.5), 2,
+				placementGrid))
+			{
+				return position;
+			}
+		}
+		std::cout << "No warp in position available!" << std::endl;
+		return target;
+	}
+
 	bool SpawnController::_spawnUnits(AeolusBot& aeolusbot)
 	{
 		bool executed = false;
@@ -215,6 +297,16 @@ namespace Aeolus
 			if (item.first->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPGATE)
 			{
 				// warp in logic
+				// only for stalkers now
+				// TODO: change this logic to build any gateway unit
+				::sc2::ABILITY_ID spawn_ability = ::sc2::ABILITY_ID::TRAINWARP_STALKER;
+
+				::sc2::Point2D enemySpawn = ManagerMediator::getInstance().GetExpansionLocations(aeolusbot).back();
+				::sc2::Point2D warpInPosition = _calculateWarpInSpot(aeolusbot, enemySpawn);
+
+				if (warpInPosition == enemySpawn) return false;
+
+				aeolusbot.Actions()->UnitCommand(item.first, spawn_ability, warpInPosition);
 			}
 			else
 			{
