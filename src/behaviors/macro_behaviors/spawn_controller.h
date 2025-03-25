@@ -41,6 +41,8 @@ namespace Aeolus
 			const ::sc2::Units& production_structures, int supply_left, int limit,
 			int& supply_cost, int& mineral_cost, int& vespene_cost);
 
+		::sc2::Point2D _calculateWarpInSpot(AeolusBot& aeolusbot, ::sc2::Point2D target);
+
 		bool _spawnUnits(AeolusBot& aeolusbot);
 	};
 }

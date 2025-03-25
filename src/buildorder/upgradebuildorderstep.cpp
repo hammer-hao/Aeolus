@@ -19,6 +19,8 @@ namespace Aeolus
 
 	bool UpgradeBuildOrderStep::execute(AeolusBot& aeolusbot)
 	{
+		std::cout << "researching blink!!!!" << std::endl;
+
 		// get the building type that can research the upgrade
 		::sc2::UNIT_TYPEID researched_from = constants::isResearchedFrom(m_to_research);
 

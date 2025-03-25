@@ -18,12 +18,12 @@ namespace Aeolus
 
 		::sc2::Point2D safe_spot = manager.FindClosestGroundSafeSpot(aeolusbot, unit->pos, 7.0);
 
-		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER)
+		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER &&
+			(unit->shield / unit->shield_max) <= 0.1f)
 		{
 			const auto& availableAbilities = aeolusbot.Query()->GetAbilitiesForUnit(unit);
 			for (const auto& ability : availableAbilities.abilities)
 			{
-				std::cout << ::sc2::AbilityTypeToName(ability.ability_id.ToType()) << std::endl;
 				if (ability.ability_id.ToType() == ::sc2::ABILITY_ID::EFFECT_BLINK)
 				{
 					// blink available, use it!
