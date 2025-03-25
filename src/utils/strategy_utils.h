@@ -177,7 +177,8 @@ namespace Aeolus
 			std::set<BuildOrderEnum> unique_strategies
 			{
 				BuildOrderEnum::MACRO_STALKERS, 
-				BuildOrderEnum::STALKER_IMMORTAL
+				BuildOrderEnum::STALKER_IMMORTAL,
+				BuildOrderEnum::BLINK_STALKERS
 			};
 
 			//// parse the input string line by line.

@@ -487,6 +487,16 @@ namespace Aeolus
 			);
 		}
 
+		::sc2::ABILITY_ID GetUpgradeCreationAbility(AeolusBot& aeolusbot, ::sc2::UPGRADE_ID upgrade_id)
+		{
+			return ManagerRequest<::sc2::ABILITY_ID, ::sc2::UPGRADE_ID>(
+				aeolusbot,
+				constants::ManagerName::UNIT_PROPERTY_MANAGER,
+				constants::ManagerRequestType::GET_UPGRADE_CREATION_ABILITY,
+				upgrade_id
+			);
+		}
+
 		std::pair<int, int> GetUnitCost(AeolusBot& aeolusbot, ::sc2::UNIT_TYPEID unit_type)
 		{
 			return ManagerRequest<std::pair<int, int>, ::sc2::UNIT_TYPEID>(
