@@ -119,7 +119,7 @@ namespace Aeolus
         }
         case (BuildOrderEnum::BLINK_STALKERS):
         {
-            return 2;
+            return 10;
         }
         }
     }
