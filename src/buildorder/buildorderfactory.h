@@ -41,8 +41,10 @@ namespace Aeolus
 			{
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(13, ::sc2::UNIT_TYPEID::PROTOSS_PYLON, true));
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(15, ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, true));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(16, ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, true));
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(17, ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR, false));
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(19, ::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE, false));
+				toAdd.push_back(std::make_unique<UnitBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_STALKER));
 				toAdd.push_back(std::make_unique<UnitBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_STALKER));
 				toAdd.push_back(std::make_unique<UpgradeBuildOrderStep>(20, ::sc2::UPGRADE_ID::WARPGATERESEARCH));
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_TWILIGHTCOUNCIL, false));
