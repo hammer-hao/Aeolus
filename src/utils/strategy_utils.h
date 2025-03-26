@@ -113,8 +113,8 @@ namespace Aeolus
 				{
 					if (it->first != strategy)
 					{
-						// decay the q-value of non-chosen strategies
-						it->second *= m_decay;
+						// decay the q-value of non-chosen strategies to 0.5
+						it->second = m_decay * it->second + (1 - m_decay) * 0.5;
 					}
 					else
 					{
