@@ -95,13 +95,20 @@ namespace Aeolus
 		if (constants::WEIGHT_COSTS.find(unit->unit_type)
 			!= constants::WEIGHT_COSTS.end())
 		{
-			//  std::cout << "PathManager: found existing unit prifile! " << std::endl;
+			//  std::cout << "PathManager: found existing unit profile! " << std::endl;
 			// if we pre-defined unit ground/air weight and range
 			auto it = constants::WEIGHT_COSTS.find(unit->unit_type);
 			double ground_cost = it->second.GroundCost;
 			double ground_range = it->second.GroundRange;
 
 			m_ground_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + Config::range_buffer, ground_cost);
+		}
+		else if (unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_BUNKER)
+		{
+			// add the range of marines + 1;
+			double ground_cost = 20;
+			double ground_range = 6 + Config::range_buffer;
+			m_ground_grid.AddCost(unit->pos.x, unit->pos.y, ground_range, ground_cost);
 		}
 		else if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_DISRUPTORPHASED)
 		{
