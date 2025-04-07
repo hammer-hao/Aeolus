@@ -12,7 +12,35 @@ namespace Aeolus
 		bool reserve_placement = true;
 		std::optional<::sc2::Point2D> placement = std::nullopt;
 
-		if (structure_id == ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR)
+		if (structure_id == ::sc2::UNIT_TYPEID::PROTOSS_NEXUS)
+		{
+			auto els = ManagerMediator::getInstance().GetExpansionLocations(aeolusbot);
+			for (const auto& el : els)
+			{
+				if (!ManagerMediator::getInstance().IsGroundPositionSafe(aeolusbot, el)) continue;
+
+				if (!ManagerMediator::getInstance().GetUnitsInRange(aeolusbot, { el }, 5.5f).empty()) continue;
+
+				auto close_own = ManagerMediator::getInstance().GetOwnUnitsInRange(aeolusbot, { el }, 5.5f);
+
+				bool occupied = false;
+				for (const auto& unit : close_own)
+				{
+					if (unit->unit_type == static_cast<int>(::sc2::UNIT_TYPEID::PROTOSS_NEXUS))
+					{
+						occupied = true;
+						break;
+					}
+				}
+				if (occupied) continue;
+
+				placement = el;
+				std::cout << "found placement for nexus: " << el.x << " " << el.y << ".";
+				break;
+			}
+			if (!placement.has_value()) return false;
+		}
+		else if (structure_id == ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR)
 		{
 			auto* observation = aeolusbot.Observation();
 
