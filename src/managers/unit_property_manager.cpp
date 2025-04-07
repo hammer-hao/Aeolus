@@ -338,6 +338,7 @@ namespace Aeolus
 
 		::sc2::UNIT_TYPEID result;
 		if (unit_type == ::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL) result = ::sc2::UNIT_TYPEID::PROTOSS_ROBOTICSFACILITY;
+		else if (unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS) result = ::sc2::UNIT_TYPEID::PROTOSS_ROBOTICSFACILITY;
 		else result = m_unit_data_cache[id].tech_requirement;
 		m_tech_requirement_cache[id] = result;
 		return result;
