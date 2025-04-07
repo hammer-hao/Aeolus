@@ -257,6 +257,7 @@ namespace Aeolus
             std::min(ManagerMediator::getInstance().GetOwnReadyTownHalls(*this).size() * 22, static_cast<size_t>(86))
         ));
         RegisterBehavior(std::make_unique<Expand>());
+        RegisterBehavior(std::make_unique<BuildGeysers>());
         RegisterBehavior(std::make_unique<AutoSupply>());
         RegisterBehavior(std::make_unique<ProductionController>(_chooseArmyComp()));
         RegisterBehavior(std::make_unique<SpawnController>(_chooseArmyComp()));
@@ -267,7 +268,6 @@ namespace Aeolus
             {
                 RegisterBehavior(std::make_unique<Expand>());
             }
-            RegisterBehavior(std::make_unique<BuildGeysers>());
         }
 
         if (Observation()->GetGameLoop() % 50 == 0)
