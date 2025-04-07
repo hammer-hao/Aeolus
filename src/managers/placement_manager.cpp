@@ -55,42 +55,7 @@ namespace Aeolus
 
 	void PlacementManager::update(int iteration)
 	{
-		/*
-		// generate debug outputs for placements
-		#ifdef BUILD_WITH_RENDERER
 
-		// const auto height_map = ::sc2::HeightMap(m_bot.Observation()->GetGameInfo());
-
-		auto* debug = m_bot.Debug();
-
-		for (auto& expansion : m_expansion_map)
-		{
-			for (const auto& building : expansion[BuildingTypes::BUILDING_2X2])
-			{
-				float terrain_height = m_height_map.TerrainHeight(::sc2::Point2D(building.first.first, building.first.second));
-				::sc2::Point3D min = ::sc2::Point3D(building.first.first - 1, building.first.second - 1, terrain_height);
-				::sc2::Point3D max = ::sc2::Point3D(building.first.first + 1, building.first.second + 1, terrain_height + 0.25);
-				std::stringstream pos;
-				pos << building.first.first << " " << building.first.second;
-				debug->DebugTextOut(pos.str(), ::sc2::Point3D(building.first.first, building.first.second, terrain_height), ::sc2::Colors::Blue);
-				debug->DebugBoxOut(min, max, ::sc2::Colors::Green);
-			}
-			for (const auto& building : expansion[BuildingTypes::BUILDING_3X3])
-			{
-				float terrain_height = m_height_map.TerrainHeight(::sc2::Point2D(building.first.first, building.first.second));
-				::sc2::Point3D min = ::sc2::Point3D(building.first.first - 1.5, building.first.second - 1.5, terrain_height);
-				::sc2::Point3D max = ::sc2::Point3D(building.first.first + 1.5, building.first.second + 1.5, terrain_height + 0.25);
-				std::stringstream pos;
-				pos << building.first.first << " " << building.first.second;
-				debug->DebugTextOut(pos.str(), ::sc2::Point3D(building.first.first, building.first.second, terrain_height), ::sc2::Colors::Blue);
-				debug->DebugBoxOut(min, max, ::sc2::Colors::Blue);
-			}
-		}
-
-		debug->SendDebug();
-
-		#endif
-		*/
 	}
 
 	void PlacementManager::Initialize()
@@ -110,6 +75,10 @@ namespace Aeolus
 
 		for (int i = 0; i < expansion_locations.size(); ++i)
 		{
+			// --- Add the town hall (5x5) at the center of the expansion ---
+			// Record the town hall placement in the expansion map.
+			_addPlacementPosition(BuildingTypes::BUILDING_5X5, i, expansion_locations[i], true, false, 0, false, 0.0, false, false);
+
 			// avoid building within 9 distance of expansion location
 			int start_x = static_cast<int>(std::round(expansion_locations[i].x - 4.5f));
 			int start_y = static_cast<int>(std::round(expansion_locations[i].y - 4.5f));
@@ -795,7 +764,7 @@ namespace Aeolus
 					available_positions = _findPotentialPlacementsAtBase(building_type, at_base, within_power_field, pylon_build_progress);
 					if (!available_positions.empty()) break;
 				}
-				std::cout << "Not available position for building size anywhere on the map." << std::endl;
+				std::cout << "Not available position for building size anywhere on the map for " << ::sc2::UnitTypeToName(structure_type) << std::endl;
 				return std::nullopt;
 			}
 		}
@@ -855,7 +824,7 @@ namespace Aeolus
 	{
 		std::vector<::sc2::Point2D> result;
 		auto potential_placements = m_expansion_map[base_index][building_size];
-		// std::cout << "PlacementManager: selecting from " << potential_placements.size() << "potential placements. " << std::endl;
+		std::cout << "PlacementManager: searching base index " << base_index << " for" << building_size << std::endl;
 		::sc2::Units own_pylons;
 
 		if (within_power_field)
