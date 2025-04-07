@@ -20,8 +20,7 @@ namespace Aeolus
 		* @brief create a new structurebuildorderstep, requires the supply threshold, the unit typeid of
 		* the structure, and whether the structure is a wall.
 		*/
-		StructureBuildOrderStep(int supply_threshold, ::sc2::UNIT_TYPEID to_build, bool is_wall) :
-			m_supply_threshold(supply_threshold), m_to_build(to_build), m_is_wall(is_wall) {}
+		StructureBuildOrderStep(int supply_threshold, ::sc2::UNIT_TYPEID to_build, bool is_wall, int base_location = 0);
 
 		/**
 		* @brief Returns the supply threshold of this build order.
@@ -34,11 +33,22 @@ namespace Aeolus
 		*/
 		std::string_view toString() override;
 
+		/**
+		* @brief get whether this build order step is finished.
+		*/
+		bool isDone(AeolusBot& aeolusbot) override;
+
+		// get whether this build has been started
+		bool started() override;
+
 		bool execute(AeolusBot& aeolusbot) override;
 
 	private:
 		int m_supply_threshold;
 		::sc2::UNIT_TYPEID m_to_build; // the id of the structure we want to build
 		bool m_is_wall; // if this structure is a wall
+		bool m_started;
+		int m_num_before;
+		int m_base_location;
 	};
 }

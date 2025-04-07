@@ -22,14 +22,15 @@ namespace Aeolus
 		m_auto_expand = true;
 	}
 
-	std::unique_ptr<BuildOrderStep> BuildOrder::peekNextStep()
-	{
+	std::unique_ptr<BuildOrderStep> BuildOrder::peekNextStep() {
+		if (m_build_order_queue.empty())
+			return nullptr;  // or handle the empty case as needed
 		return std::move(m_build_order_queue.front());
 	}
 
-	void BuildOrder::nextStep()
-	{
-		m_build_order_queue.pop();
+	void BuildOrder::nextStep() {
+		if (!m_build_order_queue.empty())
+			m_build_order_queue.pop();
 	}
 
 	bool BuildOrder::isFinished()
@@ -42,13 +43,29 @@ namespace Aeolus
 		// no build instructions left, return false
 		if (m_build_order_queue.empty()) return false;
 
-		// else, execute the build order
-		if (m_build_order_queue.front()->execute(m_aeolusbot))
+		// first item is pending, return false
+		if (m_build_order_queue.front()->started())
 		{
-			m_build_order_queue.pop();
-			return true;
+			if (m_build_order_queue.front()->isDone(m_aeolusbot))
+			{
+				// started and finished, go to the next build order
+				m_build_order_queue.pop();
+			}
+			else 
+			{
+				// started but not finished, wait it out
+				return false;
+			}
 		}
-		return false;
+
+		// no build instructions left, return false
+		if (m_build_order_queue.empty()) return false;
+		// else, execute the build order
+		if (!m_build_order_queue.front()->execute(m_aeolusbot))
+		{
+			return false;
+		}
+		else return true;
 	}
 
 	std::string_view BuildOrder::getCurrentStep()

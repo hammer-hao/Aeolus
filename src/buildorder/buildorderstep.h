@@ -18,6 +18,12 @@ namespace Aeolus
 		// get the srting representation of this step
 		virtual std::string_view toString() = 0;
 
+		// get whether this build order step is completed
+		virtual bool isDone(AeolusBot& aeolusbot) = 0;
+
+		// get whether this build has been started
+		virtual bool started() = 0;
+
 		virtual ~BuildOrderStep() {}
 
 		/*

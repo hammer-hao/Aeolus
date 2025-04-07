@@ -37,8 +37,17 @@ namespace Aeolus
 		*/
 		std::string_view toString() override;
 
+		/**
+		* @brief get whether this build order step is finished.
+		*/
+		bool isDone(AeolusBot& aeolusbot) override;
+
+		// get whether this build has been started
+		bool started() override;
+
 	private:
 		int m_supply_threshold;
 		::sc2::UNIT_TYPEID m_to_train;
+		bool m_started;
 	};
 }

@@ -13,7 +13,7 @@ namespace Aeolus
 {
 	UpgradeBuildOrderStep::UpgradeBuildOrderStep(int supply_threshold, 
 		::sc2::UPGRADE_ID to_research) : 
-		m_supply_threshold(supply_threshold), m_to_research(to_research)
+		m_supply_threshold(supply_threshold), m_to_research(to_research), m_started(false)
 	{
 	}
 
@@ -38,6 +38,14 @@ namespace Aeolus
 			&& (aeolusbot.Observation()->GetMinerals() < 150 || aeolusbot.Observation()->GetVespene() < 150))
 			return false;
 
+		if (m_to_research == ::sc2::UPGRADE_ID::EXTENDEDTHERMALLANCE
+			&& (aeolusbot.Observation()->GetMinerals() < 150 || aeolusbot.Observation()->GetVespene() < 150))
+			return false;
+
+		if (m_to_research == ::sc2::UPGRADE_ID::WARPGATERESEARCH
+			&& (aeolusbot.Observation()->GetMinerals() < 50 || aeolusbot.Observation()->GetVespene() < 50))
+			return false;
+
 		for (const auto& structure : can_research)
 		{
 			if (structure->orders.empty() && structure->build_progress >= 1.0)
@@ -46,6 +54,7 @@ namespace Aeolus
 					ManagerMediator::getInstance().GetUpgradeCreationAbility(aeolusbot, m_to_research));
 				std::cout << "EXECUTED UPGRADE ID " << 
 					::sc2::AbilityTypeToName(ManagerMediator::getInstance().GetUpgradeCreationAbility(aeolusbot, m_to_research)) << std::endl;
+				m_started = true;
 				return true;
 			}
 		}
@@ -60,5 +69,15 @@ namespace Aeolus
 	std::string_view UpgradeBuildOrderStep::toString()
 	{
 		return ::sc2::UpgradeIDToName(m_to_research);
+	}
+
+	bool UpgradeBuildOrderStep::isDone(AeolusBot& aeolusbot)
+	{
+		return true;
+	}
+
+	bool UpgradeBuildOrderStep::started()
+	{
+		return m_started;
 	}
 }
