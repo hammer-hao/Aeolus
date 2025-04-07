@@ -23,6 +23,7 @@
 #include "behaviors/macro_behaviors/auto_supply.h"
 #include "behaviors/macro_behaviors/production_controller.h"
 #include "behaviors/macro_behaviors/spawn_controller.h"
+#include "behaviors/macro_behaviors/chrono_controller.h"
 
 #include "behaviors/micro_behaviors/micro_behavior.h"
 #include "behaviors/micro_behaviors/path_to_target.h"
@@ -101,6 +102,15 @@ namespace Aeolus
                 {::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL, 0.3f }
             };
         }
+        case (BuildOrderEnum::MASS_ROBO):
+        {
+            return std::map < ::sc2::UNIT_TYPEID, float>
+            {
+                { ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS, 0.2f },
+                { ::sc2::UNIT_TYPEID::PROTOSS_STALKER, 0.7f },
+                { ::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL, 0.1f },
+            };
+        }
         }
     }
 
@@ -119,7 +129,11 @@ namespace Aeolus
         }
         case (BuildOrderEnum::BLINK_STALKERS):
         {
-            return 10;
+            return 6;
+        }
+        case (BuildOrderEnum::MASS_ROBO):
+        {
+            return 6;
         }
         }
     }
@@ -197,7 +211,8 @@ namespace Aeolus
             << "(" << unit_->tag << ") was created" << std::endl;
         // Assign role based on unit type
         if (unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER
-            || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL)
+            || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL
+            || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS)
         {
             ManagerMediator::getInstance().AssignRole(*this, unit_, constants::UnitRole::ATTACKING);
         }
@@ -256,18 +271,17 @@ namespace Aeolus
         RegisterBehavior(std::make_unique<BuildWorkers>(
             std::min(ManagerMediator::getInstance().GetOwnReadyTownHalls(*this).size() * 22, static_cast<size_t>(86))
         ));
-        RegisterBehavior(std::make_unique<Expand>());
-        RegisterBehavior(std::make_unique<BuildGeysers>());
         RegisterBehavior(std::make_unique<AutoSupply>());
-        RegisterBehavior(std::make_unique<ProductionController>(_chooseArmyComp()));
-        RegisterBehavior(std::make_unique<SpawnController>(_chooseArmyComp()));
+        RegisterBehavior(std::make_unique<ChronoController>());
 
         if (!m_build_order->isFinished())
         {
-            if (m_build_order->autoExpand())
-            {
-                RegisterBehavior(std::make_unique<Expand>());
-            }
+        }
+        else {
+            RegisterBehavior(std::make_unique<BuildGeysers>());
+            RegisterBehavior(std::make_unique<Expand>());
+            RegisterBehavior(std::make_unique<ProductionController>(_chooseArmyComp()));
+            RegisterBehavior(std::make_unique<SpawnController>(_chooseArmyComp()));
         }
 
         if (Observation()->GetGameLoop() % 50 == 0)
