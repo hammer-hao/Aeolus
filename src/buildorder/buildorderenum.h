@@ -11,6 +11,7 @@ namespace Aeolus
 		MACRO_STALKERS,
 		STALKER_IMMORTAL,
 		BLINK_STALKERS,
+		MASS_ROBO,
 		COUNT // helper for randomization, do not use!
 	};
 
@@ -30,6 +31,8 @@ namespace Aeolus
 		{
 			return "STALKER_IMMORTAL";
 		}
+		case (BuildOrderEnum::MASS_ROBO):
+			return "MASS_ROBO";
 		}
 	}
 
@@ -38,6 +41,7 @@ namespace Aeolus
 		if (string == "MACRO_STALKERS") return BuildOrderEnum::MACRO_STALKERS;
 		if (string == "STALKER_IMMORTAL") return BuildOrderEnum::STALKER_IMMORTAL;
 		if (string == "BLINK_STALKERS") return BuildOrderEnum::BLINK_STALKERS;
+		if (string == "MASS_ROBO") return BuildOrderEnum::MASS_ROBO;
 		std::cout << "Invalid build order name:" << string << std::endl;
 		return std::nullopt;
 	}
