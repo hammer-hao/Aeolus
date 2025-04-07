@@ -19,6 +19,7 @@ behaviors/macro_behaviors/build_geysers.cpp
 behaviors/macro_behaviors/auto_supply.cpp
 behaviors/macro_behaviors/production_controller.cpp
 behaviors/macro_behaviors/spawn_controller.cpp
+behaviors/macro_behaviors/chrono_controller.cpp
 behaviors/macro_behaviors/expand.cpp)
 
 source_group("Source Files\\behaviors\\micro_behaviors" FILES 
@@ -41,6 +42,7 @@ behaviors/macro_behaviors/build_geysers.h
 behaviors/macro_behaviors/auto_supply.h
 behaviors/macro_behaviors/production_controller.h
 behaviors/macro_behaviors/spawn_controller.h
+behaviors/macro_behaviors/chrono_controller.h
 behaviors/macro_behaviors/expand.h)
 
 source_group("Header Files\\behaviors\\micro_behaviors" FILES
@@ -137,6 +139,7 @@ set(bot_sources
     behaviors/macro_behaviors/auto_supply.cpp
     behaviors/macro_behaviors/production_controller.cpp
     behaviors/macro_behaviors/spawn_controller.cpp
+    behaviors/macro_behaviors/chrono_controller.cpp
     behaviors/micro_behaviors/a_move.cpp
     behaviors/micro_behaviors/keep_unit_safe.cpp
     behaviors/micro_behaviors/path_to_target.cpp
@@ -182,6 +185,7 @@ set(bot_headers
     behaviors/macro_behaviors/auto_supply.h
     behaviors/macro_behaviors/production_controller.h
     behaviors/macro_behaviors/spawn_controller.h
+    behaviors/macro_behaviors/chrono_controller.h
     behaviors/micro_behaviors/a_move.h
     behaviors/micro_behaviors/keep_unit_safe.h
     behaviors/micro_behaviors/micro_behavior.h
