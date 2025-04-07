@@ -371,7 +371,8 @@ namespace Aeolus
         {
             if (structure->unit_type != ::sc2::UNIT_TYPEID::ZERG_CREEPTUMOR
                 && structure->unit_type != ::sc2::UNIT_TYPEID::ZERG_CREEPTUMORBURROWED
-                && structure->unit_type != ::sc2::UNIT_TYPEID::ZERG_CREEPTUMORQUEEN)
+                && structure->unit_type != ::sc2::UNIT_TYPEID::ZERG_CREEPTUMORQUEEN
+                && structure->unit_type != ::sc2::UNIT_TYPEID::PROTOSS_OBSERVER)
                 filtered_structures.push_back(structure);
         }
         if (!filtered_structures.empty())
