@@ -178,7 +178,8 @@ namespace Aeolus
 			{
 				BuildOrderEnum::MACRO_STALKERS, 
 				BuildOrderEnum::STALKER_IMMORTAL,
-				BuildOrderEnum::BLINK_STALKERS
+				BuildOrderEnum::BLINK_STALKERS,
+				BuildOrderEnum::MASS_ROBO,
 			};
 
 			//// parse the input string line by line.
