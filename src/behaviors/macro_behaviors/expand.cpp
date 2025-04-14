@@ -6,16 +6,18 @@ namespace Aeolus
 {
 	bool Expand::execute(AeolusBot& aeolusbot)
 	{
-		if (aeolusbot.Observation()->GetMinerals() < 400) return false;
+		ManagerMediator& mediator = ManagerMediator::getInstance();
 
-		size_t num_pending = ManagerMediator::getInstance().GetNumberPending(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_NEXUS);
+		if (mediator.GetMinerals(aeolusbot) < 400) return false;
 
-		for (const auto& th : ManagerMediator::getInstance().GetOwnTownHalls(aeolusbot))
+		size_t num_pending = mediator.GetNumberPending(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_NEXUS);
+
+		for (const auto& th : mediator.GetOwnTownHalls(aeolusbot))
 		{
 			if (th->build_progress < 1.0f) num_pending++;
 		}
 
-		if (ManagerMediator::getInstance().GetOwnTownHalls(aeolusbot).size() + num_pending >= m_to_count
+		if (mediator.GetOwnTownHalls(aeolusbot).size() + num_pending >= m_to_count
 			|| num_pending >= m_max_pending) 
 			return false;
 
@@ -27,12 +29,12 @@ namespace Aeolus
 
 		std::cout << "Expand: Selecting a worker... " << std::endl;
 
-		auto worker = ManagerMediator::getInstance().SelectWorkerClosestTo(aeolusbot, target_location);
+		auto worker = mediator.SelectWorkerClosestTo(aeolusbot, target_location);
 
 		if (worker.has_value())
 		{
 			std::cout << "Expand: Building with the worker.. " << std::endl;
-			return ManagerMediator::getInstance().BuildWithSpecificWorker(aeolusbot, 
+			return mediator.BuildWithSpecificWorker(aeolusbot,
 				worker.value(), ::sc2::UNIT_TYPEID::PROTOSS_NEXUS, target_location);
 		}
 		return false;

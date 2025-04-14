@@ -214,8 +214,10 @@ namespace Aeolus
 		const ::sc2::Units& production_structures, int supply_left, int limit,
 		int& supply_cost, int& mineral_cost, int& vespene_cost)
 	{
-		int minerals = aeolusbot.Observation()->GetMinerals();
-		int gas = aeolusbot.Observation()->GetVespene();
+		ManagerMediator& mediator = ManagerMediator::getInstance();
+
+		int minerals = mediator.GetMinerals(aeolusbot);
+		int gas = mediator.GetVespene(aeolusbot);
 
 		auto unit_cost = ManagerMediator::getInstance().GetUnitCost(aeolusbot, spawn_type);
 		mineral_cost = unit_cost.first;

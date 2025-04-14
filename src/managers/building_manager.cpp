@@ -40,9 +40,16 @@ namespace Aeolus
 	bool BuildingManager::_buildWithSpecificWorker(const ::sc2::Unit* worker, ::sc2::UNIT_TYPEID structure_type,
 		sc2::Point2D position, bool assign_role)
 	{
+		ManagerMediator& mediator = ManagerMediator::getInstance();
+
 		std::cout << "BuildingManager: Initiated new building order!" << std::endl;
 		if (m_building_tracker.find(worker) == m_building_tracker.end())
 		{
+			// reserve the minerals for this worker
+			auto cost = mediator.GetUnitCost(m_bot, structure_type);
+			mediator.ReserveMinerals(m_bot, cost.first);
+			mediator.ReserveVespene(m_bot, cost.second);
+
 			m_building_tracker[worker] = { structure_type, position, 0.0, true };
 			m_building_counter[structure_type] += 1;
 			if (assign_role)
@@ -59,6 +66,8 @@ namespace Aeolus
 
 	void BuildingManager::_handleConstructionOrders()
 	{
+		ManagerMediator& mediator = ManagerMediator::getInstance();
+
 		::sc2::Units workers_to_remove;
 
 		for (const auto& worker_order : m_building_tracker)
@@ -67,12 +76,16 @@ namespace Aeolus
 			BuildingOrder building_order = worker_order.second;
 
 			// Check if we are finished with building
-			auto all_structures = ManagerMediator::getInstance().GetAllOwnStructures(m_bot);
+			auto all_structures = mediator.GetAllOwnStructures(m_bot);
 			::sc2::Units close_structures = utils::GetCloserThan(all_structures, 1.5f, building_order.target);
 			//if (close_structure->build_progress > 1e-16)
 			if (close_structures.size() > 0)
 			{
+				// finished building, free the reserved minerals and vespene for this building
 				workers_to_remove.push_back(worker);
+				auto cost = mediator.GetUnitCost(m_bot, building_order.building_id);
+				mediator.FreeMinerals(m_bot, cost.first);
+				mediator.FreeVespene(m_bot, cost.second);
 				continue;
 			}
 			
@@ -139,5 +152,21 @@ namespace Aeolus
 			if (worker_order.second.building_id == structure_type) i++;
 		}
 		return i;
+	}
+
+	void BuildingManager::OnUnitDestroyed(const ::sc2::Unit* unit)
+	{
+		// check if the destroyed unit is a worker with assigned building
+		auto it = m_building_tracker.find(unit);
+		if (it != m_building_tracker.end())
+		{
+			// a worker with assigned building is destroyed, clear it from the building tracker
+			ManagerMediator& mediator = ManagerMediator::getInstance();
+			auto cost = mediator.GetUnitCost(m_bot, it->second.building_id);
+			mediator.FreeMinerals(m_bot, cost.first);
+			mediator.FreeVespene(m_bot, cost.second);
+			m_building_counter[m_building_tracker[unit].building_id] -= 1;
+			m_building_tracker.erase(unit);
+		}
 	}
 }

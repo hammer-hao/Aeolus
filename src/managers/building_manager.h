@@ -41,6 +41,8 @@ namespace Aeolus
 
 		std::any ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args) override;
 
+		void OnUnitDestroyed(const ::sc2::Unit* unit);
+
 		void update(int iteration) override;
 
 	private:

@@ -19,10 +19,12 @@ namespace Aeolus
 
 	bool UpgradeBuildOrderStep::execute(AeolusBot& aeolusbot)
 	{
+		ManagerMediator& mediator = ManagerMediator::getInstance();
+
 		// get the building type that can research the upgrade
 		::sc2::UNIT_TYPEID researched_from = constants::isResearchedFrom(m_to_research);
 
-		auto all_structures = ManagerMediator::getInstance().GetAllOwnStructures(aeolusbot);
+		auto all_structures = mediator.GetAllOwnStructures(aeolusbot);
 		::sc2::Units can_research;
 
 		std::copy_if(all_structures.begin(), all_structures.end(), std::back_inserter(can_research),
@@ -35,15 +37,15 @@ namespace Aeolus
 		if (can_research.empty()) return false; // upgrade not available via any structure
 
 		if (m_to_research == ::sc2::UPGRADE_ID::BLINKTECH
-			&& (aeolusbot.Observation()->GetMinerals() < 150 || aeolusbot.Observation()->GetVespene() < 150))
+			&& (mediator.GetMinerals(aeolusbot) < 150 || mediator.GetVespene(aeolusbot) < 150))
 			return false;
 
 		if (m_to_research == ::sc2::UPGRADE_ID::EXTENDEDTHERMALLANCE
-			&& (aeolusbot.Observation()->GetMinerals() < 150 || aeolusbot.Observation()->GetVespene() < 150))
+			&& (mediator.GetMinerals(aeolusbot) < 150 || mediator.GetVespene(aeolusbot) < 150))
 			return false;
 
 		if (m_to_research == ::sc2::UPGRADE_ID::WARPGATERESEARCH
-			&& (aeolusbot.Observation()->GetMinerals() < 50 || aeolusbot.Observation()->GetVespene() < 50))
+			&& (mediator.GetMinerals(aeolusbot) < 50 || mediator.GetVespene(aeolusbot) < 50))
 			return false;
 
 		for (const auto& structure : can_research)
@@ -51,9 +53,9 @@ namespace Aeolus
 			if (structure->orders.empty() && structure->build_progress >= 1.0)
 			{
 				aeolusbot.Actions()->UnitCommand(structure,
-					ManagerMediator::getInstance().GetUpgradeCreationAbility(aeolusbot, m_to_research));
+					mediator.GetUpgradeCreationAbility(aeolusbot, m_to_research));
 				std::cout << "EXECUTED UPGRADE ID " << 
-					::sc2::AbilityTypeToName(ManagerMediator::getInstance().GetUpgradeCreationAbility(aeolusbot, m_to_research)) << std::endl;
+					::sc2::AbilityTypeToName(mediator.GetUpgradeCreationAbility(aeolusbot, m_to_research)) << std::endl;
 				m_started = true;
 				return true;
 			}

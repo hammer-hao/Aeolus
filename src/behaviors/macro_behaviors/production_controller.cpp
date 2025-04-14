@@ -19,8 +19,8 @@ namespace Aeolus
 		auto* observation = aeolusbot.Observation();
 		float mineral_collection_rate = observation->GetScore().score_details.collection_rate_minerals;
 		float gas_collection_rate = observation->GetScore().score_details.collection_rate_vespene;
-		int minerals = observation->GetMinerals();
-		int vespene = observation->GetVespene();
+		int minerals = mediator.GetMinerals(aeolusbot);
+		int vespene = mediator.GetVespene(aeolusbot);
 		::sc2::Units all_own_units = mediator.GetAllOwnUnits(aeolusbot);
 		::sc2::Units all_own_structures = mediator.GetAllOwnStructures(aeolusbot);
 
