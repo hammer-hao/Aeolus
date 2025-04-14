@@ -20,6 +20,7 @@ namespace Aeolus {
 			DEFENSE_MANAGER,
 			PLACEMENT_MANAGER,
 			BUILDING_MANAGER,
+			BUDGET_MANAGER,
 		};
 
 		enum class ManagerRequestType
@@ -37,6 +38,14 @@ namespace Aeolus {
 			GET_WORKERS_TO_GEYSER,
 			ASSIGN_INITIAL_WORKERS,
 			SELECT_WORKER_TO_TARGET,
+
+			// BudgetManager
+			GET_MINERALS,
+			GET_VESPENE,
+			RESERVE_MINERALS,
+			RESERVE_VESPENE,
+			FREE_MINERALS,
+			FREE_VESPENE,
 
 			// PathManager
 			GET_DEFAULT_GRID_DATA,

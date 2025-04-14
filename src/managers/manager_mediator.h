@@ -79,6 +79,9 @@ namespace Aeolus
 
 		// Manager mediator interface
 
+		/**
+		* @brief given a unit role, returns all units with the given role assigned.
+		*/
 		::sc2::Units GetUnitsFromRole(AeolusBot& aeolusbot, constants::UnitRole role)
 		{
 			// std::cout << "ManagerMediator: sending GetUnitsFromRole request to UnitRoleManager..." << std::endl;
@@ -113,6 +116,94 @@ namespace Aeolus
 					unit
 				);
 		}
+
+		// budget manager
+
+		/**
+		* @brief returns the amount of currently available, non-reserved minerals.
+		*/
+		int GetMinerals(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<int, int>
+				(
+					aeolusbot,
+					constants::ManagerName::BUDGET_MANAGER,
+					constants::ManagerRequestType::GET_MINERALS,
+					0
+				);
+		}
+
+		/**
+		* @brief returns the amount of currently available, non-reserved vespene
+		*/
+		int GetVespene(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<int, int>
+				(
+					aeolusbot,
+					constants::ManagerName::BUDGET_MANAGER,
+					constants::ManagerRequestType::GET_VESPENE,
+					0
+				);
+		}
+
+		/**
+		* @brief registers a given amount of minerals as reserved in the budget manager
+		*/
+		int ReserveMinerals(AeolusBot& aeolusbot, int amount)
+		{
+			return ManagerRequest<int, int>
+				(
+					aeolusbot,
+					constants::ManagerName::BUDGET_MANAGER,
+					constants::ManagerRequestType::RESERVE_MINERALS,
+					amount
+				);
+		}
+
+		/**
+		* @brief registers a given amount of vespenes as reserved in the budget manager
+		*/
+		int ReserveVespene(AeolusBot& aeolusbot, int amount)
+		{
+			return ManagerRequest<int, int>
+				(
+					aeolusbot,
+					constants::ManagerName::BUDGET_MANAGER,
+					constants::ManagerRequestType::RESERVE_VESPENE,
+					amount
+				);
+		}
+
+		/**
+		* @brief frees a given amount of minerals from the reserved space
+		*/
+		int FreeMinerals(AeolusBot& aeolusbot, int amount)
+		{
+			return ManagerRequest<int, int>
+				(
+					aeolusbot,
+					constants::ManagerName::BUDGET_MANAGER,
+					constants::ManagerRequestType::FREE_MINERALS,
+					amount
+				);
+		}
+
+		/**
+		* @brief frees a given amount of vespene from the reserved space
+		*/
+		int FreeVespene(AeolusBot& aeolusbot, int amount)
+		{
+			return ManagerRequest<int, int>
+				(
+					aeolusbot,
+					constants::ManagerName::BUDGET_MANAGER,
+					constants::ManagerRequestType::FREE_VESPENE,
+					amount
+				);
+		}
+
+		// resource manager
 
 		int CalculateMineralGatheringPoints(
 			AeolusBot& aeolusbot,
