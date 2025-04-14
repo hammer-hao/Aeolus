@@ -80,7 +80,6 @@ namespace Aeolus
 			if (m_keep_safe && percentage_health < m_flee_at_health_perc)
 			{
 				bool is_position_safe = ManagerMediator::getInstance().IsGroundPositionSafe(aeolusbot, ::sc2::Point2D(worker->pos));
-				if (!is_position_safe) std::cout << "Position is not safe and health critical. escaping..." << std::endl;
 				::sc2::Point2D safe_spot = ManagerMediator::getInstance().FindClosestGroundSafeSpot(aeolusbot, ::sc2::Point2D(worker->pos), 7.0);
 				if (worker->orders.size() == 1)
 				{
@@ -92,7 +91,6 @@ namespace Aeolus
 			}
 			else if (!ground_threats.empty() && _workerIsAttacking(aeolusbot, worker, ground_threats, distance_to_resource)) // detected threats near the town hall
 			{
-				std::cout << "Drilling enemy! " << std::endl;
 				continue;
 			}
 			else
@@ -231,7 +229,6 @@ namespace Aeolus
 			::sc2::Units enemies = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, worker, targets);
 			if (!enemies.empty())
 			{
-				std::cout << "Attacking!!! " << std::endl;
 				const ::sc2::Unit* target = utils::PickAttackTarget(enemies);
 				aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::ATTACK, target);
 				return true;
