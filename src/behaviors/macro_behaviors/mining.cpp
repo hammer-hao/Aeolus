@@ -70,7 +70,25 @@ namespace Aeolus
 
 			if (assigned_to_mineral) mining_target = worker_to_patch[worker];
 			if (assigned_to_gas) mining_target = worker_to_geyser[worker];
-			if (!mining_target.has_value()) continue; // no mining target
+			if (!mining_target.has_value())
+			{
+				// no mining target
+				if (worker->orders.empty())
+				{
+					// idle with no mining target
+					::sc2::Units availableMinerals = mediator.GetAllMineralPatches(aeolusbot);
+					if (!availableMinerals.empty())
+					{
+						const ::sc2::Unit* target = utils::SortByDistanceTo(availableMinerals, worker->pos).front();
+						aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, target);
+					}
+				}
+				else
+				{
+					// no mining target, but not idle, do nothing
+					continue;
+				}
+			}
 
 #ifdef BUILD_WITH_RENDERER
 			::sc2::HeightMap heightMap = ::sc2::HeightMap(aeolusbot.Observation()->GetGameInfo());
