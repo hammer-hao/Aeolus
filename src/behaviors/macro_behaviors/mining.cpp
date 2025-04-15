@@ -20,13 +20,19 @@ namespace Aeolus
 {
 	bool Mining::execute(AeolusBot& aeolusbot)
 	{
-		
-		// std::cout << "<<< Mining Behavior: Executing... >>>" << std::endl;
-		::sc2::Units workers = ManagerMediator::getInstance().GetUnitsFromRole(aeolusbot, constants::UnitRole::GATHERING);
-		auto worker_to_geyser = ManagerMediator::getInstance().GetWorkersToGeyser(aeolusbot);
-		auto worker_to_patch = ManagerMediator::getInstance().GetWorkersToPatch(aeolusbot);
+#ifdef BUILD_WITH_RENDERER
+		auto* debug = aeolusbot.Debug();
+#endif // 
 
-		m_patch_map = ManagerMediator::getInstance().GetMineralGatheringPoints(aeolusbot);
+
+		ManagerMediator& mediator = ManagerMediator::getInstance();
+
+		// std::cout << "<<< Mining Behavior: Executing... >>>" << std::endl;
+		::sc2::Units workers = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::GATHERING);
+		auto worker_to_geyser = mediator.GetWorkersToGeyser(aeolusbot);
+		auto worker_to_patch = mediator.GetWorkersToPatch(aeolusbot);
+
+		m_patch_map = mediator.GetMineralGatheringPoints(aeolusbot);
 
 		/*
 		#ifdef BUILD_WITH_RENDERER
@@ -47,9 +53,9 @@ namespace Aeolus
 
 		*/
 
-		m_town_halls = ManagerMediator::getInstance().GetOwnTownHalls(aeolusbot);
+		m_town_halls = mediator.GetOwnTownHalls(aeolusbot);
 
-		::sc2::Units ground_threats = ManagerMediator::getInstance().GetGroundThreatsNearBases(aeolusbot);
+		::sc2::Units ground_threats = mediator.GetGroundThreatsNearBases(aeolusbot);
 
 		// std::cout << "mining: got " << ground_threats.size() << " ground threats" << std::endl;
 
@@ -64,23 +70,36 @@ namespace Aeolus
 
 			if (assigned_to_mineral) mining_target = worker_to_patch[worker];
 			if (assigned_to_gas) mining_target = worker_to_geyser[worker];
-			if (mining_target.has_value())
+			if (!mining_target.has_value()) continue; // no mining target
+
+#ifdef BUILD_WITH_RENDERER
+			::sc2::HeightMap heightMap = ::sc2::HeightMap(aeolusbot.Observation()->GetGameInfo());
+#endif
+
+			if (aeolusbot.Observation()->GetUnit(mining_target.value()->tag) == nullptr)
+			{
+#ifdef BUILD_WITH_RENDERER
+				::sc2::Point3D debugPos(mining_target.value()->pos.x, mining_target.value()->pos.y, heightMap.TerrainHeight(
+					{ static_cast<int>(mining_target.value()->pos.x), static_cast<int>(mining_target.value()->pos.y) }));
+				debug->DebugSphereOut(debugPos, 0.5, ::sc2::Colors::Red);
+#endif // BUILD_WITH_RENDERER
+
+				// mined out of minerals / gas
+				mediator.ClearWorkerAssignment(aeolusbot, worker);
+				continue;
+			}
+
 			distance_to_resource = ::sc2::Distance2D(
 				::sc2::Point2D(worker->pos),
 				::sc2::Point2D(mining_target.value()->pos));
-			else
-			{
-				// std::cout << "Mining: No mining target!" << std::endl;
-				continue;
-			}
 
 			double percentage_health = (m_self_race == ::sc2::Race::Protoss) ? 
 				worker->shield / worker->shield_max : worker->health / worker->health_max;
 
 			if (m_keep_safe && percentage_health < m_flee_at_health_perc)
 			{
-				bool is_position_safe = ManagerMediator::getInstance().IsGroundPositionSafe(aeolusbot, ::sc2::Point2D(worker->pos));
-				::sc2::Point2D safe_spot = ManagerMediator::getInstance().FindClosestGroundSafeSpot(aeolusbot, ::sc2::Point2D(worker->pos), 7.0);
+				bool is_position_safe = mediator.IsGroundPositionSafe(aeolusbot, ::sc2::Point2D(worker->pos));
+				::sc2::Point2D safe_spot = mediator.FindClosestGroundSafeSpot(aeolusbot, ::sc2::Point2D(worker->pos), 7.0);
 				if (worker->orders.size() == 1)
 				{
 					if (worker->orders.front().ability_id == ::sc2::ABILITY_ID::GENERAL_MOVE
@@ -121,6 +140,9 @@ namespace Aeolus
 				}
 			}
 		}
+#ifdef BUILD_WITH_RENDERER
+		debug->SendDebug();
+#endif // 
 		return true;
 	}
 
