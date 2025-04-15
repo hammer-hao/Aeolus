@@ -82,7 +82,8 @@ namespace Aeolus
 						const ::sc2::Unit* target = utils::SortByDistanceTo(availableMinerals, worker->pos).front();
 						aeolusbot.Actions()->UnitCommand(worker, ::sc2::ABILITY_ID::SMART, target);
 					}
-				}
+					continue;
+				} 
 				else
 				{
 					// no mining target, but not idle, do nothing
