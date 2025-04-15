@@ -311,7 +311,8 @@ namespace Aeolus
 				{
 					if (mineral_field->display_type == ::sc2::Unit::DisplayType::Visible
 						&& ::sc2::Distance2D(::sc2::Point2D(mineral_field->pos), ::sc2::Point2D(town_hall->pos)) <= 10
-						&& m_patch_to_workers[mineral_field].size() < 2)
+						&& m_patch_to_workers[mineral_field].size() < 2
+						&& mineral_field->mineral_contents > 5)
 					{
 						townhall_minerals.push_back(mineral_field);
 					}
@@ -368,6 +369,7 @@ namespace Aeolus
 		{
 			if (patches.empty()) return;
 			if (m_worker_to_patch.find(worker) != m_worker_to_patch.end()) continue;
+			if (m_worker_to_geyser.find(worker) != m_worker_to_geyser.end()) continue;
 
 			// TODO: improve this for mid and late game!
 			const ::sc2::Unit* mineral = utils::GetClosestUnitTo(::sc2::Point2D(worker->pos), patches);
