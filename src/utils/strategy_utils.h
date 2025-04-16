@@ -223,7 +223,7 @@ namespace Aeolus
 				mab.updateFromRecord(rec);
 			}
 
-			// return the chosen srtategy
+			// return the chosen strategy
 			return mab.chooseStrategy();
 		}
 	} // namespace utils
