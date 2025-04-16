@@ -632,6 +632,9 @@ namespace Aeolus
 
 		// DefenseManager
 
+		/**
+		* @brief returns all ENEMY UNITS within a certain range of the vector of starting points. Uses KDTree.
+		*/
 		::sc2::Units GetUnitsInRange(AeolusBot& aeolusbot, std::vector<::sc2::Point2D> starting_points, float distance)
 		{
 			return ManagerRequest<::sc2::Units, std::vector<::sc2::Point2D>, float>(
@@ -643,6 +646,10 @@ namespace Aeolus
 			);
 		}
 
+		/**
+		* @brief Given a vector of starting points, returns a vector of own units within a given range of any
+		* of the given starting points.
+		*/
 		::sc2::Units GetOwnUnitsInRange(AeolusBot& aeolusbot, std::vector<::sc2::Point2D> starting_points, float distance)
 		{
 			return ManagerRequest<::sc2::Units, std::vector<::sc2::Point2D>, float>(
