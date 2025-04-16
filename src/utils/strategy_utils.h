@@ -224,6 +224,7 @@ namespace Aeolus
 			}
 
 			// return the chosen strategy
+			return BuildOrderEnum::BLINK_STALKERS;
 			return mab.chooseStrategy();
 		}
 	} // namespace utils

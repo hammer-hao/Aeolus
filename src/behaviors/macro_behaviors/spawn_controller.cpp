@@ -247,48 +247,54 @@ namespace Aeolus
 		
 		// use the cloest pylon to target
 		auto sortedPylons = utils::SortByDistanceTo(allPylons, target);
-		const ::sc2::Unit* warpPylon = sortedPylons.front();
-
-		// simulate a circular disk dimilar to the pylon coverage
-		std::vector<::sc2::Point2D> warpPositions;
-		for (int x = -5; x <= 5; ++x)
-		{
-			for (int y = -5; y <= 5; ++y)
-			{
-				if (x * x + y * y <= 25)
-				{
-					warpPositions.push_back({ warpPylon->pos.x + x, warpPylon->pos.y + y });
-				}
-			}
-		}
-
-		::sc2::Units nearUnits = ManagerMediator::getInstance().GetOwnUnitsInRange(aeolusbot,
-			warpPositions, 1.75);
 
 		::sc2::PlacementGrid placementGrid(aeolusbot.Observation()->GetGameInfo());
 
-		for (const auto& position : warpPositions)
+		for (const ::sc2::Unit* warpPylon : sortedPylons)
 		{
-			bool blocked = false;
-			for (const auto& unit : nearUnits)
+			// simulate a circular disk dimilar to the pylon coverage
+			std::vector<::sc2::Point2D> warpPositions;
+			for (int x = -5; x <= 5; ++x)
 			{
-				if (::sc2::DistanceSquared2D(position, unit->pos) < 2.25)
+				for (int y = -5; y <= 5; ++y)
 				{
-					blocked = true;
-					break;
+					if (x * x + y * y <= 25)
+					{
+						warpPositions.push_back({ warpPylon->pos.x + x, warpPylon->pos.y + y });
+					}
 				}
 			}
-			if (blocked)
-			{
-				continue;
-			}
 
-			if (utils::canPlaceStructure(static_cast<int>(position.x + 0.5), static_cast<int>(position.y + 0.5), 2,
-				placementGrid))
+			::sc2::Units nearUnits = ManagerMediator::getInstance().GetOwnUnitsInRange(aeolusbot,
+				warpPositions, 1.75);
+
+			for (const auto& position : warpPositions)
 			{
-				return position;
+				bool blocked = false;
+				for (const auto& unit : nearUnits)
+				{
+					if (::sc2::DistanceSquared2D(position, unit->pos) < 2.25)
+					{
+						blocked = true;
+						break;
+					}
+				}
+				if (blocked)
+				{
+					std::cout << "warp in blocked at position: " << position.x << " " << position.y << std::endl;
+					continue;
+				}
+
+				if (utils::canPlaceStructure(static_cast<int>(position.x + 0.5), static_cast<int>(position.y + 0.5), 2,
+					placementGrid))
+				{
+					std::cout << "found a good warp in spot at position: " << position.x << " " << position.y << std::endl;
+					return position;
+				}
 			}
 		}
+
+		// somehow no positions available, just return the target
 		return target;
 	}
 

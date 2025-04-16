@@ -232,13 +232,10 @@ namespace Aeolus
 
     // Handle unit destruction
     void AeolusBot::OnUnitDestroyed(const ::sc2::Unit* unit_) {
-        std::cout << "Aeolus: Unit destroyed!" << std::endl;
         manager_hub_.OnUnitDestroyed(unit_);
 
         // if we have only one building left, record as loss:
         int buildings_left = ManagerMediator::getInstance().GetAllOwnStructures(*this).size();
-
-        std::cout << "Aeolus: there are " << buildings_left << " buildings left" << std::endl;
         if (buildings_left <= 2)
         {
             m_won_game = false;

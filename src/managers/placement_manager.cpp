@@ -824,7 +824,7 @@ namespace Aeolus
 	{
 		std::vector<::sc2::Point2D> result;
 		auto potential_placements = m_expansion_map[base_index][building_size];
-		std::cout << "PlacementManager: searching base index " << base_index << " for" << building_size << std::endl;
+		// std::cout << "PlacementManager: searching base index " << base_index << " for" << building_size << std::endl;
 		::sc2::Units own_pylons;
 
 		if (within_power_field)
