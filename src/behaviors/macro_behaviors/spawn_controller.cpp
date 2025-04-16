@@ -262,7 +262,7 @@ namespace Aeolus
 			}
 		}
 
-		::sc2::Units nearUnits = ManagerMediator::getInstance().GetUnitsInRange(aeolusbot,
+		::sc2::Units nearUnits = ManagerMediator::getInstance().GetOwnUnitsInRange(aeolusbot,
 			warpPositions, 1.75);
 
 		::sc2::PlacementGrid placementGrid(aeolusbot.Observation()->GetGameInfo());
@@ -278,15 +278,17 @@ namespace Aeolus
 					break;
 				}
 			}
-			if (blocked) continue;
+			if (blocked)
+			{
+				continue;
+			}
 
-			if (utils::canPlaceStructure(static_cast<int>(position.x - 0.5), static_cast<int>(position.y - 0.5), 2,
+			if (utils::canPlaceStructure(static_cast<int>(position.x + 0.5), static_cast<int>(position.y + 0.5), 2,
 				placementGrid))
 			{
 				return position;
 			}
 		}
-		std::cout << "No warp in position available!" << std::endl;
 		return target;
 	}
 
