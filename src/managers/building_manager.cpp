@@ -179,6 +179,9 @@ namespace Aeolus
 				BuildingOrder order = it->second; // extract the existing building order
 				m_building_tracker.erase(unit); // erase the previous unit
 				m_building_tracker[worker.value()] = order;
+
+				std::cout << "BuildingManager: Assigned BUILDING role!" << std::endl;
+				ManagerMediator::getInstance().AssignRole(m_bot, worker.value(), constants::UnitRole::BUILDING);
 			}
 		}
 	}
