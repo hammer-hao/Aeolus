@@ -160,13 +160,26 @@ namespace Aeolus
 		auto it = m_building_tracker.find(unit);
 		if (it != m_building_tracker.end())
 		{
-			// a worker with assigned building is destroyed, clear it from the building tracker
+			// a worker with assigned building is destroyed
+			// clear it from the building tracker, and send out a new worker to replace it
 			ManagerMediator& mediator = ManagerMediator::getInstance();
-			auto cost = mediator.GetUnitCost(m_bot, it->second.building_id);
-			mediator.FreeMinerals(m_bot, cost.first);
-			mediator.FreeVespene(m_bot, cost.second);
-			m_building_counter[m_building_tracker[unit].building_id] -= 1;
-			m_building_tracker.erase(unit);
+
+			auto worker = mediator.SelectWorkerClosestTo(m_bot, it->second.target);
+
+			if (!worker.has_value())
+			{
+				auto cost = mediator.GetUnitCost(m_bot, it->second.building_id);
+				mediator.FreeMinerals(m_bot, cost.first);
+				mediator.FreeVespene(m_bot, cost.second);
+				m_building_counter[m_building_tracker[unit].building_id] -= 1;
+				m_building_tracker.erase(unit);
+			}
+			else
+			{
+				BuildingOrder order = it->second; // extract the existing building order
+				m_building_tracker.erase(unit); // erase the previous unit
+				m_building_tracker[worker.value()] = order;
+			}
 		}
 	}
 }
