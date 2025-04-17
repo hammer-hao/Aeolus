@@ -51,7 +51,8 @@ namespace Aeolus
 				double rand_val = static_cast<double>(std::rand()) / RAND_MAX; // random value between 0 and 1
 				BuildOrderEnum chosenStrategy;
 
-				if (rand_val < m_epsilon)
+				// if (rand_val < m_epsilon)
+				if (false)
 				{
 					// exploration: choose a random strategy
 					std::cout << "MAB: choosing a random strategy... " << std::endl;
