@@ -273,6 +273,8 @@ namespace Aeolus
 				bool blocked = false;
 				for (const auto& unit : nearUnits)
 				{
+					std::cout << "Near unit: " << ::sc2::UnitTypeToName(unit->unit_type)
+						<< " distance squared: " << ::sc2::DistanceSquared2D(position, unit->pos) << std::endl;
 					if (::sc2::DistanceSquared2D(position, unit->pos) < 2.25)
 					{
 						blocked = true;
