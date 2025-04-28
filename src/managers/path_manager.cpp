@@ -239,6 +239,7 @@ namespace Aeolus
 			else return goal;
 		}
 
+		auto heightMap = ::sc2::HeightMap(m_bot.Observation()->GetGameInfo());
 
 		// sensed danger and danger is within distance, perform custom pathfinding.
 		auto path = AStarPathFind(start, goal, cost_grid, smoothing, sensitivity);
