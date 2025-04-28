@@ -12,6 +12,7 @@
 #include "unit_property_manager.h"
 #include "defense_manager.h"
 #include "placement_manager.h"
+#include "door_manager.h"
 #include "building_manager.h"
 #include "budget_manager.h"
 
@@ -38,6 +39,7 @@ namespace Aeolus
 			managers.push_back(std::make_unique<PathManager>(aeolusbot));
 			managers.push_back(std::make_unique<UnitPropertyManager>(aeolusbot));
 			managers.push_back(std::make_unique<DefenseManager>(aeolusbot));
+			managers.push_back(std::make_unique<DoorManager>(aeolusbot));
 			managers.push_back(std::make_unique<PlacementManager>(aeolusbot));
 			managers.push_back(std::make_unique<BuildingManager>(aeolusbot));
 
@@ -49,8 +51,9 @@ namespace Aeolus
 			m_path_manager_ref = static_cast<PathManager*>(managers[4].get());
 			m_unit_property_manager_ref = static_cast<UnitPropertyManager*>(managers[5].get());
 			m_defense_manager_ref = static_cast<DefenseManager*>(managers[6].get());
-			m_placement_manager_ref = static_cast<PlacementManager*>(managers[7].get());
-			m_building_manager_ref = static_cast<BuildingManager*>(managers[8].get());
+			m_door_manager_ref = static_cast<DoorManager*>(managers[7].get());
+			m_placement_manager_ref = static_cast<PlacementManager*>(managers[8].get());
+			m_building_manager_ref = static_cast<BuildingManager*>(managers[9].get());
 
 			m_managers.push_back(m_unit_filter_manager_ref);
 			m_managers.push_back(m_unit_role_manager_ref);
@@ -59,6 +62,7 @@ namespace Aeolus
 			m_managers.push_back(m_path_manager_ref);
 			m_managers.push_back(m_unit_property_manager_ref);
 			m_managers.push_back(m_defense_manager_ref);
+			m_managers.push_back(m_door_manager_ref);
 			m_managers.push_back(m_placement_manager_ref);
 			m_managers.push_back(m_building_manager_ref);
 
@@ -120,6 +124,7 @@ namespace Aeolus
 		UnitFilterManager* m_unit_filter_manager_ref;
 		UnitPropertyManager* m_unit_property_manager_ref;
 		DefenseManager* m_defense_manager_ref;
+		DoorManager* m_door_manager_ref;
 		PlacementManager* m_placement_manager_ref;
 		BuildingManager* m_building_manager_ref;
 	};
