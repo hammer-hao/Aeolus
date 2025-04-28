@@ -791,8 +791,35 @@ namespace Aeolus
 			);
 		}
 
-		// populate the managers! 
-		// void Populate(AeolusBot&);
+		// TargetManager
+
+		/**
+		* @brief returns the (strategic) attacking target that we want to send
+		* out army in the direction to.
+		*/
+		::sc2::Point2D GetAtttackTarget(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Point2D, int>(
+				aeolusbot,
+				constants::ManagerName::TARGET_MANAGER,
+				constants::ManagerRequestType::GET_ATTACK_TARGET,
+				0
+			);
+		}
+
+		/**
+		* @brief Given a base index, returns the point target to position defensive
+		* units for that base. Only supports the first five bases.
+		*/
+		::sc2::Point2D GetDefenseTarget(AeolusBot& aeolusbot, int baseIndex)
+		{
+			return ManagerRequest<::sc2::Point2D, int>(
+				aeolusbot,
+				constants::ManagerName::TARGET_MANAGER,
+				constants::ManagerRequestType::GET_DEFENSE_TARGET,
+				baseIndex
+			);
+		}
 	};
 }
 

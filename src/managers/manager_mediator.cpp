@@ -3,7 +3,6 @@
 #include "unit_role_manager.h"
 #include "path_manager.h"
 
-
 #include <iostream>
 #include <vector>
 #include <typeinfo>

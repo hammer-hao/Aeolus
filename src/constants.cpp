@@ -11,6 +11,7 @@ namespace Aeolus {
 			case ManagerName::UNIT_ROLE_MANAGER: return "UnitRoleManager";
 			case ManagerName::RESOURCE_MANAGER: return "ResourceManager";
 			case ManagerName::PATH_MANAGER: return "PathManager";
+			case ManagerName::TARGET_MANAGER: return "TargetManager";
 			case ManagerName::NEUTRAL_UNIT_MANAGER: return "NeutralUnitManager";
 			case ManagerName::UNIT_FILTER_MANAGER: return "UnitFilterManager";
 			case ManagerName::UNIT_PROPERTY_MANAGER: return "UnitPropertyManager";

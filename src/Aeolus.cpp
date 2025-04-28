@@ -381,10 +381,14 @@ namespace Aeolus
         if (ManagerMediator::getInstance().GetUnitsFromRole(*this, constants::UnitRole::ATTACKING).size()
             < m_move_out_supply)
         {
-            return utils::GetPositionTowards(ManagerMediator::getInstance().GetExpansionLocations(*this)[1],
-                ManagerMediator::getInstance().GetExpansionLocations(*this).back(), 9);
+            return ManagerMediator::getInstance().GetDefenseTarget(*this, 1);
+            //return utils::GetPositionTowards(ManagerMediator::getInstance().GetExpansionLocations(*this)[1],
+            //    ManagerMediator::getInstance().GetExpansionLocations(*this).back(), 9);
         }
 
+        return ManagerMediator::getInstance().GetAtttackTarget(*this);
+
+        /*
         auto enemy_structures = ManagerMediator::getInstance().GetAllEnemyStructures(*this);
         ::sc2::Units filtered_structures;
         for (const auto& structure : enemy_structures)
@@ -411,6 +415,7 @@ namespace Aeolus
             }
             return targets[m_current_base_target];
         }
+        */
     }
 
     // Custom macro/economy management logic

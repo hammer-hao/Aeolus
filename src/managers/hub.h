@@ -7,6 +7,7 @@
 #include "manager_mediator.h"
 #include "unit_role_manager.h"
 #include "path_manager.h"
+#include "target_manager.h"
 #include "resource_manager.h"
 #include "unit_filter_manager.h"
 #include "unit_property_manager.h"
@@ -41,6 +42,7 @@ namespace Aeolus
 			managers.push_back(std::make_unique<DefenseManager>(aeolusbot));
 			managers.push_back(std::make_unique<DoorManager>(aeolusbot));
 			managers.push_back(std::make_unique<PlacementManager>(aeolusbot));
+			managers.push_back(std::make_unique<TargetManager>(aeolusbot));
 			managers.push_back(std::make_unique<BuildingManager>(aeolusbot));
 
 			// Store raw pointers before transferring ownership
@@ -53,7 +55,8 @@ namespace Aeolus
 			m_defense_manager_ref = static_cast<DefenseManager*>(managers[6].get());
 			m_door_manager_ref = static_cast<DoorManager*>(managers[7].get());
 			m_placement_manager_ref = static_cast<PlacementManager*>(managers[8].get());
-			m_building_manager_ref = static_cast<BuildingManager*>(managers[9].get());
+			m_target_manager_ref = static_cast<TargetManager*>(managers[9].get());
+			m_building_manager_ref = static_cast<BuildingManager*>(managers[10].get());
 
 			m_managers.push_back(m_unit_filter_manager_ref);
 			m_managers.push_back(m_unit_role_manager_ref);
@@ -64,6 +67,7 @@ namespace Aeolus
 			m_managers.push_back(m_defense_manager_ref);
 			m_managers.push_back(m_door_manager_ref);
 			m_managers.push_back(m_placement_manager_ref);
+			m_managers.push_back(m_target_manager_ref);
 			m_managers.push_back(m_building_manager_ref);
 
 			ManagerMediator::getInstance().AddManagers(managers);
@@ -101,6 +105,7 @@ namespace Aeolus
 			m_unit_role_manager_ref->ClearRole(unit);
 			m_resource_manager_ref->OnUnitDestroyed(unit);
 			m_building_manager_ref->OnUnitDestroyed(unit);
+			m_door_manager_ref->onUnitDestroyed(unit);
 		}
 
 		void _initializeManagers()
@@ -111,6 +116,7 @@ namespace Aeolus
 		void Initialize()
 		{
 			m_placement_manager_ref->Initialize();
+			m_target_manager_ref->Initialize();
 		}
 
 	private:
@@ -126,6 +132,7 @@ namespace Aeolus
 		DefenseManager* m_defense_manager_ref;
 		DoorManager* m_door_manager_ref;
 		PlacementManager* m_placement_manager_ref;
+		TargetManager* m_target_manager_ref;
 		BuildingManager* m_building_manager_ref;
 	};
 }
