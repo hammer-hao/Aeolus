@@ -169,7 +169,7 @@ namespace Aeolus
 			{
 				// Reconstruct and optionally smooth
 				auto path = reconstructPath(cameFrom, static_cast<int>(goal_y), static_cast<int>(goal_x));
-				if (path.size() > 1) {
+				if (smoothing && path.size() > 1) {
 					return smoothPath(path, sensitivity); // the first step beyond the start, adjusted for sensitivity
 				}
 				return path; // if path has only one point, start==goal
@@ -201,13 +201,25 @@ namespace Aeolus
 					}
 				}
 
+				/*
+				// step height check: if height difference > 1.5 then it is not possible
+				double hcur = heightMap.TerrainHeight({ current.col, current.row });
+				double hnbr = heightMap.TerrainHeight({ nc, nr });
+				if (std::abs(hcur - hnbr) > 1.5f) continue;
+				*/
+
+
 				if (!isValid(grid, nr, nc))
 				{
 					continue;
 				}
 
+				double moveCost = grid(nr, nc);
+				if (std::abs(dir.first) == 1 && std::abs(dir.second) == 1)
+					moveCost *= 1.41421;  // Approx sqrt(2)
+
 				// The cost to move to neighbor depends on costMap + gCost
-				double tentativeG = gCost[current.row][current.col] + grid(nr, nc);
+				double tentativeG = gCost[current.row][current.col] + moveCost;
 				// If we found a better way to get to neighbor
 				if (tentativeG < gCost[nr][nc]) {
 					gCost[nr][nc] = tentativeG;
