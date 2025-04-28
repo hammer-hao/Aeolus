@@ -682,6 +682,34 @@ namespace Aeolus
 			);
 		}
 
+		// DoorManager
+
+		/**
+		* @brief Sets the position for the "door" unit to hold position in the natural
+		*/
+		int SetDoorPosition(AeolusBot& aeolusbot, std::pair<float, float> doorPos)
+		{
+			return ManagerRequest<int, std::pair<float, float>>(
+				aeolusbot,
+				constants::ManagerName::DOOR_MANAGER,
+				constants::ManagerRequestType::SET_DOOR_POSITION,
+				doorPos
+			);
+		}
+
+		/**
+		* @brief enable the door manager
+		*/
+		int EnableDoorManager(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<int, int>(
+				aeolusbot,
+				constants::ManagerName::DOOR_MANAGER,
+				constants::ManagerRequestType::ENABLE_DOOR_MANAGER,
+				0
+			);
+		}
+
 		// PlacementManager
 
 		std::vector<::sc2::Point2D> GetExpansionLocations(AeolusBot& aeolusbot)

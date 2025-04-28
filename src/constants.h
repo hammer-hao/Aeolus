@@ -18,6 +18,7 @@ namespace Aeolus {
 			UNIT_FILTER_MANAGER,
 			UNIT_PROPERTY_MANAGER,
 			DEFENSE_MANAGER,
+			DOOR_MANAGER,
 			PLACEMENT_MANAGER,
 			BUILDING_MANAGER,
 			BUDGET_MANAGER,
@@ -92,6 +93,10 @@ namespace Aeolus {
 			GET_GROUND_THREATS_NEAR_BASES,
 			GET_ENEMY_UNITS_IN_RANGE_MAP,
 
+			// DoorManager
+			SET_DOOR_POSITION,
+			ENABLE_DOOR_MANAGER,
+
 			// PlacementManager
 			GET_EXPANSION_LOCATIONS,
 			REQUEST_BUILDING_PLACEMENT,
@@ -105,7 +110,8 @@ namespace Aeolus {
 		{
 			GATHERING,
 			BUILDING,
-			ATTACKING
+			ATTACKING,
+			DOOR
 		};
 		std::string ManagerNameToString(ManagerName name);
 		std::string ManagerRequestTypeToString(ManagerRequestType requestType);

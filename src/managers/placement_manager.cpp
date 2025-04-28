@@ -57,6 +57,7 @@ namespace Aeolus
 
 	void PlacementManager::update(int iteration)
 	{
+		/*
 		// generate debug outputs for placements
 		#ifdef BUILD_WITH_RENDERER
 
@@ -95,6 +96,7 @@ namespace Aeolus
 
 		debug->SendDebug();
 		#endif
+		*/
 	}
 
 	void PlacementManager::Initialize()
@@ -750,7 +752,7 @@ namespace Aeolus
 			}
 		}
 
-
+/*
 #ifdef BUILD_WITH_RENDERER
 
 		auto* debug = m_bot.Debug();
@@ -774,6 +776,7 @@ namespace Aeolus
 
 		debug->SendDebug();
 #endif
+*/
 		std::cout << "solved natural ramp ends: " << end1.first << " " << end1.second << ", "
 			<< end2.first << " " << end2.second << std::endl;
 		return { end1, end2 };
@@ -905,8 +908,8 @@ namespace Aeolus
 			std::pair<int, int> pos3 = { pos1.first + offset.first, pos1.second + offset.second };
 
 			std::pair<int, int> unitPos = { 
-				(pos1.first + offset.first - pos2.first) / 2,
-				(pos1.second + offset.second - pos2.second) / 2 };
+				(pos1.first + offset.first + pos2.first) / 2,
+				(pos1.second + offset.second + pos2.second) / 2 };
 
 			return { pos3, unitPos };
 		}
@@ -1152,6 +1155,9 @@ namespace Aeolus
 			int y_begin = pos3.second - 2;
 			std::cout << x_begin << " " << y_begin << std::endl;
 			m_occupied_points.block<5, 5>(x_begin, y_begin).setConstant(1); // no placing within 1 block of the crucial gap
+
+			// set the blocker (door) position for the door manager
+			ManagerMediator::getInstance().SetDoorPosition(m_bot, pos3AndBlocker.second);
 
 			pylonPos = findNaturalPylonPlacement({ pos1, pos2, pos3 }, placementGrid, expansion_locations[1]);
 		}
