@@ -65,6 +65,7 @@ source_group("Source Files\\Managers" FILES
     managers/unit_property_manager.cpp
     managers/placement_manager.cpp
     managers/door_manager.cpp
+    managers/target_manager.cpp
     managers/defense_manager.cpp
     managers/unit_role_manager.cpp
     managers/budget_manager.cpp
@@ -80,6 +81,7 @@ source_group("Header Files\\Managers" FILES
     managers/unit_property_manager.h
     managers/placement_manager.h
     managers/door_manager.h
+    managers/target_manager.h
     managers/defense_manager.h
     managers/unit_role_manager.h
     managers/building_manager.h
@@ -162,6 +164,7 @@ set(bot_sources
     managers/defense_manager.cpp
     managers/placement_manager.cpp
     managers/door_manager.cpp
+    managers/target_manager.cpp
     managers/building_manager.cpp
     pathing/grid.cpp
     pathing/map_data.cpp
@@ -214,6 +217,7 @@ set(bot_headers
     managers/defense_manager.h
     managers/placement_manager.h
     managers/door_manager.h
+    managers/target_manager.h
     managers/building_manager.h
     pathing/grid.h
     pathing/map_data.h
