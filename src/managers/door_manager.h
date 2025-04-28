@@ -32,6 +32,8 @@ namespace Aeolus
 
 		void update(int iteration) override;
 
+		void onUnitDestroyed(const ::sc2::Unit* unit);
+
 	private:
 		bool m_enabled;
 
@@ -46,8 +48,6 @@ namespace Aeolus
 		void setDoorPos(std::pair<float, float> doorPos);
 
 		void catchNewDoorUnit();
-
-		void onUnitDestroyed(const ::sc2::Unit* unit);
 
 		void closeDoor();
 
