@@ -496,11 +496,10 @@ namespace Aeolus
 
 	std::vector<std::pair<double, double>> PlacementManager::makeSampleAxis(int m)
 	{
-		constexpr double M_PI = 3.14159265358979323846;
 		std::vector<std::pair<double, double>> out;
 		out.reserve(m);
 		for (int i = 0; i < m; ++i) {
-			double angle = (static_cast<double>(i) / static_cast<double>(m)) * M_PI;
+			double angle = (static_cast<double>(i) / static_cast<double>(m)) * 3.14159265358979323846;
 			double c = std::cos(angle);
 			double s = std::sin(angle);
 			out.emplace_back(c, s);
