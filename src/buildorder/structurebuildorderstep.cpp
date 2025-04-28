@@ -87,6 +87,4 @@ namespace Aeolus
 	{
 		return m_started;
 	}
-
-
 }

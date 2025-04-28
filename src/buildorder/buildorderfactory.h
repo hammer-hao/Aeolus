@@ -77,6 +77,19 @@ namespace Aeolus
 				toAdd.push_back(std::make_unique<UnitBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS));
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_NEXUS, false));
 			}
+			else if (buildOrderEnum == BuildOrderEnum::STALKER_VOIDRAY)
+			{
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(13, ::sc2::UNIT_TYPEID::PROTOSS_PYLON, true, 1));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(14, ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, true, 1));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(15, ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR, false));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(18, ::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE, true, 1));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(19, ::sc2::UNIT_TYPEID::PROTOSS_NEXUS, false));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR, false));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_STARGATE, true, 1));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_SHIELDBATTERY, false, 1));
+				toAdd.push_back(std::make_unique<UnitBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_STALKER));
+				toAdd.push_back(std::make_unique<UnitBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_VOIDRAY));
+			}
 			return std::make_unique<BuildOrder>(aeolusbot, std::move(toAdd));
 		}
 	};

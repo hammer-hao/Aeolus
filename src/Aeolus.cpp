@@ -94,6 +94,10 @@ namespace Aeolus
         {
             return std::map<::sc2::UNIT_TYPEID, float>{{::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.0f}};
         }
+        case (BuildOrderEnum::STALKER_VOIDRAY):
+        {
+            return std::map<::sc2::UNIT_TYPEID, float>{{::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.0f}};
+        }
         case (BuildOrderEnum::STALKER_IMMORTAL):
         {
             return std::map < ::sc2::UNIT_TYPEID, float>
@@ -134,6 +138,10 @@ namespace Aeolus
         case (BuildOrderEnum::MASS_ROBO):
         {
             return 6;
+        }
+        case (BuildOrderEnum::STALKER_VOIDRAY):
+        {
+            return 10;
         }
         }
     }
@@ -212,7 +220,8 @@ namespace Aeolus
         // Assign role based on unit type
         if (unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER
             || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL
-            || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS)
+            || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS
+            || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_VOIDRAY)
         {
             ManagerMediator::getInstance().AssignRole(*this, unit_, constants::UnitRole::ATTACKING);
         }
