@@ -102,6 +102,7 @@ namespace Aeolus
 
 		void OnUnitDestroyed(const ::sc2::Unit* unit)
 		{
+			std::cout << "Unit destroyed: " << ::sc2::UnitTypeToName(unit->unit_type) << std::endl;
 			m_unit_role_manager_ref->ClearRole(unit);
 			m_resource_manager_ref->OnUnitDestroyed(unit);
 			m_building_manager_ref->OnUnitDestroyed(unit);
