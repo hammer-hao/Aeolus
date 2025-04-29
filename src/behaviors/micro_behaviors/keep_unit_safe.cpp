@@ -2,6 +2,7 @@
 
 #include "micro_maneuver.h"
 #include "path_to_target.h"
+#include "move.h"
 #include <sc2api/sc2_common.h>
 #include <sc2api/sc2_unit.h>
 #include <sc2api/sc2_typeenums.h>
@@ -14,9 +15,13 @@ namespace Aeolus
 	{
 		auto& manager = ManagerMediator::getInstance();
 		
-		if (manager.IsGroundPositionSafe(aeolusbot, unit->pos)) return false;
+		if (!unit->is_flying && manager.IsGroundPositionSafe(aeolusbot, unit->pos)) return false;
 
-		::sc2::Point2D safe_spot = manager.FindClosestGroundSafeSpot(aeolusbot, unit->pos, 7.0);
+		if (unit->is_flying && manager.IsAirPositionSafe(aeolusbot, unit->pos)) return false;
+
+		::sc2::Point2D safe_spot = (unit->is_flying) ?
+			manager.FindClosestGroundSafeSpot(aeolusbot, unit->pos, 7.0) :
+			manager.FindClosestAirSafeSpot(aeolusbot, unit->pos, 7.0);
 
 		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER &&
 			(unit->shield / unit->shield_max) <= 0.1f)
@@ -32,6 +37,7 @@ namespace Aeolus
 				}
 			}
 		}
+
 		// blink not available, just path unit to target
 		auto path = PathToTarget(safe_spot);
 		return path.execute(aeolusbot, unit);

@@ -89,6 +89,7 @@ namespace Aeolus
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_SHIELDBATTERY, false, 1));
 				toAdd.push_back(std::make_unique<UnitBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_STALKER));
 				toAdd.push_back(std::make_unique<UnitBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_VOIDRAY));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, false));
 			}
 			return std::make_unique<BuildOrder>(aeolusbot, std::move(toAdd));
 		}

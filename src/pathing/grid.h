@@ -12,6 +12,13 @@
 
 namespace Aeolus
 {
+    enum class GridType
+    {
+        GROUND,
+        AIR,
+        BOTH
+    };
+
 	class Grid
 	{
 	public:
@@ -27,6 +34,17 @@ namespace Aeolus
         {
             std::cout << "Grid initialized from Eigen::Matrix with dimensions: "
                 << m_height << "x" << m_width << std::endl;
+        }
+
+        // Dimension constructor: initialize all cells to 1
+        Grid(int width, int height)
+            : m_width(width), m_height(height), m_grid(m_height, m_width), m_cached_grid(m_height, m_width)
+        {
+            m_grid.setOnes();
+            m_cached_grid = m_grid;
+            std::cout << "Grid initialized with dimensions: "
+                << m_height << "x" << m_width
+                << " and all cells set to 1" << std::endl;
         }
 
 		Grid(::sc2::ImageData image_data)

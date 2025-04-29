@@ -37,12 +37,15 @@ namespace Aeolus
 		MapData m_mapdata;
 		AeolusBot& m_bot;
 		Grid m_ground_grid;
+		Grid m_air_grid;
 		std::vector<std::pair<int, int>> m_danger_tiles_cache;
 		bool m_danger_tiles_is_cached;
 
 		void _addUnitInfluence(const ::sc2::Unit* unit);
 
 		bool _isGroundPositionSafe(::sc2::Point2D position);
+
+		bool _isAirPositionSafe(::sc2::Point2D position);
 
 		void _reset_grids(); // reset all grids to cached versions
 
@@ -54,6 +57,8 @@ namespace Aeolus
 
 		::sc2::Point2D _getClosestSafeSpot(::sc2::Point2D position, const double& radius);
 
+		::sc2::Point2D _getClosestAirSafeSpot(::sc2::Point2D position, const double& radius);
+
 		std::vector<::sc2::Point2D> _getFloodFillArea(::sc2::Point2D starting_point, int max_distance);
 
 		/*
@@ -62,7 +67,7 @@ namespace Aeolus
 		the next point to move to in that path.
 		*/
 		::sc2::Point2D AStarPathFindNext(::sc2::Point2D start, ::sc2::Point2D goal,
-			const Grid& grid, bool sense_danger = true, int danger_distance = 20,
+			GridType gridType, bool sense_danger = true, int danger_distance = 20,
 			float danger_threshold = 5.0f, bool smoothing = false, int sensitivity = 5);
 	};
 }

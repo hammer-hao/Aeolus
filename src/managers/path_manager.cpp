@@ -17,6 +17,7 @@ namespace Aeolus
 		{
 			m_mapdata.update();
 			m_ground_grid = m_mapdata.GetAStarGrid();
+			m_air_grid = Grid(m_ground_grid.GetWidth(), m_ground_grid.GetHeight());
 			m_ground_grid.UpdateCache();
 
 		}
@@ -46,6 +47,14 @@ namespace Aeolus
 		{
 			return _getAStarGrid();
 		}
+		case (constants::ManagerRequestType::GET_GROUND_GRID):
+		{
+			return m_ground_grid;
+		}
+		case (constants::ManagerRequestType::GET_AIR_GRID):
+		{
+			return m_air_grid;
+		}
 		case (constants::ManagerRequestType::FIND_CLOSEST_GROUND_SAFE_SPOT):
 		{
 			auto params = std::any_cast<std::tuple<::sc2::Point2D, double>>(args);
@@ -53,11 +62,24 @@ namespace Aeolus
 			double radius = std::get<1>(params);
 			return _getClosestSafeSpot(position, radius);
 		}
+		case (constants::ManagerRequestType::FIND_CLOSEST_AIR_SAFE_SPOT):
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Point2D, double>>(args);
+			::sc2::Point2D position = std::get<0>(params);
+			double radius = std::get<1>(params);
+			return _getClosestAirSafeSpot(position, radius);
+		}
 		case (constants::ManagerRequestType::IS_GROUND_POSITION_SAFE):
 		{
 			auto params = std::any_cast<std::tuple<::sc2::Point2D>>(args);
 			::sc2::Point2D position = std::get<0>(params);
 			return _isGroundPositionSafe(position);
+		}
+		case (constants::ManagerRequestType::IS_AIR_POSITION_SAFE):
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Point2D>>(args);
+			::sc2::Point2D position = std::get<0>(params);
+			return _isAirPositionSafe(position);
 		}
 		case (constants::ManagerRequestType::GET_FLOOD_FILL_AREA):
 		{
@@ -68,15 +90,16 @@ namespace Aeolus
 		}
 		case (constants::ManagerRequestType::GET_NEXT_PATH_POINT):
 		{
-			auto params = std::any_cast<std::tuple <::sc2::Point2D, ::sc2::Point2D, bool, int, float, bool, int>>(args);
+			auto params = std::any_cast<std::tuple <::sc2::Point2D, ::sc2::Point2D, GridType, bool, int, float, bool, int>>(args);
 			::sc2::Point2D start = std::get<0>(params);
 			::sc2::Point2D goal = std::get<1>(params);
-			bool sense_danger = std::get<2>(params);
-			int danger_distance = std::get<3>(params);
-			float danger_threshold = std::get<4>(params);
-			bool smoothing = std::get<5>(params);
-			int sensitivity = std::get<6>(params);
-			return AStarPathFindNext(start, goal, m_ground_grid, sense_danger, danger_distance, danger_threshold, smoothing, sensitivity);
+			GridType gridType = std::get<2>(params);
+			bool sense_danger = std::get<3>(params);
+			int danger_distance = std::get<4>(params);
+			float danger_threshold = std::get<5>(params);
+			bool smoothing = std::get<6>(params);
+			int sensitivity = std::get<7>(params);
+			return AStarPathFindNext(start, goal, gridType, sense_danger, danger_distance, danger_threshold, smoothing, sensitivity);
 		}
 		default:
 			return 0;
@@ -91,6 +114,7 @@ namespace Aeolus
 	void PathManager::_addUnitInfluence(const ::sc2::Unit* unit)
 	{
 		// std::cout << "PathManager: adding unit influence... " << std::endl;
+		ManagerMediator& mediator = ManagerMediator::getInstance();
 
 		if (constants::WEIGHT_COSTS.find(unit->unit_type)
 			!= constants::WEIGHT_COSTS.end())
@@ -132,12 +156,12 @@ namespace Aeolus
 			// oracle with pulsar beam
 		}
 		
-		else if (ManagerMediator::getInstance().CanAttackGround(m_bot, unit))
+		else if (mediator.CanAttackGround(m_bot, unit))
 		{
 			// std::cout << "PathManager: found unit with ground attack " << std::endl;
-			double ground_range = ManagerMediator::getInstance().GroundRange(m_bot, unit);
+			double ground_range = mediator.GroundRange(m_bot, unit);
 			// std::cout << "PathManager: unit range acquired " << std::endl;
-			double ground_dps = ManagerMediator::getInstance().GroundDPS(m_bot, unit);
+			double ground_dps = mediator.GroundDPS(m_bot, unit);
 			// std::cout << "PathManager: unit ground dps acquired " << std::endl;
 			m_ground_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + Config::range_buffer, ground_dps);
 
@@ -150,16 +174,24 @@ namespace Aeolus
 				// non-melee units
 				// handle ground attack here
 
-				if (ManagerMediator::getInstance().CanAttackAir(m_bot, unit))
+				if (mediator.CanAttackAir(m_bot, unit))
 				{
 					// handle air attack
+					double air_range = mediator.AirRange(m_bot, unit);
+					double air_dps = mediator.AirDPS(m_bot, unit);
+
+					m_air_grid.AddCost(unit->pos.x, unit->pos.y, air_range + Config::range_buffer, air_dps);
 				}
 			}
 		}
 		else if (ManagerMediator::getInstance().CanAttackAir(m_bot, unit))
 		{
 			// units with air attack only (no attack vs ground)
-			// TODO: if unit is flying, get ground to air grid and air to air grid 
+			// handle air attack
+			double air_range = mediator.AirRange(m_bot, unit);
+			double air_dps = mediator.AirDPS(m_bot, unit);
+
+			m_air_grid.AddCost(unit->pos.x, unit->pos.y, air_range + Config::range_buffer, air_dps);
 		}
 	}
 
@@ -168,14 +200,25 @@ namespace Aeolus
 		return m_ground_grid.FindClosestSafeSpot(position, radius);
 	}
 
+	::sc2::Point2D PathManager::_getClosestAirSafeSpot(::sc2::Point2D position, const double& radius)
+	{
+		return m_air_grid.FindClosestSafeSpot(position, radius);
+	}
+
 	bool PathManager::_isGroundPositionSafe(::sc2::Point2D position)
 	{
 		return m_ground_grid.IsPositionSafe(position);
 	}
 
+	bool PathManager::_isAirPositionSafe(::sc2::Point2D position)
+	{
+		return m_air_grid.IsPositionSafe(position);
+	}
+
 	void PathManager::_reset_grids()
 	{
 		m_ground_grid.Reset();
+		m_air_grid.Reset();
 	}
 
 	void PathManager::_reset_danger_tiles()
@@ -200,10 +243,14 @@ namespace Aeolus
 	}
 
 	::sc2::Point2D PathManager::AStarPathFindNext(::sc2::Point2D start, ::sc2::Point2D goal,
-		const Grid& grid, bool sense_danger, int danger_distance,
+		GridType gridType, bool sense_danger, int danger_distance,
 		float danger_threshold, bool smoothing, int sensitivity)
 	{
-		auto cost_grid = m_ground_grid.GetGrid();
+		Grid avoidanceGrid;
+		if (gridType == GridType::GROUND) avoidanceGrid = m_ground_grid;
+		if (gridType == GridType::AIR) avoidanceGrid = m_air_grid;
+
+		const auto& cost_grid = avoidanceGrid.GetGrid();
 
 		if (sense_danger)
 		{

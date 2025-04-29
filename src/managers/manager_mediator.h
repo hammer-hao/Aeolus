@@ -72,7 +72,12 @@ namespace Aeolus
 				return std::any_cast<ReturnType>(result);
 			}
 			catch (const std::bad_any_cast& e) {
-				throw std::runtime_error("Failed to cast result in ManagerRequest: " + std::string(e.what()));
+				throw std::runtime_error(
+					std::string("Failed to cast result in ManagerRequest: ") +
+					e.what() +
+					" " + manager_name +
+					" " + std::to_string(static_cast<int>(request))
+				);
 			}
 		}
 
@@ -461,6 +466,17 @@ namespace Aeolus
 			);
 		}
 
+		::sc2::Point2D FindClosestAirSafeSpot(AeolusBot& aeolusbot, ::sc2::Point2D position, double radius)
+		{
+			return ManagerRequest<::sc2::Point2D, ::sc2::Point2D, double>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::FIND_CLOSEST_AIR_SAFE_SPOT,
+				position,
+				radius
+			);
+		}
+
 		bool IsGroundPositionSafe(AeolusBot& aeolusbot, ::sc2::Point2D position)
 		{
 			return ManagerRequest<bool, ::sc2::Point2D>(
@@ -470,6 +486,17 @@ namespace Aeolus
 				position
 			);
 		}
+
+		bool IsAirPositionSafe(AeolusBot& aeolusbot, ::sc2::Point2D position)
+		{
+			return ManagerRequest<bool, ::sc2::Point2D>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::IS_AIR_POSITION_SAFE,
+				position
+			);
+		}
+
 
 		std::vector<::sc2::Point2D> GetFloodFillArea(AeolusBot& aeolusbot, ::sc2::Point2D starting_point, int max_distance)
 		{
@@ -482,21 +509,45 @@ namespace Aeolus
 			);
 		}
 
-		::sc2::Point2D FindNextPathingPoint(AeolusBot& aeolusbot, ::sc2::Point2D start,
+		::sc2::Point2D FindNextPathingPoint(AeolusBot& aeolusbot, GridType gridType, ::sc2::Point2D start,
 			::sc2::Point2D goal, bool sense_danger = true, int danger_distance = 20,
 			float danger_threshold = 5.0f, bool smoothing = false, int sensitivity = 5)
 		{
-			return ManagerRequest<::sc2::Point2D, ::sc2::Point2D, ::sc2::Point2D, bool, int, float, bool, int>(
+			return ManagerRequest<::sc2::Point2D, ::sc2::Point2D, ::sc2::Point2D, GridType, bool, int, float, bool, int>(
 				aeolusbot,
 				constants::ManagerName::PATH_MANAGER,
 				constants::ManagerRequestType::GET_NEXT_PATH_POINT,
 				start,
 				goal,
+				gridType,
 				sense_danger,
 				danger_distance,
 				danger_threshold,
 				smoothing,
 				sensitivity
+			);
+		}
+
+		/**
+		* @brief Returns the ground avoidance grid.
+		*/
+		Grid GetGroundGrid(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<Grid, int>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::GET_GROUND_GRID,
+				0
+			);
+		}
+
+		Grid GetAirGrid(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<Grid, int>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::GET_AIR_GRID,
+				0
 			);
 		}
 
