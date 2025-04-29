@@ -126,6 +126,11 @@ namespace Aeolus
 			double ground_range = it->second.GroundRange;
 
 			m_ground_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + Config::range_buffer, ground_cost);
+
+			double air_cost = it->second.AirCost;
+			double air_range = it->second.AirRange;
+			
+			m_air_grid.AddCost(unit->pos.x, unit->pos.y, air_range + Config::range_buffer, air_cost);
 		}
 		else if (unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_BUNKER)
 		{
@@ -133,6 +138,10 @@ namespace Aeolus
 			double ground_cost = 20;
 			double ground_range = 6 + Config::range_buffer;
 			m_ground_grid.AddCost(unit->pos.x, unit->pos.y, ground_range, ground_cost);
+
+			double air_cost = 20;
+			double air_Range = 6 + Config::range_buffer;
+			m_air_grid.AddCost(unit->pos.x, unit->pos.y, air_Range, air_cost);
 		}
 		else if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_DISRUPTORPHASED)
 		{
