@@ -606,10 +606,12 @@ namespace Aeolus
 		{
 			int x = static_cast<int>(bestRef.x + i * optimalAxes.first);
 			int y = static_cast<int>(bestRef.y + i * optimalAxes.second);
+			/*
 #ifdef BUILD_WITH_RENDERER
 			float z = m_height_map.TerrainHeight({ x, y });
 			m_bot.Debug()->DebugBoxOut({x - 0.5f, y - 0.5f, z}, {x + 0.5f, y + 0.5f, z + 0.2f}, ::sc2::Colors::Yellow);
 #endif
+			*/
 			if (!placementGrid.IsPlacable({ x, y }) ||
 				(std::abs(heightMap.TerrainHeight({x, y}) - bestRefHeight) > 0.1f))
 			{
@@ -621,10 +623,12 @@ namespace Aeolus
 		{
 			int x = static_cast<int>(bestRef.x - i * optimalAxes.first);
 			int y = static_cast<int>(bestRef.y - i * optimalAxes.second);
+			/*
 #ifdef BUILD_WITH_RENDERER
 			float z = m_height_map.TerrainHeight({ x, y });
 			m_bot.Debug()->DebugBoxOut({ x - 0.5f, y - 0.5f, z }, { x + 0.5f, y + 0.5f, z + 0.2f }, ::sc2::Colors::Yellow);
 #endif
+			*/
 			if (!placementGrid.IsPlacable({ x, y }) ||
 				(std::abs(heightMap.TerrainHeight({ x, y }) - bestRefHeight) > 0.1f))
 			{
