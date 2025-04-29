@@ -19,7 +19,7 @@ namespace Aeolus
 	{
 		ManagerMediator& mediator = ManagerMediator::getInstance();
 
-		std::cout << "Training " << sc2::UnitTypeToName(m_to_train) << std::endl;
+		// std::cout << "Training " << sc2::UnitTypeToName(m_to_train) << std::endl;
 		auto result = utils::_isTrainedFrom(m_to_train);
 		if (!result.has_value()) throw std::invalid_argument("Invalid unit type to train!");
 
@@ -35,7 +35,7 @@ namespace Aeolus
 
 		if (canTrain.empty())
 		{
-			std::cout << "no building available to train!" << std::endl;
+			// std::cout << "no building available to train!" << std::endl;
 			return false; // no building available to train
 		}
 
@@ -44,8 +44,8 @@ namespace Aeolus
 		if (!std::any_of(all_structures.begin(), all_structures.end(),
 			[required_tech](const ::sc2::Unit* structure) {return structure->unit_type == required_tech; }))
 		{
-			std::cout << "we do not have the required tech to train " << ::sc2::UnitTypeToName(m_to_train) << std::endl;
-			std::cout << "required tech: " << ::sc2::UnitTypeToName(required_tech) << std::endl;
+			// std::cout << "we do not have the required tech to train " << ::sc2::UnitTypeToName(m_to_train) << std::endl;
+			// std::cout << "required tech: " << ::sc2::UnitTypeToName(required_tech) << std::endl;
 			return false; // does not have required tech yet.
 		}
 
@@ -53,8 +53,8 @@ namespace Aeolus
 		if (mediator.GetMinerals(aeolusbot) < unitCost.first
 			|| mediator.GetVespene(aeolusbot) < unitCost.second)
 		{
-			std::cout << "Not enough resources! current minerals: " << mediator.GetMinerals(aeolusbot)
-				<< " current gas: " << mediator.GetVespene(aeolusbot) << std::endl;
+			// std::cout << "Not enough resources! current minerals: " << mediator.GetMinerals(aeolusbot)
+			//	<< " current gas: " << mediator.GetVespene(aeolusbot) << std::endl;
 			return false; // not enough resources to afford this unit.
 		}
 
@@ -62,7 +62,7 @@ namespace Aeolus
 		{
 			{
 				// found available structure
-				std::cout << "Issueing training command to " << ::sc2::UnitTypeToName(structure->unit_type)
+			    std::cout << "Issueing training command to " << ::sc2::UnitTypeToName(structure->unit_type)
 					<< " to train " << ::sc2::UnitTypeToName(m_to_train) << std::endl;
 				aeolusbot.Actions()->UnitCommand(structure,
 					ManagerMediator::getInstance().GetCreationAbility(aeolusbot, m_to_train));
