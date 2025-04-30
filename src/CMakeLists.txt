@@ -9,7 +9,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Group files into folders
 
 source_group("Source Files" FILES main.cpp bot.cpp constants.cpp behavior_executor.cpp Aeolus.cpp build_order_executor.cpp)
-source_group("Header Files" FILES Bot.h constants.h behavior_executor.h Aeolus.h thirdparty/nanoflann.hpp build_order_executor.h build_order_enum.h)
+source_group("Header Files" FILES 
+Bot.h constants.h behavior_executor.h Aeolus.h 
+thirdparty/nanoflann.hpp build_order_executor.h build_order_enum.h enums.h)
 
 source_group("Source Files\\behaviors\\macro_behaviors" FILES 
 behaviors/macro_behaviors/mining.cpp
@@ -20,6 +22,7 @@ behaviors/macro_behaviors/auto_supply.cpp
 behaviors/macro_behaviors/production_controller.cpp
 behaviors/macro_behaviors/spawn_controller.cpp
 behaviors/macro_behaviors/chrono_controller.cpp
+behaviors/macro_behaviors/repower_structures.cpp
 behaviors/macro_behaviors/expand.cpp)
 
 source_group("Source Files\\behaviors\\micro_behaviors" FILES 
@@ -43,6 +46,7 @@ behaviors/macro_behaviors/auto_supply.h
 behaviors/macro_behaviors/production_controller.h
 behaviors/macro_behaviors/spawn_controller.h
 behaviors/macro_behaviors/chrono_controller.h
+behaviors/macro_behaviors/repower_structures.h
 behaviors/macro_behaviors/expand.h)
 
 source_group("Header Files\\behaviors\\micro_behaviors" FILES
@@ -146,6 +150,7 @@ set(bot_sources
     behaviors/macro_behaviors/production_controller.cpp
     behaviors/macro_behaviors/spawn_controller.cpp
     behaviors/macro_behaviors/chrono_controller.cpp
+    behaviors/macro_behaviors/repower_structures.cpp
     behaviors/micro_behaviors/a_move.cpp
     behaviors/micro_behaviors/keep_unit_safe.cpp
     behaviors/micro_behaviors/path_to_target.cpp
@@ -183,6 +188,7 @@ set(bot_sources
 set(bot_headers
     Aeolus.h
     Bot.h
+    enums.h
     constants.h
     behavior_executor.h
     behaviors/macro_behaviors/macro_behavior.h 
@@ -195,6 +201,7 @@ set(bot_headers
     behaviors/macro_behaviors/production_controller.h
     behaviors/macro_behaviors/spawn_controller.h
     behaviors/macro_behaviors/chrono_controller.h
+    behaviors/macro_behaviors/repower_structures.h
     behaviors/micro_behaviors/a_move.h
     behaviors/micro_behaviors/keep_unit_safe.h
     behaviors/micro_behaviors/micro_behavior.h
