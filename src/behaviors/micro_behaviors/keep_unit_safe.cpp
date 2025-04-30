@@ -19,7 +19,7 @@ namespace Aeolus
 
 		if (unit->is_flying && manager.IsAirPositionSafe(aeolusbot, unit->pos)) return false;
 
-		::sc2::Point2D safe_spot = (unit->is_flying) ?
+		::sc2::Point2D safe_spot = (!unit->is_flying) ?
 			manager.FindClosestGroundSafeSpot(aeolusbot, unit->pos, 7.0) :
 			manager.FindClosestAirSafeSpot(aeolusbot, unit->pos, 7.0);
 
