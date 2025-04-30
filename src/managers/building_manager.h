@@ -1,31 +1,13 @@
 #pragma once
 
 #include "manager.h"
+#include "../enums.h"
 #include <sc2api/sc2_common.h>
 #include <unordered_map>
 
 namespace Aeolus
 {
 	class AeolusBot;
-
-	struct BuildingOrder {
-		::sc2::UNIT_TYPEID building_id = ::sc2::UNIT_TYPEID::PROTOSS_PYLON;
-		::sc2::Point2D target = {0, 0};
-		double time_requested = 0.0;
-		bool order_complete = false;
-
-		BuildingOrder(
-			::sc2::UNIT_TYPEID building_id = ::sc2::UNIT_TYPEID::PROTOSS_PYLON,
-			::sc2::Point2D target = { 0, 0 },
-			double time_requested = 0.0,
-			bool order_complete = false
-		) : building_id(building_id), 
-			target(target),
-			time_requested(time_requested),
-			order_complete(order_complete)
-		{
-		}
-	};
 
 	class BuildingManager : public Manager
 	{
@@ -64,6 +46,8 @@ namespace Aeolus
 		std::unordered_map<::sc2::UNIT_TYPEID, int> m_building_counter;
 
 		size_t _getNumPending(::sc2::UNIT_TYPEID structure_type);
+
+		const std::unordered_map<const ::sc2::Unit*, BuildingOrder>& getBuildingTracker() const;
 
 		void _handleConstructionOrders();
 	};

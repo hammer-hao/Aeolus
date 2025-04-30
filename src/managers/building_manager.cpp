@@ -13,6 +13,10 @@ namespace Aeolus
 	{
 		switch (request)
 		{
+		case (constants::ManagerRequestType::GET_BUILDING_TRACKER):
+		{
+			return &getBuildingTracker();
+		}
 		case (constants::ManagerRequestType::BUILD_WITH_SPECIFIC_WORKER):
 		{
 			auto params = std::any_cast<std::tuple<const ::sc2::Unit*, ::sc2::UNIT_TYPEID, ::sc2::Point2D, bool>>(args);
@@ -152,6 +156,11 @@ namespace Aeolus
 			if (worker_order.second.building_id == structure_type) i++;
 		}
 		return i;
+	}
+
+	const std::unordered_map<const ::sc2::Unit*, BuildingOrder>& BuildingManager::getBuildingTracker() const
+	{
+		return std::ref(m_building_tracker);
 	}
 
 	void BuildingManager::OnUnitDestroyed(const ::sc2::Unit* unit)

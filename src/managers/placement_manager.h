@@ -2,6 +2,7 @@
 
 #include "manager.h"
 #include "../pathing/grid.h"
+#include "../enums.h"
 #include <sc2api/sc2_common.h>
 #include <Eigen/Dense>
 #include <tuple>
@@ -9,42 +10,6 @@
 namespace Aeolus
 {
 	class AeolusBot;
-
-	struct BuildingAttributes {
-		bool available = true;
-		bool is_wall = false;
-		int building_tag = 0;
-		bool worker_on_route = false;
-		double time_requested = 0.0;
-		bool production_pylon = false;
-		bool optimal_pylon = false;
-
-		BuildingAttributes(
-			bool available = true,
-			bool is_wall = false,
-			int building_tag = 0,
-			bool worker_on_route = false,
-			double time_requested = 0.0,
-			bool production_pylon = false,
-			bool optimal_pylon = false
-			) : available(available), is_wall(is_wall), building_tag(building_tag),
-			worker_on_route(worker_on_route), time_requested(time_requested),
-			production_pylon(production_pylon), optimal_pylon(optimal_pylon)
-		{
-		}
-	};
-
-	enum BuildingTypes
-	{
-		BUILDING_2X2,
-		BUILDING_3X3,
-		BUILDING_5X5,
-		NOT_FOUND
-	};
-
-	using BuildingMap = std::map<std::pair<float, float>, BuildingAttributes>;
-	using BuildingTypeMap = std::unordered_map<BuildingTypes, BuildingMap>;
-	using ExpansionMap = std::vector<BuildingTypeMap>;
 
 	class PlacementManager :public Manager
 	{
@@ -63,6 +28,10 @@ namespace Aeolus
 		void Initialize();
 
 		std::any ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args) override;
+
+		void OnUnitCreated(const ::sc2::Unit* unit);
+
+		void OnUnitDestroyed(const ::sc2::Unit* unit);
 
 	private:
 		AeolusBot& m_bot;
@@ -203,5 +172,15 @@ namespace Aeolus
 			convolve2dValid(
 				const Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic>& input,
 				const Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic>& kernel);
+
+		/**
+		* @brief returns all building placements handled by the placement manager,
+		* in read-only format.
+		*/
+		const ExpansionMap& getBuildingPlacements() const;
+
+		void makePlacementAvailable(BuildingTypes buildingSize, int baseIndex, ::sc2::Point2D pos, ::sc2::Tag tag);
+
+		void makePlacementUnavailable(BuildingTypes buildingSize, int baseIndex, ::sc2::Point2D pos, ::sc2::Tag tag);
 	};
 }

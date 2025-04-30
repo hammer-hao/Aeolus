@@ -2,6 +2,7 @@
 #include "manager_mediator.h"
 #include "../pathing/grid.h"
 #include "../Aeolus.h"
+#include "../enums.h"
 #include "../utils/position_utils.h"
 #include "../utils/Astar.hpp"
 #include <chrono>
@@ -30,6 +31,10 @@ namespace Aeolus
 	{
 		switch (request)
 		{
+		case (constants::ManagerRequestType::GET_BUILDING_PLACEMENTS):
+		{
+			return &getBuildingPlacements();
+		}
 		case (constants::ManagerRequestType::GET_EXPANSION_LOCATIONS):
 		{
 			// Grid placement_grid = Grid(m_bot.Observation()->GetGameInfo().placement_grid);
@@ -68,27 +73,27 @@ namespace Aeolus
 		{
 			for (const auto& building : expansion[BuildingTypes::BUILDING_2X2])
 			{
-				if (true)
+				if (building.second.available)
 				{
-					float terrain_height = m_height_map.TerrainHeight(::sc2::Point2D(building.first.first, building.first.second));
-					::sc2::Point3D min = ::sc2::Point3D(building.first.first - 1, building.first.second - 1, terrain_height);
-					::sc2::Point3D max = ::sc2::Point3D(building.first.first + 1, building.first.second + 1, terrain_height + 0.25);
+					float terrain_height = m_height_map.TerrainHeight(::sc2::Point2D(building.first.toWorld().x, building.first.toWorld().y));
+					::sc2::Point3D min = ::sc2::Point3D(building.first.toWorld().x - 1, building.first.toWorld().y - 1, terrain_height);
+					::sc2::Point3D max = ::sc2::Point3D(building.first.toWorld().x + 1, building.first.toWorld().y + 1, terrain_height + 0.25);
 					std::stringstream pos;
-					pos << building.first.first << " " << building.first.second;
-					debug->DebugTextOut(pos.str(), ::sc2::Point3D(building.first.first, building.first.second, terrain_height), ::sc2::Colors::Blue);
+					pos << building.first.toWorld().x << " " << building.first.toWorld().y;
+					debug->DebugTextOut(pos.str(), ::sc2::Point3D(building.first.toWorld().x, building.first.toWorld().y, terrain_height), ::sc2::Colors::Blue);
 					debug->DebugBoxOut(min, max, ::sc2::Colors::Green);
 				}
 			}
 			for (const auto& building : expansion[BuildingTypes::BUILDING_3X3])
 			{
-				if (true)
+				if (building.second.available)
 				{
-					float terrain_height = m_height_map.TerrainHeight(::sc2::Point2D(building.first.first, building.first.second));
-					::sc2::Point3D min = ::sc2::Point3D(building.first.first - 1.5, building.first.second - 1.5, terrain_height);
-					::sc2::Point3D max = ::sc2::Point3D(building.first.first + 1.5, building.first.second + 1.5, terrain_height + 0.25);
+					float terrain_height = m_height_map.TerrainHeight(::sc2::Point2D(building.first.toWorld().x, building.first.toWorld().y));
+					::sc2::Point3D min = ::sc2::Point3D(building.first.toWorld().x - 1.5, building.first.toWorld().y - 1.5, terrain_height);
+					::sc2::Point3D max = ::sc2::Point3D(building.first.toWorld().x + 1.5, building.first.toWorld().y + 1.5, terrain_height + 0.25);
 					std::stringstream pos;
-					pos << building.first.first << " " << building.first.second;
-					debug->DebugTextOut(pos.str(), ::sc2::Point3D(building.first.first, building.first.second, terrain_height), ::sc2::Colors::Blue);
+					pos << building.first.toWorld().x << " " << building.first.toWorld().y;
+					debug->DebugTextOut(pos.str(), ::sc2::Point3D(building.first.toWorld().x, building.first.toWorld().y, terrain_height), ::sc2::Colors::Blue);
 					debug->DebugBoxOut(min, max, ::sc2::Colors::Blue);
 				}
 			}
@@ -181,7 +186,7 @@ namespace Aeolus
 			kernel.setOnes();
 			auto pylon_locations = _findBuildingLocations(kernel, bounding_box, 7, 7, placementGridNew, pathing_grid, m_occupied_points, 2, 2);
 
-			std::cout << "found " << pylon_locations.size() << " pylon locations." << std::endl;
+			// std::cout << "found " << pylon_locations.size() << " pylon locations." << std::endl;
 
 			for (const auto& location : pylon_locations)
 			{
@@ -201,7 +206,7 @@ namespace Aeolus
 			auto threebythree_locations = _findBuildingLocations(kernel, bounding_box, 3, 3, placementGridNew, pathing_grid, m_occupied_points, 3, 3);
 			size_t num_threebythree = threebythree_locations.size();
 
-			std::cout << "found " << num_threebythree << " three by three locations." << std::endl;
+			// std::cout << "found " << num_threebythree << " three by three locations." << std::endl;
 
 			for (int j = 0; j < num_threebythree; ++j)
 			{
@@ -222,7 +227,7 @@ namespace Aeolus
 			auto twobytwo_locations = _findBuildingLocations(kernel, bounding_box, 2, 2, placementGridNew, pathing_grid, m_occupied_points, 2, 2);
 			size_t num_twobytwo = twobytwo_locations.size();
 
-			std::cout << "found " << num_twobytwo << " two by two locations." << std::endl;
+			// std::cout << "found " << num_twobytwo << " two by two locations." << std::endl;
 
 			for (int j = 0; j < num_twobytwo; ++j)
 			{
@@ -253,14 +258,14 @@ namespace Aeolus
 					int this_three_by_threes = 0;
 					for (const auto& three_by_three : m_expansion_map[i][BuildingTypes::BUILDING_3X3])
 					{
-						if (::sc2::DistanceSquared2D(::sc2::Point2D(two_by_two.first.first, two_by_two.first.second),
-							::sc2::Point2D(three_by_three.first.first, three_by_three.first.second)) < 42.25)
+						if (::sc2::DistanceSquared2D(two_by_two.first.toWorld(),
+							three_by_three.first.toWorld()) < 42.25)
 							this_three_by_threes++;
 					}
 					if (this_three_by_threes > most_three_by_threes)
 					{
 						most_three_by_threes = this_three_by_threes;
-						best_pylon_pos = two_by_two.first;
+						best_pylon_pos = { two_by_two.first.toWorld().x,  two_by_two.first.toWorld().y };
 					}
 				}
 			}
@@ -271,6 +276,11 @@ namespace Aeolus
 		auto end = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 		std::cout << "Completed placement calculation in " << duration.count() << " ms." << std::endl;
+	}
+
+	const ExpansionMap& PlacementManager::getBuildingPlacements() const
+	{
+		return std::ref(m_expansion_map);
 	}
 
 	std::vector<std::vector<std::pair<int, int>>>
@@ -526,7 +536,7 @@ namespace Aeolus
 
 		for (const auto& ref : refs)
 		{
-			std::cout << "ref: " << ref.x << " " << ref.y << std::endl;
+			// std::cout << "ref: " << ref.x << " " << ref.y << std::endl;
 			double localBestScore = std::numeric_limits<double>::infinity();
 			std::pair<double, double> bestAxis = { 0.0, 0.0 };
 			
@@ -581,7 +591,7 @@ namespace Aeolus
 				int width = pos + neg + 1;
 
 				double score = std::abs(width - targetWidth);
-				std::cout << "width: " << width << std::endl;
+				// std::cout << "width: " << width << std::endl;
 				if (score < localBestScore)
 				{
 					localBestScore = score;
@@ -1372,10 +1382,6 @@ namespace Aeolus
 		size_t buildingWidth,
 		size_t buildingHeight)
 	{
-		if (placement_grid.IsPlacable({ 128, 43 }))
-		{
-			std::cout << "128, 43 is PLACABLE!!" << std::endl;
-		}
 
 		// auto pathing = pathing_grid.GetGrid();
 		auto to_avoid = ManagerMediator::getInstance().GetAstarGrid(m_bot).GetGrid();
@@ -1605,7 +1611,7 @@ namespace Aeolus
 		{
 			if (candidate.second.available && !candidate.second.worker_on_route)
 			{
-				::sc2::Point2D pos = { candidate.first.first, candidate.first.second };
+				::sc2::Point2D pos = { candidate.first.toWorld().x, candidate.first.toWorld().y};
 				if (_canPlaceStructure(pos, building_size)) result.push_back(pos);
 			}
 		}
@@ -1682,5 +1688,89 @@ namespace Aeolus
 	{
 		m_expansion_map[expansion_location][building_type][{position.x, position.y}] = 
 			BuildingAttributes(available, is_wall, building_tag, worker_on_route, time_requested, production_pylon, optimal_pylon);
+	}
+
+	void PlacementManager::makePlacementUnavailable(
+		BuildingTypes buildingSize, int baseIndex, ::sc2::Point2D pos, ::sc2::Tag tag)
+	{
+		if (buildingSize == BuildingTypes::NOT_FOUND) return;
+
+		if (baseIndex >= m_expansion_map.size()) return;
+
+		auto& placement = m_expansion_map[baseIndex][buildingSize][{pos.x, pos.y}];
+
+		placement.available = false;
+		placement.building_tag = tag;
+		placement.worker_on_route = false;
+	}
+
+	void PlacementManager::makePlacementAvailable(
+		BuildingTypes buildingSize, int baseIndex, ::sc2::Point2D pos, ::sc2::Tag tag)
+	{
+		if (buildingSize == BuildingTypes::NOT_FOUND) return;
+
+		if (baseIndex >= m_expansion_map.size()) return;
+
+		auto& placement = m_expansion_map[baseIndex][buildingSize][{pos.x, pos.y}];
+
+		placement.available = true;
+		placement.building_tag = 0;
+		placement.worker_on_route = false;
+	}
+
+	void PlacementManager::OnUnitCreated(const ::sc2::Unit* unit)
+	{
+		if (constants::BUILDINGS_2X2.find(unit->unit_type) != constants::BUILDINGS_2X2.end())
+		{
+			for (int i = 0; i < m_expansion_map.size(); ++i)
+			{
+				if (m_expansion_map[i][BuildingTypes::BUILDING_2X2].find({unit->pos.x, unit->pos.y})
+					!= m_expansion_map[i][BuildingTypes::BUILDING_2X2].end())
+				{
+					makePlacementUnavailable(BuildingTypes::BUILDING_2X2, i, unit->pos, unit->tag);
+					break;
+				}
+			}
+		}
+		else if (constants::BUILDINGS_3X3.find(unit->unit_type) != constants::BUILDINGS_3X3.end())
+		{
+			for (int i = 0; i < m_expansion_map.size(); ++i)
+			{
+				if (m_expansion_map[i][BuildingTypes::BUILDING_3X3].find({ unit->pos.x, unit->pos.y })
+					!= m_expansion_map[i][BuildingTypes::BUILDING_3X3].end())
+				{
+					makePlacementUnavailable(BuildingTypes::BUILDING_3X3, i, unit->pos, unit->tag);
+					break;
+				}
+			}
+		}
+	}
+
+	void PlacementManager::OnUnitDestroyed(const ::sc2::Unit* unit)
+	{
+		if (constants::BUILDINGS_2X2.find(unit->unit_type) != constants::BUILDINGS_2X2.end())
+		{
+			for (int i = 0; i < m_expansion_map.size(); ++i)
+			{
+				if (m_expansion_map[i][BuildingTypes::BUILDING_2X2].find({ unit->pos.x, unit->pos.y })
+					!= m_expansion_map[i][BuildingTypes::BUILDING_2X2].end())
+				{
+					makePlacementAvailable(BuildingTypes::BUILDING_2X2, i, unit->pos, unit->tag);
+					break;
+				}
+			}
+		}
+		else if (constants::BUILDINGS_3X3.find(unit->unit_type) != constants::BUILDINGS_3X3.end())
+		{
+			for (int i = 0; i < m_expansion_map.size(); ++i)
+			{
+				if (m_expansion_map[i][BuildingTypes::BUILDING_3X3].find({ unit->pos.x, unit->pos.y })
+					!= m_expansion_map[i][BuildingTypes::BUILDING_3X3].end())
+				{
+					makePlacementAvailable(BuildingTypes::BUILDING_3X3, i, unit->pos, unit->tag);
+					break;
+				}
+			}
+		}
 	}
 }
