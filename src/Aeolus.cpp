@@ -24,6 +24,7 @@
 #include "behaviors/macro_behaviors/production_controller.h"
 #include "behaviors/macro_behaviors/spawn_controller.h"
 #include "behaviors/macro_behaviors/chrono_controller.h"
+#include "behaviors/macro_behaviors/repower_structures.h"
 
 #include "behaviors/micro_behaviors/micro_behavior.h"
 #include "behaviors/micro_behaviors/path_to_target.h"
@@ -221,6 +222,8 @@ namespace Aeolus
     void AeolusBot::OnUnitCreated(const ::sc2::Unit* unit_) {
         std::cout << "Aeolus:" << sc2::UnitTypeToName(unit_->unit_type) 
             << "(" << unit_->tag << ") was created" << std::endl;
+
+        manager_hub_.OnUnitCreated(unit_);
         // Assign role based on unit type
         if (unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER
             || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL
@@ -283,6 +286,7 @@ namespace Aeolus
         ));
         RegisterBehavior(std::make_unique<AutoSupply>());
         RegisterBehavior(std::make_unique<ChronoController>());
+        RegisterBehavior(std::make_unique<RepowerStructures>());
 
         if (!m_build_order->isFinished())
         {

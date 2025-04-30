@@ -6,7 +6,7 @@ namespace Aeolus
 {
 	bool BuildStructure::execute(AeolusBot& aeolusbot)
 	{
-		std::cout << "BuildStructure: Executing..." << std::endl;
+		// std::cout << "BuildStructure: Executing..." << std::endl;
 		bool build_within_power_field = (structure_id != ::sc2::UNIT_TYPEID::PROTOSS_PYLON);
 		bool find_alternative = true;
 		bool reserve_placement = true;
@@ -98,7 +98,8 @@ namespace Aeolus
 				reserve_placement,
 				build_within_power_field,
 				0.8f,
-				false);
+				m_build_close_to,
+				m_close_to);
 
 			std::cout << "BuildStructure: found a valid placement" << std::endl;
 		}

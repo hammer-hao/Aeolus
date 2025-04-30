@@ -109,10 +109,12 @@ namespace Aeolus {
 			// PlacementManager
 			GET_EXPANSION_LOCATIONS,
 			REQUEST_BUILDING_PLACEMENT,
+			GET_BUILDING_PLACEMENTS,
 
 			// BuildingManager
 			BUILD_WITH_SPECIFIC_WORKER,
 			GET_NUMBER_PENDING,
+			GET_BUILDING_TRACKER,
 		};
 
 		enum class UnitRole

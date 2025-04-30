@@ -4,6 +4,7 @@
 #include <any>
 #include <map>
 #include <optional>
+#include <functional>
 
 #include <sc2api/sc2_unit.h>
 #include <sc2api/sc2_map_info.h>
@@ -11,6 +12,7 @@
 #include "../constants.h"
 #include "manager.h"
 #include "../pathing/grid.h"
+#include "../enums.h"
 
 namespace Aeolus
 {
@@ -763,6 +765,22 @@ namespace Aeolus
 
 		// PlacementManager
 
+		/**
+		* @brief returns all placements calculated in the map in read-only format.
+		*/
+		const ExpansionMap& GetBuildingPlacements(AeolusBot& aeolusbot)
+		{
+			const ExpansionMap* ptr = ManagerRequest<const ExpansionMap*, int>(
+				aeolusbot,
+				constants::ManagerName::PLACEMENT_MANAGER,
+				constants::ManagerRequestType::GET_BUILDING_PLACEMENTS,
+				0
+			);
+
+			return *ptr;
+		}
+
+
 		std::vector<::sc2::Point2D> GetExpansionLocations(AeolusBot& aeolusbot)
 		{
 			return ManagerRequest<std::vector<::sc2::Point2D>, int>(
@@ -813,6 +831,18 @@ namespace Aeolus
 		}
 
 		// BuildingManager
+		const std::unordered_map<const ::sc2::Unit*, BuildingOrder>& GetBuildingTracker(AeolusBot& aeolusbot)
+		{
+			const std::unordered_map<const ::sc2::Unit*, BuildingOrder>* ptr =
+				ManagerRequest<const std::unordered_map<const ::sc2::Unit*, BuildingOrder>*, int>(
+					aeolusbot,
+					constants::ManagerName::BUILDING_MANAGER,
+					constants::ManagerRequestType::GET_BUILDING_TRACKER,
+					0
+				);
+
+			return *ptr;
+		}
 
 		bool BuildWithSpecificWorker(AeolusBot& aeolusbot,
 			const ::sc2::Unit* worker,
