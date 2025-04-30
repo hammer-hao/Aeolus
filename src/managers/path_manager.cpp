@@ -255,10 +255,9 @@ namespace Aeolus
 		GridType gridType, bool sense_danger, int danger_distance,
 		float danger_threshold, bool smoothing, int sensitivity)
 	{
-		Grid avoidanceGrid;
-		if (gridType == GridType::GROUND) avoidanceGrid = m_ground_grid;
-		if (gridType == GridType::AIR) avoidanceGrid = m_air_grid;
-
+		Grid& avoidanceGrid = (gridType == GridType::GROUND)
+			? m_ground_grid
+			: m_air_grid;
 		const auto& cost_grid = avoidanceGrid.GetGrid();
 
 		if (sense_danger)
@@ -300,8 +299,7 @@ namespace Aeolus
 		// sensed danger and danger is within distance, perform custom pathfinding.
 		auto path = AStarPathFind(start, goal, cost_grid, smoothing, sensitivity);
 
-		if (path.empty()) return goal;
-		else return path.front();
+		return (path.size() > 1) ? path[1] : goal;
 	}
 }
 

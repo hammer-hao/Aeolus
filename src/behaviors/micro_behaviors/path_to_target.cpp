@@ -22,9 +22,13 @@ namespace Aeolus
 
 		// std::cout << "Path to target: retrieved grid... " << std::endl;
 
-		::sc2::Point2D move_to = ManagerMediator::getInstance().FindNextPathingPoint(aeolusbot, influenceGridType, unit->pos, m_target);
+		::sc2::Point2D move_to = ManagerMediator::getInstance().FindNextPathingPoint(
+			aeolusbot, 
+			influenceGridType, 
+			unit->pos, 
+			m_target
+		);
 
-		// std::cout << "Path to target: next point calculated " << std::endl;
 		//aeolusbot.Actions()->UnitCommand(unit, ::sc2::ABILITY_ID::MOVE_MOVE, m_target);
 		//return true;
 
