@@ -3,6 +3,8 @@
 #include <sc2api/sc2_interfaces.h>
 #include <sc2api/sc2_unit.h>
 #include <sc2api/sc2_data.h>
+#include <any>
+#include <tuple>
 
 namespace Aeolus
 {
@@ -10,6 +12,12 @@ namespace Aeolus
 	{
 		switch (request)
 		{
+		case (constants::ManagerRequestType::IS_STRUCTURE_PRESENT):
+		{
+			auto params = std::any_cast<std::tuple<::sc2::UNIT_TYPEID>>(args);
+			::sc2::UNIT_TYPEID structureType = std::get<0>(params);
+			return isStructurePresent(structureType);
+		}
 		case (constants::ManagerRequestType::GET_ALL_ENEMY_UNITS):
 		{
 			return m_all_enemy_units;
@@ -202,5 +210,14 @@ namespace Aeolus
 				unit_type_data.food_required == 0.0f); // Structures don't consume supply
 				*/
 			});
+	}
+
+	bool UnitFilterManager::isStructurePresent(::sc2::UNIT_TYPEID structureType)
+	{
+		for (const auto& structure : m_own_structures)
+		{
+			if (structure->unit_type == structureType) return true;
+		}
+		return false;
 	}
 }

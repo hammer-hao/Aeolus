@@ -293,6 +293,19 @@ namespace Aeolus
 
 		// UnitFilterManager
 
+		/**
+		* @brief Returns whether we own a structure (building or completed) of the given structure type.
+		*/
+		bool IsStructureAvailable(AeolusBot& aeolusbot, ::sc2::UNIT_TYPEID structureType)
+		{
+			return ManagerRequest<bool, ::sc2::UNIT_TYPEID>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::IS_STRUCTURE_PRESENT,
+				structureType
+			);
+		}
+
 		::sc2::Units GetAllDestructables(AeolusBot& aeolusbot)
 		{
 			std::cout << "trying to send get all destructables to unitfiltermanager" << std::endl;

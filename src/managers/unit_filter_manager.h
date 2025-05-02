@@ -30,6 +30,8 @@ namespace Aeolus
 		::sc2::Units _getAllStructures(AeolusBot& aeolusbot, ::sc2::Unit::Alliance alliance);
 		AeolusBot& m_bot;
 
+		bool isStructurePresent(::sc2::UNIT_TYPEID structureType);
+
 		// All unit data in the game. Cached at iteration 0 every game.
 		::sc2::UnitTypes m_unit_data_cache;
 

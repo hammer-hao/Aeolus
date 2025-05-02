@@ -5,6 +5,7 @@
 #include <sc2api/sc2_interfaces.h>
 #include <sc2api/sc2_action.h>
 #include <sc2lib/sc2_search.h>
+#include <sc2api/sc2_typeenums.h>
 
 #include <iostream>
 #include <random>
@@ -23,6 +24,7 @@
 #include "behaviors/macro_behaviors/auto_supply.h"
 #include "behaviors/macro_behaviors/production_controller.h"
 #include "behaviors/macro_behaviors/spawn_controller.h"
+#include "behaviors/macro_behaviors/upgrades_controller.h"
 #include "behaviors/macro_behaviors/chrono_controller.h"
 #include "behaviors/macro_behaviors/repower_structures.h"
 
@@ -296,6 +298,19 @@ namespace Aeolus
             RegisterBehavior(std::make_unique<Expand>());
             RegisterBehavior(std::make_unique<ProductionController>(_chooseArmyComp()));
             RegisterBehavior(std::make_unique<SpawnController>(_chooseArmyComp()));
+            RegisterBehavior(std::make_unique<UpgradesController>(
+                std::vector<::sc2::UPGRADE_ID>{
+                ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL1,
+                    ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL2,
+                    ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL1,
+                    ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL3,
+                    ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL2,
+                    ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL3,
+                    ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL1,
+                    ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL2,
+                    ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL3
+                }
+            ));
         }
 
         if (Observation()->GetGameLoop() % 50 == 0)
