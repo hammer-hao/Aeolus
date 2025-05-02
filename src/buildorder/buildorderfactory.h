@@ -91,6 +91,25 @@ namespace Aeolus
 				toAdd.push_back(std::make_unique<UnitBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_VOIDRAY));
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, false));
 			}
+			else if (buildOrderEnum == BuildOrderEnum::FORGE_EXPAND)
+			{
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(12, ::sc2::UNIT_TYPEID::PROTOSS_PYLON, true, 1));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(13, ::sc2::UNIT_TYPEID::PROTOSS_FORGE, true, 1));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(15, ::sc2::UNIT_TYPEID::PROTOSS_PHOTONCANNON, false, 1));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(15, ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, true, 1));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(15, ::sc2::UNIT_TYPEID::PROTOSS_PHOTONCANNON, false, 1));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(16, ::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE, true, 1));
+				toAdd.push_back(std::make_unique<UnitBuildOrderStep>(16, ::sc2::UNIT_TYPEID::PROTOSS_ZEALOT));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(17, ::sc2::UNIT_TYPEID::PROTOSS_NEXUS, false));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(18, ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR, false));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(18, ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR, false));
+				toAdd.push_back(std::make_unique<UpgradeBuildOrderStep>(20, ::sc2::UPGRADE_ID::WARPGATERESEARCH));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_TWILIGHTCOUNCIL, false));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, true));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, true));
+				toAdd.push_back(std::make_unique<UpgradeBuildOrderStep>(20, ::sc2::UPGRADE_ID::BLINKTECH));
+
+			}
 			return std::make_unique<BuildOrder>(aeolusbot, std::move(toAdd));
 		}
 	};

@@ -97,6 +97,10 @@ namespace Aeolus
         {
             return std::map<::sc2::UNIT_TYPEID, float>{{::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.0f}};
         }
+        case (BuildOrderEnum::FORGE_EXPAND):
+        {
+            return std::map<::sc2::UNIT_TYPEID, float>{{::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.0f}};
+        }
         case (BuildOrderEnum::STALKER_VOIDRAY):
         {
             return std::map < ::sc2::UNIT_TYPEID, float>
@@ -141,6 +145,10 @@ namespace Aeolus
         case (BuildOrderEnum::BLINK_STALKERS):
         {
             return 6;
+        }
+        case (BuildOrderEnum::FORGE_EXPAND):
+        {
+            return 8;
         }
         case (BuildOrderEnum::MASS_ROBO):
         {
@@ -230,7 +238,8 @@ namespace Aeolus
         if (unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER
             || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL
             || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS
-            || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_VOIDRAY)
+            || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_VOIDRAY
+            || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ZEALOT)
         {
             ManagerMediator::getInstance().AssignRole(*this, unit_, constants::UnitRole::ATTACKING);
         }

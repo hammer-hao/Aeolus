@@ -41,7 +41,8 @@ namespace Aeolus
 
 		// need to make sure we have required tech
 		::sc2::UNIT_TYPEID required_tech = mediator.GetRequiredTech(aeolusbot, m_to_train);
-		if (!std::any_of(all_structures.begin(), all_structures.end(),
+		if (required_tech != ::sc2::UNIT_TYPEID::INVALID &&
+			!std::any_of(all_structures.begin(), all_structures.end(),
 			[required_tech](const ::sc2::Unit* structure) {return structure->unit_type == required_tech; }))
 		{
 			// std::cout << "we do not have the required tech to train " << ::sc2::UnitTypeToName(m_to_train) << std::endl;
@@ -54,7 +55,7 @@ namespace Aeolus
 			|| mediator.GetVespene(aeolusbot) < unitCost.second)
 		{
 			// std::cout << "Not enough resources! current minerals: " << mediator.GetMinerals(aeolusbot)
-			//	<< " current gas: " << mediator.GetVespene(aeolusbot) << std::endl;
+			// << " current gas: " << mediator.GetVespene(aeolusbot) << std::endl;
 			return false; // not enough resources to afford this unit.
 		}
 
