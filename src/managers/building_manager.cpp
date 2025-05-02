@@ -175,8 +175,10 @@ namespace Aeolus
 
 			auto worker = mediator.SelectWorkerClosestTo(m_bot, it->second.target);
 
-			if (!worker.has_value())
+			if (!worker.has_value() || it->second.building_id == ::sc2::UNIT_TYPEID::PROTOSS_NEXUS)
 			{
+				// give up if we were going to expand
+				// since the buildOrder or auto expand will take over the replacing logic
 				auto cost = mediator.GetUnitCost(m_bot, it->second.building_id);
 				mediator.FreeMinerals(m_bot, cost.first);
 				mediator.FreeVespene(m_bot, cost.second);

@@ -81,12 +81,35 @@ namespace Aeolus
 
 	bool StructureBuildOrderStep::isDone(AeolusBot& aeolusbot)
 	{
+		auto& mediator = ManagerMediator::getInstance();
+
 		int num_now = 0;
-		for (const auto& structure : ManagerMediator::getInstance().GetAllOwnStructures(aeolusbot))
+
+		for (const auto& structure : mediator.GetAllOwnStructures(aeolusbot))
 		{
 			if (structure->unit_type == m_to_build) num_now++;
 		}
-		return (num_now > m_num_before);
+		if (num_now > m_num_before) return true;
+		// wanted to build a nexus, and it is pending (with minerals reserved)
+		// move on. 
+		if (m_to_build == ::sc2::UNIT_TYPEID::PROTOSS_NEXUS)
+		{
+			for (const auto& item : mediator.GetBuildingTracker(aeolusbot))
+			{
+				if (item.second.building_id == ::sc2::UNIT_TYPEID::PROTOSS_NEXUS)
+				{
+					for (const auto& structure : mediator.GetAllEnemyStructures(aeolusbot))
+					{
+						if (::sc2::DistanceSquared2D(item.second.target, structure->pos) < 25.0f)
+						{
+							// found something dangerously close to the nexus, skip the build
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	bool StructureBuildOrderStep::started()
