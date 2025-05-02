@@ -17,6 +17,9 @@ namespace Aeolus
 	{
 		ManagerMediator& mediator = ManagerMediator::getInstance();
 
+		// need at least 100 minerals to construct pylons
+		if (mediator.GetMinerals(aeolusbot) < 100) return false;
+
 		auto allStructures = mediator.GetAllOwnStructures(aeolusbot);
 		
 		::sc2::Units allPylons;
