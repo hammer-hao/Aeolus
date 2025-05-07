@@ -92,11 +92,11 @@ namespace Aeolus
 		if (num_now > m_num_before) return true;
 		// wanted to build a nexus, and it is pending (with minerals reserved)
 		// move on. 
-		if (m_to_build == ::sc2::UNIT_TYPEID::PROTOSS_NEXUS)
+		if (m_to_build == ::sc2::UNIT_TYPEID::PROTOSS_NEXUS || m_to_build == ::sc2::UNIT_TYPEID::PROTOSS_PYLON)
 		{
 			for (const auto& item : mediator.GetBuildingTracker(aeolusbot))
 			{
-				if (item.second.building_id == ::sc2::UNIT_TYPEID::PROTOSS_NEXUS)
+				if (item.second.building_id == m_to_build)
 				{
 					for (const auto& structure : mediator.GetAllEnemyStructures(aeolusbot))
 					{
