@@ -62,7 +62,6 @@ namespace Aeolus
 
 	void PlacementManager::update(int iteration)
 	{
-		/*
 		// generate debug outputs for placements
 		#ifdef BUILD_WITH_RENDERER
 
@@ -101,7 +100,6 @@ namespace Aeolus
 
 		debug->SendDebug();
 		#endif
-		*/
 	}
 
 	void PlacementManager::Initialize()
@@ -123,6 +121,7 @@ namespace Aeolus
 		::sc2::Units allDestructibles = ManagerMediator::getInstance().GetAllDestructables(m_bot);
 		for (const auto& destructible : allDestructibles)
 		{
+			// std::cout << ::sc2::UnitTypeToName(destructible->unit_type) << std::endl;
 			if (constants::DESTRUCTABLE2X2_IDS.find(destructible->unit_type) != constants::DESTRUCTABLE2X2_IDS.end())
 			{
 				int xStart = static_cast<int>(destructible->pos.x - 1);
