@@ -103,6 +103,19 @@ namespace Aeolus
 			return { 0.0f, 0.0f };
 		}
 
+		std::vector<::sc2::Point2D> startingPoints;
+		for (const auto& th : ManagerMediator::getInstance().GetOwnTownHalls(m_bot))
+		{
+			startingPoints.push_back(th->pos);
+		}
+		auto threats = ManagerMediator::getInstance().GetUnitsInRange(m_bot, startingPoints, 15.0f);
+
+		if (!threats.empty())
+		{
+			auto* target = utils::GetClosestUnitTo(m_defenseTarget[baseLocation], threats);
+			return target->pos;
+		}
+
 		return m_defenseTarget[baseLocation];
 	}
 

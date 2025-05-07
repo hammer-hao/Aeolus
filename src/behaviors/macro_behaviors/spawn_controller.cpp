@@ -239,6 +239,7 @@ namespace Aeolus
 	::sc2::Point2D SpawnController::_calculateWarpInSpot(AeolusBot& aeolusbot, ::sc2::Point2D target)
 	{
 		auto allStructures = ManagerMediator::getInstance().GetAllOwnStructures(aeolusbot);
+		auto allGasSprings = ManagerMediator::getInstance().GetAllVespeneGeysers(aeolusbot);
 		::sc2::Units allPylons;
 		std::copy_if(allStructures.begin(), allStructures.end(), std::back_inserter(allPylons),
 			[](const ::sc2::Unit* structure) {return structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_PYLON; });
@@ -249,6 +250,7 @@ namespace Aeolus
 		auto sortedPylons = utils::SortByDistanceTo(allPylons, target);
 
 		::sc2::PlacementGrid placementGrid(aeolusbot.Observation()->GetGameInfo());
+		::sc2::HeightMap heightMap(aeolusbot.Observation()->GetGameInfo());
 
 		for (const ::sc2::Unit* warpPylon : sortedPylons)
 		{
@@ -258,7 +260,7 @@ namespace Aeolus
 			{
 				for (int y = -5; y <= 5; ++y)
 				{
-					if (x * x + y * y <= 25)
+					if ((x * x + y * y <= 25) && (x * x + y * y > 4))
 					{
 						warpPositions.push_back({ warpPylon->pos.x + x, warpPylon->pos.y + y });
 					}
@@ -267,14 +269,17 @@ namespace Aeolus
 
 			::sc2::Units nearUnits = ManagerMediator::getInstance().GetOwnUnitsInRange(aeolusbot,
 				warpPositions, 1.75);
+			nearUnits.insert(nearUnits.end(), allGasSprings.begin(), allGasSprings.end());
 
 			for (const auto& position : warpPositions)
 			{
 				bool blocked = false;
+				if (!utils::isPowered(position, allPylons, heightMap)) continue;
 				for (const auto& unit : nearUnits)
 				{
-					std::cout << "Near unit: " << ::sc2::UnitTypeToName(unit->unit_type)
-						<< " distance squared: " << ::sc2::DistanceSquared2D(position, unit->pos) << std::endl;
+					// std::cout << "Near unit: " << ::sc2::UnitTypeToName(unit->unit_type)
+					// 	<< " distance squared: " << ::sc2::DistanceSquared2D(position, unit->pos) << std::endl;
+					if (unit->is_flying) continue;
 					if (::sc2::DistanceSquared2D(position, unit->pos) < 2.25)
 					{
 						blocked = true;
@@ -283,14 +288,23 @@ namespace Aeolus
 				}
 				if (blocked)
 				{
-					std::cout << "warp in blocked at position: " << position.x << " " << position.y << std::endl;
+					// std::cout << "warp in blocked at position: " << position.x << " " << position.y << std::endl;
 					continue;
 				}
 
-				if (utils::canPlaceStructure(static_cast<int>(position.x + 0.5), static_cast<int>(position.y + 0.5), 2,
+				if (utils::canPlaceStructure(static_cast<int>(std::round(position.x - 1)), static_cast<int>(std::round(position.y - 1)), 2,
 					placementGrid))
 				{
 					std::cout << "found a good warp in spot at position: " << position.x << " " << position.y << std::endl;
+
+					/*
+					aeolusbot.Debug()->DebugSphereOut({ position.x, position.y,
+						heightMap.TerrainHeight({static_cast<int>(position.x), static_cast<int>(position.y)}) },
+						0.5f,
+						::sc2::Colors::Blue);
+					aeolusbot.Debug()->SendDebug();
+					*/
+
 					return position;
 				}
 			}
