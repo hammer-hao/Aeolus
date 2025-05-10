@@ -59,6 +59,12 @@ namespace Aeolus
 			return false; // not enough resources to afford this unit.
 		}
 
+		auto supplyCost = mediator.GetUnitSupplyCost(aeolusbot, m_to_train);
+		if (aeolusbot.Observation()->GetFoodCap() - aeolusbot.Observation()->GetFoodUsed() < supplyCost)
+		{
+			return false;
+		}
+
 		for (const auto& structure : canTrain)
 		{
 			{
