@@ -17,6 +17,7 @@ namespace Aeolus
 		TargetManager(AeolusBot& aeolusbot) : m_bot(aeolusbot) 
 		{
 			m_attackTarget = { 0.0f, 0.0f };
+			m_prismTarget = { 0.0f, 0.0f };
 			m_defenseTarget = {};
 			m_currentBaseTarget = 0;
 		}
@@ -38,6 +39,8 @@ namespace Aeolus
 		::sc2::Point2D m_attackTarget;
 
 		std::vector<::sc2::Point2D> m_defenseTarget;
+
+		::sc2::Point2D m_prismTarget;
 
 		::sc2::Point2D getAttackTarget();
 

@@ -67,6 +67,8 @@ namespace Aeolus
 		ManagerMediator& mediator = ManagerMediator::getInstance();
 
 		auto enemy_structures = mediator.GetAllEnemyStructures(m_bot);
+
+		// calculate attack target
 		::sc2::Units filtered_structures;
 		for (const auto& structure : enemy_structures)
 		{
@@ -93,6 +95,89 @@ namespace Aeolus
 			}
 			m_attackTarget = targets[m_currentBaseTarget];
 		}
+
+		// calculate prism target
+
+		auto start = std::chrono::high_resolution_clock::now();
+
+		::sc2::Units attackingUnits = mediator.GetUnitsFromRole(m_bot, constants::UnitRole::ATTACKING);
+		
+		::sc2::Units unitsInDanger;
+
+		::sc2::Units* unitsOfInterest = nullptr;
+
+		std::copy_if(attackingUnits.begin(), attackingUnits.end(), std::back_inserter(unitsInDanger),
+			[&](const ::sc2::Unit* unit)
+			{
+				return !mediator.IsGroundPositionSafe(m_bot, unit->pos);
+			});
+
+		if (unitsInDanger.empty())
+		{
+			if (!attackingUnits.empty())
+			{
+				unitsOfInterest = &attackingUnits;
+			}
+		}
+		else
+		{
+			unitsOfInterest = &unitsInDanger;
+		}
+
+		if (unitsOfInterest)
+		{
+			float totalWeight = 0.0f;
+			float weightX = 0.0f;
+			float weightY = 0.0f;
+
+			for (const auto* unit : *unitsOfInterest) {
+				float max_hp = unit->health_max + unit->shield_max;
+				float current_hp = unit->health + unit->shield;
+				float hp_ratio = current_hp / max_hp;
+
+				auto cost = mediator.GetUnitCost(m_bot, unit->unit_type);
+				float value = cost.first + cost.second;
+				float weight = value * (1.0f + (1.0f - hp_ratio) * 2.0f);  // k = 2.0
+
+				weightX += unit->pos.x * weight;
+				weightY += unit->pos.y * weight;
+				totalWeight += weight;
+			}
+
+			if (totalWeight > 0.0f)
+			{
+				// identify the closest attacking unit to this center, as we don't want to be skewed into
+				// the middle of the map
+				::sc2::Point2D weightedCenter = { weightX / totalWeight, weightY / totalWeight };
+				
+				const ::sc2::Unit* medianUnit = utils::GetClosestUnitTo(weightedCenter, attackingUnits);
+				
+				if (medianUnit) m_prismTarget = medianUnit->pos;
+				else m_prismTarget = weightedCenter;
+			}
+
+		}
+
+		// End timer
+		auto end = std::chrono::high_resolution_clock::now();
+
+		// Duration in microseconds (ms)
+		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+
+		std::cout << "Execution time: " << duration.count() << "us" << std::endl;
+
+#ifdef BUILD_WITH_RENDERER
+
+		if (m_prismTarget != ::sc2::Point2D(0.0f, 0.0f))
+		{
+			auto* debug = m_bot.Debug();
+			::sc2::HeightMap heightMap(m_bot.Observation()->GetGameInfo());
+			float z = heightMap.TerrainHeight({ static_cast<int>(m_prismTarget.x), static_cast<int>(m_prismTarget.y) });
+			debug->DebugSphereOut({ m_prismTarget.x, m_prismTarget.y, z }, 1.0f, ::sc2::Colors::Green);
+		}
+
+#endif // 
+
 	}
 
 	::sc2::Point2D TargetManager::getDefenseTarget(int baseLocation)
