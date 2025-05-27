@@ -28,5 +28,10 @@ namespace Aeolus {
 		float GetTurnRate(const ::sc2::UNIT_TYPEID& unit_type);
 
 		bool isAttackReady(AeolusBot& aeolusbot, const ::sc2::Unit* unit, const ::sc2::Unit* target);
+		
+		/**
+		* @brief Given a unit, return its "value" weight. Used mainly to calculate prism target.
+		*/
+		float getWeight(const ::sc2::Unit* unit, std::pair<int, int> cost);
 	}
 }

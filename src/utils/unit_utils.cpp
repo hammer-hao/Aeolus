@@ -207,5 +207,17 @@ namespace Aeolus
 
 			return time_needed >= (unit->weapon_cooldown / 22.4);
 		}
+
+		float getWeight(const ::sc2::Unit* unit, std::pair<int, int> cost)
+		{
+			float max_hp = unit->health_max + unit->shield_max;
+			float current_hp = unit->health + unit->shield;
+			float hp_ratio = current_hp / max_hp;
+
+			float value = cost.first + cost.second;
+			float weight = value * (1.0f + (1.0f - hp_ratio) * 2.0f);  // k = 2.0
+
+			return weight;
+		}
 	}
 }
