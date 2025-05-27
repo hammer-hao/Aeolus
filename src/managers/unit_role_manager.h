@@ -17,6 +17,10 @@ namespace Aeolus {
 			return name;
 		}
 
+		void OnUnitCreated(const ::sc2::Unit* unit);
+
+		void OnUnitDestroyed(const ::sc2::Unit* unit);
+
 		// member function to assign a role to a unit
 		void AssignRole(const ::sc2::Unit* unit, constants::UnitRole unitrole);
 

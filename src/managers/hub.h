@@ -103,12 +103,13 @@ namespace Aeolus
 		void OnUnitCreated(const ::sc2::Unit* unit)
 		{
 			m_placement_manager_ref->OnUnitCreated(unit);
+			m_unit_role_manager_ref->OnUnitCreated(unit);
 		}
 
 		void OnUnitDestroyed(const ::sc2::Unit* unit)
 		{
 			std::cout << "Unit destroyed: " << ::sc2::UnitTypeToName(unit->unit_type) << std::endl;
-			m_unit_role_manager_ref->ClearRole(unit);
+			m_unit_role_manager_ref->OnUnitDestroyed(unit);
 			m_resource_manager_ref->OnUnitDestroyed(unit);
 			m_building_manager_ref->OnUnitDestroyed(unit);
 			m_door_manager_ref->onUnitDestroyed(unit);

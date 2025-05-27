@@ -62,6 +62,7 @@ namespace Aeolus
 
 	void PlacementManager::update(int iteration)
 	{
+		/*
 		// generate debug outputs for placements
 		#ifdef BUILD_WITH_RENDERER
 
@@ -100,6 +101,7 @@ namespace Aeolus
 
 		debug->SendDebug();
 		#endif
+		*/
 	}
 
 	void PlacementManager::Initialize()

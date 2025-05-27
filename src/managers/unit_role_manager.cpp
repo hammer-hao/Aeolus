@@ -85,6 +85,28 @@ namespace Aeolus {
 		}
 	}
 
+	void UnitRoleManager::OnUnitCreated(const ::sc2::Unit* unit)
+	{
+		// Assign role based on unit type
+		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER
+			|| unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL
+			|| unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS
+			|| unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_VOIDRAY
+			|| unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ZEALOT)
+		{
+			AssignRole(unit, constants::UnitRole::ATTACKING);
+		}
+		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPPRISM)
+		{
+			AssignRole(unit, constants::UnitRole::PRISM);
+		}
+	}
+
+	void UnitRoleManager::OnUnitDestroyed(const ::sc2::Unit* unit)
+	{
+		ClearRole(unit);
+	}
+
 	::sc2::Units UnitRoleManager::GetUnitsFromRole(constants::UnitRole role) const
 	{
 		// std::cout << "UnitRoleManager: Finding units..." << std::endl;
