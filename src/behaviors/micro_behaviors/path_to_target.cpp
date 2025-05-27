@@ -17,7 +17,7 @@ namespace Aeolus
 
 		// std::cout << "Path to target: retrieving grid... " << std::endl;
 		GridType influenceGridType = (unit->is_flying) ?
-			GridType::AIR :
+			((unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPPRISM) ? GridType::BOTH : GridType::AIR) :
 			GridType::GROUND;
 
 		// std::cout << "Path to target: retrieved grid... " << std::endl;

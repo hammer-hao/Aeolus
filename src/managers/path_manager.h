@@ -38,6 +38,7 @@ namespace Aeolus
 		AeolusBot& m_bot;
 		Grid m_ground_grid;
 		Grid m_air_grid;
+		Grid m_prism_grid;
 		std::vector<std::pair<int, int>> m_danger_tiles_cache;
 		bool m_danger_tiles_is_cached;
 
@@ -46,6 +47,8 @@ namespace Aeolus
 		bool _isGroundPositionSafe(::sc2::Point2D position);
 
 		bool _isAirPositionSafe(::sc2::Point2D position);
+
+		bool _isPrismPositionSafe(::sc2::Point2D position);
 
 		void _reset_grids(); // reset all grids to cached versions
 
@@ -58,6 +61,8 @@ namespace Aeolus
 		::sc2::Point2D _getClosestSafeSpot(::sc2::Point2D position, const double& radius);
 
 		::sc2::Point2D _getClosestAirSafeSpot(::sc2::Point2D position, const double& radius);
+
+		::sc2::Point2D _getClosestPrismSafeSpot(::sc2::Point2D position, const double& radius);
 
 		std::vector<::sc2::Point2D> _getFloodFillArea(::sc2::Point2D starting_point, int max_distance);
 

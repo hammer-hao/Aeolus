@@ -492,6 +492,21 @@ namespace Aeolus
 			);
 		}
 
+		/**
+		* @brief given a 2D starting position and a radious. Find the point within that radius that has the lowest
+		* influence cost from enemy ground and air attacks combined.
+		*/
+		::sc2::Point2D FindClosestPrismSafeSpot(AeolusBot& aeolusbot, ::sc2::Point2D position, double radius)
+		{
+			return ManagerRequest<::sc2::Point2D, ::sc2::Point2D, double>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::FIND_CLOSEST_PRISM_SAFE_SPOT,
+				position,
+				radius
+			);
+		}
+
 		bool IsGroundPositionSafe(AeolusBot& aeolusbot, ::sc2::Point2D position)
 		{
 			return ManagerRequest<bool, ::sc2::Point2D>(
@@ -508,6 +523,20 @@ namespace Aeolus
 				aeolusbot,
 				constants::ManagerName::PATH_MANAGER,
 				constants::ManagerRequestType::IS_AIR_POSITION_SAFE,
+				position
+			);
+		}
+
+		/**
+		* @brief given a 2D position. Returns whether that position is safe from both air attacks and
+		* ground attacks.
+		*/
+		bool IsPrismPositionSafe(AeolusBot& aeolusbot, ::sc2::Point2D position)
+		{
+			return ManagerRequest<bool, ::sc2::Point2D>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::IS_PRISM_POSITION_SAFE,
 				position
 			);
 		}
@@ -727,6 +756,21 @@ namespace Aeolus
 			);
 		}
 
+		/**
+		* @brief Given a vector of starting points, returns a vector of own units with the ATTACKING role within
+		* range of any of the given starting points
+		*/
+		::sc2::Units GetOwnAttackingUnitsInRange(AeolusBot& aeolusbot, std::vector<::sc2::Point2D> starting_points, float distance)
+		{
+			return ManagerRequest<::sc2::Units, std::vector<::sc2::Point2D>, float>(
+				aeolusbot,
+				constants::ManagerName::DEFENSE_MANAGER,
+				constants::ManagerRequestType::GET_OWN_ATTACKING_IN_RANGE,
+				starting_points,
+				distance
+			);
+		}
+
 		::sc2::Units GetGroundThreatsNearBases(AeolusBot& aeolusbot)
 		{
 			return ManagerRequest<::sc2::Units, int>(
@@ -897,6 +941,20 @@ namespace Aeolus
 				aeolusbot,
 				constants::ManagerName::TARGET_MANAGER,
 				constants::ManagerRequestType::GET_ATTACK_TARGET,
+				0
+			);
+		}
+
+		/**
+		* @brief returns the warp prism target that covers what's most likely
+		* the center of the attacking army
+		*/
+		::sc2::Point2D GetPrismTarget(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Point2D, int>(
+				aeolusbot,
+				constants::ManagerName::TARGET_MANAGER,
+				constants::ManagerRequestType::GET_PRISM_TARGET,
 				0
 			);
 		}

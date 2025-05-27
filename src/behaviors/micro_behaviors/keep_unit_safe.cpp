@@ -14,14 +14,27 @@ namespace Aeolus
 	bool KeepUnitSafe::execute(AeolusBot& aeolusbot, const ::sc2::Unit* unit)
 	{
 		auto& manager = ManagerMediator::getInstance();
-		
-		if (!unit->is_flying && manager.IsGroundPositionSafe(aeolusbot, unit->pos)) return false;
 
-		if (unit->is_flying && manager.IsAirPositionSafe(aeolusbot, unit->pos)) return false;
+		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPPRISM)
+		{
+			if (unit->cargo_space_taken == 0 && manager.IsAirPositionSafe(aeolusbot, unit->pos)) return false;
+			else if (manager.IsGroundPositionSafe(aeolusbot, unit->pos) && manager.IsAirPositionSafe(aeolusbot, unit->pos)) return false;
+		}
+		else if (!unit->is_flying && manager.IsGroundPositionSafe(aeolusbot, unit->pos)) return false;
+		else if (unit->is_flying && manager.IsAirPositionSafe(aeolusbot, unit->pos)) return false;
 
-		::sc2::Point2D safe_spot = (!unit->is_flying) ?
-			manager.FindClosestGroundSafeSpot(aeolusbot, unit->pos, 7.0) :
-			manager.FindClosestAirSafeSpot(aeolusbot, unit->pos, 7.0);
+		::sc2::Point2D safe_spot = { 0.0, 0.0 };
+
+		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPPRISM)
+		{
+			safe_spot = manager.FindClosestPrismSafeSpot(aeolusbot, unit->pos, 7.0);
+		}
+		else
+		{
+			safe_spot = (!unit->is_flying) ?
+				manager.FindClosestGroundSafeSpot(aeolusbot, unit->pos, 7.0) :
+				manager.FindClosestAirSafeSpot(aeolusbot, unit->pos, 7.0);
+		}
 
 		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER &&
 			(unit->shield / unit->shield_max) <= 0.1f)

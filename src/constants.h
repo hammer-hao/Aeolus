@@ -50,6 +50,7 @@ namespace Aeolus {
 
 			// TargetManager
 			GET_ATTACK_TARGET,
+			GET_PRISM_TARGET,
 			GET_DEFENSE_TARGET,
 
 			// PathManager
@@ -59,8 +60,10 @@ namespace Aeolus {
 			GET_AIR_GRID,
 			FIND_CLOSEST_GROUND_SAFE_SPOT,
 			FIND_CLOSEST_AIR_SAFE_SPOT,
+			FIND_CLOSEST_PRISM_SAFE_SPOT,
 			IS_GROUND_POSITION_SAFE,
 			IS_AIR_POSITION_SAFE,
+			IS_PRISM_POSITION_SAFE,
 			GET_FLOOD_FILL_AREA,
 			GET_NEXT_PATH_POINT,
 
@@ -99,6 +102,7 @@ namespace Aeolus {
 			// DefenseManager
 			GET_UNITS_IN_RANGE,
 			GET_OWN_UNITS_IN_RANGE,
+			GET_OWN_ATTACKING_IN_RANGE,
 			GET_GROUND_THREATS_NEAR_BASES,
 			GET_ENEMY_UNITS_IN_RANGE_MAP,
 
@@ -122,7 +126,8 @@ namespace Aeolus {
 			GATHERING,
 			BUILDING,
 			ATTACKING,
-			DOOR
+			DOOR,
+			PRISM
 		};
 		std::string ManagerNameToString(ManagerName name);
 		std::string ManagerRequestTypeToString(ManagerRequestType requestType);
