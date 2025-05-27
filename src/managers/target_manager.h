@@ -44,6 +44,8 @@ namespace Aeolus
 
 		::sc2::Point2D getAttackTarget();
 
+		::sc2::Point2D getPrismTarget();
+
 		::sc2::Point2D getDefenseTarget(int baseLocation);
 
 		int m_currentBaseTarget;

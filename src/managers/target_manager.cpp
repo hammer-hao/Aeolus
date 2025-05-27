@@ -17,6 +17,10 @@ namespace Aeolus
 		{
 			return getAttackTarget();
 		}
+		case (constants::ManagerRequestType::GET_PRISM_TARGET):
+		{
+			return getPrismTarget();
+		}
 		case (constants::ManagerRequestType::GET_DEFENSE_TARGET):
 		{
 			auto params = std::any_cast<std::tuple<int>>(args);
@@ -98,65 +102,82 @@ namespace Aeolus
 
 		// calculate prism target
 
-		auto start = std::chrono::high_resolution_clock::now();
+		// auto start = std::chrono::high_resolution_clock::now();
 
 		::sc2::Units attackingUnits = mediator.GetUnitsFromRole(m_bot, constants::UnitRole::ATTACKING);
 		
-		::sc2::Units unitsInDanger;
+		int bestCount = 0;
+		const ::sc2::Unit* seed = nullptr;
 
-		::sc2::Units* unitsOfInterest = nullptr;
-
-		std::copy_if(attackingUnits.begin(), attackingUnits.end(), std::back_inserter(unitsInDanger),
-			[&](const ::sc2::Unit* unit)
-			{
-				return !mediator.IsGroundPositionSafe(m_bot, unit->pos);
-			});
-
-		if (unitsInDanger.empty())
+		for (const auto* unit : attackingUnits)
 		{
-			if (!attackingUnits.empty())
+			auto neighbours = mediator.GetOwnAttackingUnitsInRange(m_bot, { unit->pos }, 5.0f);
+			if (neighbours.size() > bestCount)
 			{
-				unitsOfInterest = &attackingUnits;
+				bestCount = neighbours.size();
+				seed = unit;
 			}
 		}
-		else
+
+		if (seed) m_prismTarget = seed->pos;
+
+		/*
+		// Use a DBSCAN-like algorithm to find main army cluster
+
+		// stalker radius is 0.625 -> two next to each other would be 1.3 apart.
+		// Use 2 to allow some spread
+		// monitor this value closely
+		constexpr float clusterRadius = 5.0f;
+		// Minimum number of neighbors to form a cluster, use 5 for now. i.e. 4 other attacking units within a 5.0 range
+		constexpr int minPts = 5;
+		
+		// initialize unvisited to track units to go to, and clusters to store the results
+		std::unordered_set<::sc2::Tag> visited;
+		std::vector<std::vector<const ::sc2::Unit*>> clusters;
+
+		for (const auto* unit : attackingUnits)
 		{
-			unitsOfInterest = &unitsInDanger;
-		}
+			if (visited.count(unit->tag)) continue; // already visited
 
-		if (unitsOfInterest)
-		{
-			float totalWeight = 0.0f;
-			float weightX = 0.0f;
-			float weightY = 0.0f;
+			::sc2::Units neighbours = mediator.GetOwnAttackingUnitsInRange(m_bot, { unit->pos }, clusterRadius);
 
-			for (const auto* unit : *unitsOfInterest) {
-				float max_hp = unit->health_max + unit->shield_max;
-				float current_hp = unit->health + unit->shield;
-				float hp_ratio = current_hp / max_hp;
-
-				auto cost = mediator.GetUnitCost(m_bot, unit->unit_type);
-				float value = cost.first + cost.second;
-				float weight = value * (1.0f + (1.0f - hp_ratio) * 2.0f);  // k = 2.0
-
-				weightX += unit->pos.x * weight;
-				weightY += unit->pos.y * weight;
-				totalWeight += weight;
-			}
-
-			if (totalWeight > 0.0f)
+			if (neighbours.size() < minPts)
 			{
-				// identify the closest attacking unit to this center, as we don't want to be skewed into
-				// the middle of the map
-				::sc2::Point2D weightedCenter = { weightX / totalWeight, weightY / totalWeight };
-				
-				const ::sc2::Unit* medianUnit = utils::GetClosestUnitTo(weightedCenter, attackingUnits);
-				
-				if (medianUnit) m_prismTarget = medianUnit->pos;
-				else m_prismTarget = weightedCenter;
+				visited.insert(unit->tag); // not enough neighbors, ignore this unit
+				continue;
 			}
 
+			std::vector<const ::sc2::Unit*> cluster;
+			std::queue<const ::sc2::Unit*> expandQueue;
+			expandQueue.push(unit);
+			visited.insert(unit->tag);
+
+			while (!expandQueue.empty())
+			{
+				const ::sc2::Unit* current = expandQueue.front(); expandQueue.pop();
+				cluster.push_back(current);
+
+				::sc2::Units currNeighbours = mediator.GetOwnAttackingUnitsInRange(m_bot, { current->pos }, clusterRadius);
+				if (currNeighbours.size() > minPts)
+				{
+					for (const auto* neighbour : currNeighbours)
+					{
+						if (!visited.count(neighbour->tag))
+						{
+							visited.insert(neighbour->tag);
+							expandQueue.push(neighbour);
+						}
+					}
+				}
+			}
+
+			clusters.push_back(std::move(cluster));
 		}
+
+		// std::cout << "found " << clusters.size() << " army clusters." << '\n';
+		*/
+
+		/*
 
 		// End timer
 		auto end = std::chrono::high_resolution_clock::now();
@@ -166,6 +187,8 @@ namespace Aeolus
 
 		std::cout << "Execution time: " << duration.count() << "us" << std::endl;
 
+		*/
+
 #ifdef BUILD_WITH_RENDERER
 
 		if (m_prismTarget != ::sc2::Point2D(0.0f, 0.0f))
@@ -174,6 +197,8 @@ namespace Aeolus
 			::sc2::HeightMap heightMap(m_bot.Observation()->GetGameInfo());
 			float z = heightMap.TerrainHeight({ static_cast<int>(m_prismTarget.x), static_cast<int>(m_prismTarget.y) });
 			debug->DebugSphereOut({ m_prismTarget.x, m_prismTarget.y, z }, 1.0f, ::sc2::Colors::Green);
+
+			debug->SendDebug();
 		}
 
 #endif // 
@@ -207,5 +232,10 @@ namespace Aeolus
 	::sc2::Point2D TargetManager::getAttackTarget()
 	{
 		return m_attackTarget;
+	}
+
+	::sc2::Point2D TargetManager::getPrismTarget()
+	{
+		return m_prismTarget;
 	}
 }
