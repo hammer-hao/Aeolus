@@ -21,6 +21,7 @@ namespace Aeolus
 		DefenseManager(AeolusBot& aeolusbot) : m_bot(aeolusbot)
 		{
 			m_ground_threat_range = 15;
+			m_searchResults.reserve(32);
 		}
 
 		std::string_view GetName() const override {
@@ -51,5 +52,8 @@ namespace Aeolus
 		::sc2::Units m_own_town_halls;
 		std::unique_ptr<UnitsKDTree> m_all_own_units_tree;
 		std::unique_ptr<UnitsKDTree> m_all_enemy_units_tree;
+		std::unique_ptr<UnitsKDTree> m_all_own_attacking_tree;
+
+		std::vector<nanoflann::ResultItem<unsigned int, float>>  m_searchResults;
 	};
 }

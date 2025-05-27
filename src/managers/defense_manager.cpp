@@ -23,7 +23,7 @@ namespace Aeolus
 		case (constants::ManagerRequestType::GET_UNITS_IN_RANGE):
 		{
 			auto params = std::any_cast<std::tuple<std::vector<::sc2::Point2D>, float>>(args);
-			std::vector<::sc2::Point2D> starting_points = std::get<0>(params);
+			const std::vector<::sc2::Point2D>& starting_points = std::get<0>(params);
 			float distance = std::get<1>(params);
 
 			// Convert that std::vector<::sc2::Point2D> into std::vector<StartPointType>
@@ -41,18 +41,29 @@ namespace Aeolus
 		case (constants::ManagerRequestType::GET_OWN_UNITS_IN_RANGE):
 		{
 			auto params = std::any_cast<std::tuple<std::vector<::sc2::Point2D>, float>>(args);
-			std::vector<::sc2::Point2D> starting_points = std::get<0>(params);
+			const std::vector<::sc2::Point2D>& starting_points = std::get<0>(params);
 			float distance = std::get<1>(params);
 			// Convert that std::vector<::sc2::Point2D> into std::vector<StartPointType>
 			std::vector<StartPointType> st_points;
 			st_points.reserve(starting_points.size());
 			for (auto& pt : starting_points)
 			{
-				// Since StartPointType = std::variant<const sc2::Unit*, sc2::Point2D>
-				// we can push_back the Point2D directly into that variant
 				st_points.push_back(pt);
 			}
 			return UnitsInRange(st_points, distance, *m_all_own_units_tree);
+		}
+		case (constants::ManagerRequestType::GET_OWN_ATTACKING_IN_RANGE):
+		{
+			auto params = std::any_cast<std::tuple<std::vector<::sc2::Point2D>, float>>(args);
+			const std::vector<::sc2::Point2D> starting_points = std::get<0>(params);
+			float distance = std::get<1>(params);
+			std::vector<StartPointType> st_points;
+			st_points.reserve(starting_points.size());
+			for (auto& pt : starting_points)
+			{
+				st_points.push_back(pt);
+			}
+			return UnitsInRange(st_points, distance, *m_all_own_attacking_tree);
 		}
 		case (constants::ManagerRequestType::GET_ENEMY_UNITS_IN_RANGE_MAP):
 		{
@@ -84,8 +95,11 @@ namespace Aeolus
 	{
 		::sc2::Units all_enemy_units = ManagerMediator::getInstance().GetAllEnemyUnits(m_bot);
 		::sc2::Units all_own_units = ManagerMediator::getInstance().GetAllOwnUnits(m_bot);
+		::sc2::Units all_own_attacking_units = ManagerMediator::getInstance().GetUnitsFromRole(m_bot, constants::UnitRole::ATTACKING);
+
 		m_all_enemy_units_tree = UnitsKDTree::create(all_enemy_units);
 		m_all_own_units_tree = UnitsKDTree::create(all_own_units);
+		m_all_own_attacking_tree = UnitsKDTree::create(all_own_attacking_units);
 	}
 
 	::sc2::Units DefenseManager::UnitsInRange(
@@ -95,45 +109,40 @@ namespace Aeolus
 	{
 		// Result list to hold units in range for each start point
 		::sc2::Units units_in_range;
-		std::unordered_set<const ::sc2::Unit*> unique_units;
+		units_in_range.reserve(64);
+		
+		float squareDistance = distance * distance;
 		nanoflann::SearchParameters params;
 
-		if (!starting_points.empty())
-		{
-			std::vector<::sc2::Point2D> positions;
-			positions.reserve(starting_points.size());
-			for (const auto& point : starting_points)
+		if (starting_points.empty() || !tree.tree) return units_in_range;
+
+		auto& seen = tree.seen_flags;
+		auto& scratch = tree.seen_indices;
+		scratch.clear();
+
+		for (auto const& sp : starting_points) {
+			::sc2::Point2D position = std::holds_alternative<const ::sc2::Unit*>(sp)
+				? std::get<const ::sc2::Unit*>(sp)->pos
+				: std::get<::sc2::Point2D>(sp);
+
+			// perform range search
+			float query_point[2] = { position.x, position.y };
+			m_searchResults.clear();
+			tree.tree->radiusSearch(query_point, squareDistance, m_searchResults, params);
+
+			for (const auto& result : m_searchResults)
 			{
-				if (std::holds_alternative<const ::sc2::Unit*>(point))
+				size_t idx = result.first;
+				if (!seen[idx])
 				{
-					const ::sc2::Unit* unit = std::get<const ::sc2::Unit*>(point);
-					positions.emplace_back(unit->pos.x, unit->pos.y);
-				}
-				else
-				{
-					positions.emplace_back(std::get<::sc2::Point2D>(point));
+					seen[idx] = 1;
+					scratch.push_back(idx);
+					units_in_range.push_back(tree.unit_map[idx]);
 				}
 			}
-
-			// Query the KDTree for units within range
-			for (const auto& position : positions)
-			{
-				std::vector<size_t> indices; // to hold query results;
-
-				// perform range search
-				float query_point[2] = { position.x, position.y };
-				std::vector<nanoflann::ResultItem<unsigned int, float>> search_results;
-				if (tree.tree) tree.tree->radiusSearch(query_point, distance * distance, search_results, params);
-				// else std::cout << "No existing tree!" << std::endl;
-
-				for (const auto& result : search_results)
-				{
-					const ::sc2::Unit* unit = tree.unit_map[result.first];
-					unique_units.insert(unit);
-				}
-			}
-			if (unique_units.size() > 0) units_in_range.assign(unique_units.begin(), unique_units.end());
 		}
+		
+		for (size_t idx : scratch) seen[idx] = 0;
 		return units_in_range;
 	}
 

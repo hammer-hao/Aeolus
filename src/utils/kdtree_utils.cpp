@@ -24,6 +24,9 @@ namespace Aeolus
 
 		units_kd_tree->tree = std::make_unique<KDTree>(2, units_kd_tree->cloud, nanoflann::KDTreeSingleIndexAdaptorParams(10));
 		units_kd_tree->tree->buildIndex();
+
+		units_kd_tree->seen_flags.assign(units_kd_tree->unit_map.size(), 0);
+		units_kd_tree->seen_indices.reserve(64);
 		return units_kd_tree;
 	}
 }

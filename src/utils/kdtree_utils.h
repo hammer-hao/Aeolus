@@ -30,8 +30,10 @@ namespace Aeolus
 		// Keep a persistent copy of the data so it doesn't go out of scope:
 		UnitPointCloud cloud;
 
-		std::unique_ptr<KDTree> tree;
+		std::unique_ptr<KDTree>			tree;
 		std::vector<const ::sc2::Unit*> unit_map;
+		std::vector<char>			    seen_flags;
+		std::vector<size_t>             seen_indices;
 
 		static std::unique_ptr<UnitsKDTree> create(const std::vector<const sc2::Unit*>& units);
 	};
