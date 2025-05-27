@@ -86,6 +86,9 @@ namespace Aeolus
         // micro units
         void Micro(::sc2::Units units, ::sc2::Point2D target);
 
+        // micro prism
+        void PrismMicro(const ::sc2::Units warpPrisms, ::sc2::Point2D target);
+
         int m_current_base_target;
 
         // calculate the next target to attack

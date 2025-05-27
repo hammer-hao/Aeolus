@@ -34,6 +34,8 @@
 #include "behaviors/micro_behaviors/keep_unit_safe.h"
 #include "behaviors/micro_behaviors/a_move.h"
 #include "behaviors/micro_behaviors/stutter_unit_back.h"
+#include "behaviors/micro_behaviors/unload.h"
+#include "behaviors/micro_behaviors/pick_unit_up.h"
 
 #include "utils/unit_utils.h"
 #include "utils/position_utils.h"
@@ -185,6 +187,8 @@ namespace Aeolus
     // Called every game step
     void AeolusBot::OnStep() {
 
+        auto& mediator = ManagerMediator::getInstance();
+
         // std::cout << "Aeolus: Taking a step... " << std::endl;
 
         // Example: Get game loop information
@@ -195,7 +199,7 @@ namespace Aeolus
 
         #ifdef BUILD_WITH_RENDERER
         
-        ::sc2::ImageData pathing_grid = ManagerMediator::getInstance().GetDefaultGridData(*this);
+        ::sc2::ImageData pathing_grid = mediator.GetDefaultGridData(*this);
 
         utils::DrawPathingGrid(pathing_grid);
 
@@ -209,8 +213,11 @@ namespace Aeolus
         Macro();
 
         // Micro our units
-        ::sc2::Units forces = ManagerMediator::getInstance().GetUnitsFromRole(*this, constants::UnitRole::ATTACKING);
+        ::sc2::Units forces = mediator.GetUnitsFromRole(*this, constants::UnitRole::ATTACKING);
         if (!forces.empty()) Micro(forces, CalculateTarget());
+        ::sc2::Units prisms = mediator.GetUnitsFromRole(*this, constants::UnitRole::PRISM);
+        auto prismTarget = mediator.GetPrismTarget(*this);
+        if (prismTarget != ::sc2::Point2D(0.0f, 0.0f)) PrismMicro(prisms, prismTarget);
 
         #ifndef BUILD_FOR_LADDER
         if (Observation()->GetGameLoop() % 100 == 0)
@@ -234,15 +241,6 @@ namespace Aeolus
             << "(" << unit_->tag << ") was created" << std::endl;
 
         manager_hub_.OnUnitCreated(unit_);
-        // Assign role based on unit type
-        if (unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER
-            || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL
-            || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS
-            || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_VOIDRAY
-            || unit_->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ZEALOT)
-        {
-            ManagerMediator::getInstance().AssignRole(*this, unit_, constants::UnitRole::ATTACKING);
-        }
     }
 
     // Handle idle units
@@ -404,6 +402,47 @@ namespace Aeolus
             }
 
             // Now register the combat behavior
+            RegisterBehavior(std::move(combat_behavior));
+        }
+    }
+
+    void AeolusBot::PrismMicro(::sc2::Units prisms, ::sc2::Point2D target)
+    {
+        for (const auto* prism : prisms)
+        {
+            auto combat_behavior = std::make_unique<MicroBehavior>(prism);
+
+            // 1st priority: keep prism safe
+            combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+
+            // 2nd priority: unload all units inside
+            combat_behavior->AddBehavior(std::make_unique<Unload>());
+
+            // 3rd/main priority: prick up endangered units
+            ::sc2::Units inPickupRange = ManagerMediator::getInstance().GetOwnAttackingUnitsInRange(*this, { prism->pos }, 5.0f);
+            if (!inPickupRange.empty())
+            {
+                for (const auto* unit : inPickupRange)
+                {
+                    if ((unit->shield / unit->shield_max) <= 0.3f && !ManagerMediator::getInstance().IsGroundPositionSafe(*this, unit->pos))
+                    {
+                        combat_behavior->AddBehavior(std::make_unique<PickUnitUp>(unit));
+                        break;
+                    }
+                }
+            }
+
+            bool updatePath = true;
+            if (prism->orders.size() == 1)
+            {
+                if (prism->orders.front().ability_id == ::sc2::ABILITY_ID::GENERAL_MOVE
+                    && ::sc2::DistanceSquared2D(prism->orders.front().target_pos, target) < 4.0f)
+                    updatePath = false;
+            }
+
+            // nothing else to do: path the prism to our optimal position
+            if (updatePath) combat_behavior->AddBehavior(std::make_unique<PathToTarget>(target));
+
             RegisterBehavior(std::move(combat_behavior));
         }
     }

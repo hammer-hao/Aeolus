@@ -102,6 +102,8 @@ namespace Aeolus
 
 		const ::sc2::Unit* GetClosestUnitTo(::sc2::Point2D x, ::sc2::Units y)
 		{
+			if (y.empty()) return nullptr;
+
 			float min_distance{ std::numeric_limits<float>::max() };
 			const ::sc2::Unit* closest_unit;
 
