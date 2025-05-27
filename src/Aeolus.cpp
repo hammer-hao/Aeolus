@@ -424,7 +424,7 @@ namespace Aeolus
             {
                 for (const auto* unit : inPickupRange)
                 {
-                    if ((unit->shield / unit->shield_max) <= 0.3f && !ManagerMediator::getInstance().IsGroundPositionSafe(*this, unit->pos))
+                    if ((unit->shield / unit->shield_max) <= 0.01f && !ManagerMediator::getInstance().IsGroundPositionSafe(*this, unit->pos))
                     {
                         combat_behavior->AddBehavior(std::make_unique<PickUnitUp>(unit));
                         break;
