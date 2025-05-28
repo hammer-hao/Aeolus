@@ -6,6 +6,8 @@
 #include "../Aeolus.h"
 #include "../utils/unit_utils.h"
 #include <stdexcept>
+#include <algorithm>
+#include "../behaviors/macro_behaviors/build_structure.h"
 
 
 namespace Aeolus
@@ -62,6 +64,18 @@ namespace Aeolus
 		auto supplyCost = mediator.GetUnitSupplyCost(aeolusbot, m_to_train);
 		if (aeolusbot.Observation()->GetFoodCap() - aeolusbot.Observation()->GetFoodUsed() < supplyCost)
 		{
+			std::cout << "Not enough spare supply to train " << ::sc2::UnitTypeToName(m_to_train) << ", building a pylon first... " << std::endl;
+			if (mediator.GetNumberPending(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_PYLON) == 0)
+			{
+				::sc2::Units allStructures = mediator.GetAllOwnStructures(aeolusbot);
+				if (std::any_of(allStructures.begin(), allStructures.end(), [](const ::sc2::Unit* structure)
+					{
+						return structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_PYLON && structure->build_progress < 1.0f;
+					}))
+				{
+					std::make_unique<BuildStructure>(::sc2::UNIT_TYPEID::PROTOSS_PYLON, 0, false).get()->execute(aeolusbot);
+				}
+			}
 			return false;
 		}
 
