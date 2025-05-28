@@ -8,7 +8,7 @@ namespace Aeolus
 		if (unit->cargo_space_taken <= 0) return false;
 
 		std::cout << "issueing unload all command..." << std::endl;
-		aeolusbot.Actions()->UnitCommand(unit, ::sc2::ABILITY_ID::UNLOADALLAT, unit->pos);
+		aeolusbot.Actions()->UnitCommand(unit, ::sc2::ABILITY_ID::UNLOADALLAT, unit);
 		return true;
 	}
 }
