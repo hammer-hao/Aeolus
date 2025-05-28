@@ -75,7 +75,20 @@ namespace Aeolus
 
 	bool UpgradeBuildOrderStep::isDone(AeolusBot& aeolusbot)
 	{
-		return true;
+		auto& mediator = ManagerMediator::getInstance();
+		// get the building type that can research the upgrade
+		::sc2::UNIT_TYPEID researched_from = constants::isResearchedFrom(m_to_research);
+
+		::sc2::ABILITY_ID creationAbility = mediator.GetUpgradeCreationAbility(aeolusbot, m_to_research);
+		for (const auto& structure : mediator.GetAllOwnStructures(aeolusbot))
+		{
+			for (const auto& order : structure->orders)
+			{
+				if (order.ability_id == creationAbility) return true;
+			}
+		}
+		std::cout << ::sc2::UpgradeIDToName(m_to_research) << " is NOT done" << '\n';
+		return false;
 	}
 
 	bool UpgradeBuildOrderStep::started()
