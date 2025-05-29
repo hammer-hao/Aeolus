@@ -6,6 +6,7 @@
 #include "../../Aeolus.h"
 #include "../../constants.h"
 #include "../../utils/unit_utils.h"
+#include "tech_up.h"
 #include <map>
 #include <optional>
 #include <sc2api/sc2_unit.h>
@@ -47,7 +48,9 @@ namespace Aeolus
 			auto trained_from = utils::_isTrainedFrom(unit_type);
 			if (trained_from.has_value())
 			{
-				if (_techUp(aeolusbot, unit_type)) return true;
+				TechUp techUp(unit_type);
+				bool techingUp = techUp.execute(aeolusbot);
+				if (techingUp) return true;
 
 				if (minerals > m_add_production_at_bank.first
 					&& vespene > m_add_production_at_bank.second)
