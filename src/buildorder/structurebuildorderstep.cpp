@@ -106,6 +106,15 @@ namespace Aeolus
 							return true;
 						}
 					}
+
+					if (::sc2::DistanceSquared2D(item.first->pos, item.second.target) <= 9.0f 
+						&& !mediator.IsGroundPositionSafe(aeolusbot, item.first->pos))
+					{
+						// the worker in charge is in serious trouble, let's just assume it failed to build
+						// and move on.
+						// of course, the construction may still take place.
+						return true;
+					}
 				}
 			}
 		}
