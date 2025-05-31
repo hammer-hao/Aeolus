@@ -60,7 +60,7 @@ namespace Aeolus
         // based on the strategy, select the army comp
         std::map<::sc2::UNIT_TYPEID, float> m_armyComp;
 
-        std::map<::sc2::UNIT_TYPEID, float> AeolusBot::_chooseArmyComp();
+        std::map<::sc2::UNIT_TYPEID, float> _chooseArmyComp();
 
         // based on the strategy, select the move out supply
         int _getMoveOutTiming();
