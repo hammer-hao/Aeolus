@@ -99,6 +99,15 @@ source_group("Header Files\\Managers" FILES
     managers/building_manager.h
     managers/budget_manager.h)
 
+source_group("Source Files\\states" FILES
+    states/forward_pressure.cpp
+    states/consolidate.cpp)
+
+source_group("Header Files\\states" FILES
+    states/bot_state.h
+    states/consolidate.h
+    states/forward_pressure.h)
+
 source_group("Source Files\\Pathing" FILES
     pathing/grid.cpp
     pathing/map_data.cpp)
@@ -183,6 +192,8 @@ set(bot_sources
     managers/door_manager.cpp
     managers/target_manager.cpp
     managers/building_manager.cpp
+    states/consolidate.cpp
+    states/forward_pressure.cpp
     pathing/grid.cpp
     pathing/map_data.cpp
     utils/feature_layer_utils.cpp
@@ -242,6 +253,9 @@ set(bot_headers
     managers/door_manager.h
     managers/target_manager.h
     managers/building_manager.h
+    states/bot_state.h
+    states/consolidate.h
+    states/forward_pressure.h
     pathing/grid.h
     pathing/map_data.h
     pathing/weight_costs.h

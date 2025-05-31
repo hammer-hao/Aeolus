@@ -4,6 +4,7 @@
 #include "Bot.h"  // Include the base Bot class
 #include "managers/hub.h"
 #include "behavior_executor.h"
+#include "states/bot_state.h"
 #include <string>
 
 #include "buildorder/buildorder.h"
@@ -23,10 +24,19 @@ namespace Aeolus
 
         void RegisterBehavior(std::unique_ptr<Behavior> behavior);
 
+        bool isBuildFinished() const;
+
         void setOpponentID(const std::string& opponent_id)
         {
             m_opponent_id = opponent_id;
         }
+
+        std::map<::sc2::UNIT_TYPEID, float> getArmyComp();
+
+        // change our current state to a new one
+        void ChangeState(std::unique_ptr<BotState> new_state);
+
+        int getMoveOutSupply();
 
     private:
         std::string m_opponent_id;
@@ -37,6 +47,8 @@ namespace Aeolus
 
         BuildOrderEnum m_build_order_enum;
 
+        std::unique_ptr<BotState> m_currentState;
+
         // Executor for the bot's registered behaviors
         // Aeolus::BehaviorExecutor behavior_executor{};
 
@@ -46,7 +58,9 @@ namespace Aeolus
         BuildOrderEnum _chooseBuildOrder();
 
         // based on the strategy, select the army comp
-        std::map<::sc2::UNIT_TYPEID, float> _chooseArmyComp();
+        std::map<::sc2::UNIT_TYPEID, float> m_armyComp;
+
+        std::map<::sc2::UNIT_TYPEID, float> AeolusBot::_chooseArmyComp();
 
         // based on the strategy, select the move out supply
         int _getMoveOutTiming();
@@ -78,21 +92,10 @@ namespace Aeolus
         void ManageArmy();       // Custom army management logic
         void ManageProduction(); // Custom production logic
         void Macro();
+        void Micro();
         void PrepareUnits();
 
         // implement the build runner
         void ExecuteBuildOrder();
-
-        // micro units
-        void Micro(::sc2::Units units, ::sc2::Point2D target);
-
-        // micro prism
-        void PrismMicro(const ::sc2::Units warpPrisms, ::sc2::Point2D target);
-
-        int m_current_base_target;
-
-        // calculate the next target to attack
-        ::sc2::Point2D CalculateTarget();
     };
-
 }

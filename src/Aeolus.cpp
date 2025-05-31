@@ -37,6 +37,10 @@
 #include "behaviors/micro_behaviors/unload.h"
 #include "behaviors/micro_behaviors/pick_unit_up.h"
 
+#include "states/bot_state.h"
+#include "states/forward_pressure.h"
+#include "states/consolidate.h"
+
 #include "utils/unit_utils.h"
 #include "utils/position_utils.h"
 #include "utils/file_io_utils.h"
@@ -56,12 +60,13 @@ namespace Aeolus
 {
 
     // Constructor
-    AeolusBot::AeolusBot(std::string opponent_id) : m_opponent_id(opponent_id), 
-        m_build_order(BuildOrderFactory::makeBuildOrder(*this, _chooseBuildOrder())), m_won_game(true)
+    AeolusBot::AeolusBot(std::string opponent_id) : m_opponent_id(opponent_id), m_won_game(true)
     {
-        std::cout << "Aeolus bot initialized!" << std::endl;
-        m_current_base_target = 0;
+        m_build_order_enum = _chooseBuildOrder();
+        m_build_order = BuildOrderFactory::makeBuildOrder(*this, m_build_order_enum);
         m_move_out_supply = _getMoveOutTiming();
+
+        std::cout << "Aeolus bot initialized!" << std::endl;
     }
 
     // Destructor (optional)
@@ -84,11 +89,16 @@ namespace Aeolus
         std::cout << "Opponent id: " << opponent << std::endl;
         BuildOrderEnum result = utils::chooseBestStrateGyFromHistory(utils::getMatchesForOpponent(opponent));
         m_build_order_enum = result;
+        std::cout << "choosing army comp..." << std::endl;
+        m_armyComp = _chooseArmyComp();
+        std::cout << "chosen army comp!" << std::endl;
         return result;
     }
 
     std::map<::sc2::UNIT_TYPEID, float> AeolusBot::_chooseArmyComp()
     {
+        std::cout << "Build order: " << buildOrderToString(m_build_order_enum) << std::endl;
+
         switch (m_build_order_enum)
         {
         case (BuildOrderEnum::MACRO_STALKERS):
@@ -121,11 +131,23 @@ namespace Aeolus
         }
         case (BuildOrderEnum::MASS_ROBO):
         {
+            std::cout << "[_chooseArmyComp] in MASS_ROBO branch" << std::endl;
+            auto ret = std::map<::sc2::UNIT_TYPEID, float>{
+              {::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS, 0.2f},
+              {::sc2::UNIT_TYPEID::PROTOSS_STALKER, 0.7f},
+              {::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL, 0.1f},
+            };
+            std::cout << "[_chooseArmyComp] about to return, map size = "
+                << ret.size() << std::endl;
+            return ret;
+        }
+        default:
+        {
+            std::cout << "Unknown build order: " << buildOrderToString(m_build_order_enum) << std::endl;
             return std::map < ::sc2::UNIT_TYPEID, float>
             {
-                { ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS, 0.2f },
-                { ::sc2::UNIT_TYPEID::PROTOSS_STALKER, 0.7f },
-                { ::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL, 0.1f },
+                {::sc2::UNIT_TYPEID::PROTOSS_STALKER, 0.7f},
+                { ::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL, 0.3f }
             };
         }
         }
@@ -178,6 +200,9 @@ namespace Aeolus
         buildOrderTag << "Tag:";
         buildOrderTag << buildOrderToString(m_build_order_enum);
         Actions()->SendChat(buildOrderTag.str());
+
+        // set state initially to consolidate
+        ChangeState(MakeState<ConsolidateState>());
     }
 
     // Game end logic
@@ -211,13 +236,7 @@ namespace Aeolus
         // std::cout << "DEBUG: About to call Macro()" << std::endl; // Add this
 
         Macro();
-
-        // Micro our units
-        ::sc2::Units forces = mediator.GetUnitsFromRole(*this, constants::UnitRole::ATTACKING);
-        if (!forces.empty()) Micro(forces, CalculateTarget());
-        ::sc2::Units prisms = mediator.GetUnitsFromRole(*this, constants::UnitRole::PRISM);
-        auto prismTarget = mediator.GetPrismTarget(*this);
-        if (prismTarget != ::sc2::Point2D(0.0f, 0.0f)) PrismMicro(prisms, prismTarget);
+        Micro();
 
         #ifndef BUILD_FOR_LADDER
         if (Observation()->GetGameLoop() % 100 == 0)
@@ -229,10 +248,9 @@ namespace Aeolus
         }
         #endif
         // std::cout << "Aeolus: Taken a step!" << std::endl;
+        // 
         // Call AfterStep at the end of each step
         AfterStep();
-
-        // std::cout << "Aeolus: Executed all behaviors!" << std::endl;
     }
 
     // Handle unit creation
@@ -289,206 +307,13 @@ namespace Aeolus
         // std::cout << "Aeolus: Macroing..." << std::endl;
         // Implement custom logic for gathering resources, expanding, etc.
         ExecuteBuildOrder();
-        RegisterBehavior(std::make_unique<Mining>());
-        RegisterBehavior(std::make_unique<BuildWorkers>(
-            std::min(ManagerMediator::getInstance().GetOwnReadyTownHalls(*this).size() * 22, static_cast<size_t>(86))
-        ));
-        RegisterBehavior(std::make_unique<ChronoController>());
-        RegisterBehavior(std::make_unique<RepowerStructures>());
 
-        if (!m_build_order->isFinished())
-        {
-            if (Observation()->GetFoodCap() <= Observation()->GetFoodUsed())
-                RegisterBehavior(std::make_unique<AutoSupply>());
-        }
-        else {
-            RegisterBehavior(std::make_unique<BuildGeysers>());
-            RegisterBehavior(std::make_unique<Expand>());
-            RegisterBehavior(std::make_unique<AutoSupply>());
-            RegisterBehavior(std::make_unique<ProductionController>(_chooseArmyComp()));
-            RegisterBehavior(std::make_unique<SpawnController>(_chooseArmyComp()));
-            RegisterBehavior(std::make_unique<UpgradesController>(
-                std::vector<::sc2::UPGRADE_ID>{
-                ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL1,
-                    ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL2,
-                    ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL1,
-                    ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL3,
-                    ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL2,
-                    ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL3,
-                    ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL1,
-                    ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL2,
-                    ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL3
-                }
-            ));
-        }
-
-        if (Observation()->GetGameLoop() % 50 == 0)
-        std::cout << "current gameloop: " << Observation()->GetGameLoop() << std::endl;
+        m_currentState->macro(*this);
     }
 
-    void AeolusBot::Micro(::sc2::Units units, ::sc2::Point2D target)
+    void AeolusBot::Micro()
     {
-        std::vector<::sc2::Point2D> starting_points;
-        float search_radius = 15.0f;
-        for (const auto& unit : units) starting_points.push_back(unit->pos);
-        auto enemies_in_range = ManagerMediator::getInstance().GetEnemyUnitsInRangeMap(*this, 
-            starting_points, search_radius);
-
-        for (int i = 0; i < units.size(); ++i)
-        {
-            const ::sc2::Unit* unit = units[i];
-
-            // 1) Create the MicroBehavior as a unique_ptr
-            auto combat_behavior = std::make_unique<MicroBehavior>(unit);
-
-            // 2) Filter out close enemies
-            ::sc2::Units close_units;
-            for (const auto& enemy : enemies_in_range[i])
-                if (enemy->display_type != ::sc2::Unit::DisplayType::Snapshot
-                    && constants::IGNORED_UNITS.find(enemy->unit_type) == constants::IGNORED_UNITS.end())
-                    close_units.push_back(enemy);
-
-            ::sc2::Units close_non_structures;
-            for (const auto& enemy : close_units) if (constants::ALL_STRUCTURES.find(enemy->unit_type) == constants::ALL_STRUCTURES.end())
-                close_non_structures.push_back(enemy);
-
-            // Add the path behavior if no close enemy is spotted
-            if (!close_units.empty())
-            {
-                auto in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(*this, unit, close_non_structures);
-                if (!in_attack_range.empty())
-                {
-                    combat_behavior->AddBehavior(
-                        std::make_unique<ShootTargetInRange>(
-                            in_attack_range
-                        )
-                    );
-                }
-                else
-                {
-                    auto all_in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(*this, unit, close_units);
-                    if (!all_in_attack_range.empty())
-                    {
-                        combat_behavior->AddBehavior(
-                            std::make_unique<ShootTargetInRange>(
-                                all_in_attack_range
-                            )
-                        );
-                    }
-                }
-
-                auto enemy_target = utils::PickAttackTarget(close_units);
-
-                if ((unit->shield / unit->shield_max) < 0.1)
-                {
-                    combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-                }
-                else
-                {
-                    combat_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
-                }
-            }
-            else
-            {
-                combat_behavior->AddBehavior(
-                    std::make_unique<PathToTarget>(
-                        target
-                    ));
-
-                combat_behavior->AddBehavior(
-                    std::make_unique<AMove>(
-                        target
-                    ));
-            }
-
-            // Now register the combat behavior
-            RegisterBehavior(std::move(combat_behavior));
-        }
-    }
-
-    void AeolusBot::PrismMicro(::sc2::Units prisms, ::sc2::Point2D target)
-    {
-        for (const auto* prism : prisms)
-        {
-            auto combat_behavior = std::make_unique<MicroBehavior>(prism);
-
-            // 1st priority: keep prism safe
-            combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-
-            // 2nd priority: unload all units inside
-            combat_behavior->AddBehavior(std::make_unique<Unload>());
-
-            // 3rd/main priority: prick up endangered units
-            ::sc2::Units inPickupRange = ManagerMediator::getInstance().GetOwnAttackingUnitsInRange(*this, { prism->pos }, 5.0f);
-            if (!inPickupRange.empty())
-            {
-                for (const auto* unit : inPickupRange)
-                {
-                    if ((unit->shield / unit->shield_max) <= 0.01f && !ManagerMediator::getInstance().IsGroundPositionSafe(*this, unit->pos))
-                    {
-                        combat_behavior->AddBehavior(std::make_unique<PickUnitUp>(unit));
-                        break;
-                    }
-                }
-            }
-
-            bool updatePath = true;
-            if (prism->orders.size() == 1)
-            {
-                if (prism->orders.front().ability_id == ::sc2::ABILITY_ID::GENERAL_MOVE
-                    && ::sc2::DistanceSquared2D(prism->orders.front().target_pos, target) < 4.0f)
-                    updatePath = false;
-            }
-
-            // nothing else to do: path the prism to our optimal position
-            if (updatePath) combat_behavior->AddBehavior(std::make_unique<PathToTarget>(target));
-
-            RegisterBehavior(std::move(combat_behavior));
-        }
-    }
-
-    // calculate the next target to attack
-    ::sc2::Point2D AeolusBot::CalculateTarget()
-    {
-        // if less than move out supply, stay home
-        if (ManagerMediator::getInstance().GetUnitsFromRole(*this, constants::UnitRole::ATTACKING).size()
-            < m_move_out_supply)
-        {
-            return ManagerMediator::getInstance().GetDefenseTarget(*this, 1);
-            //return utils::GetPositionTowards(ManagerMediator::getInstance().GetExpansionLocations(*this)[1],
-            //    ManagerMediator::getInstance().GetExpansionLocations(*this).back(), 9);
-        }
-
-        return ManagerMediator::getInstance().GetAtttackTarget(*this);
-
-        /*
-        auto enemy_structures = ManagerMediator::getInstance().GetAllEnemyStructures(*this);
-        ::sc2::Units filtered_structures;
-        for (const auto& structure : enemy_structures)
-        {
-            if (structure->unit_type != ::sc2::UNIT_TYPEID::ZERG_CREEPTUMOR
-                && structure->unit_type != ::sc2::UNIT_TYPEID::ZERG_CREEPTUMORBURROWED
-                && structure->unit_type != ::sc2::UNIT_TYPEID::ZERG_CREEPTUMORQUEEN)
-                filtered_structures.push_back(structure);
-        }
-        if (!filtered_structures.empty())
-        {
-            return utils::GetClosestUnitTo(Observation()->GetStartLocation(), filtered_structures)->pos;
-        }
-        else if (Observation()->GetGameLoop() / 22.4f < 240.0f) 
-            return ManagerMediator::getInstance().GetExpansionLocations(*this).back();
-        else
-        {
-            auto targets = ManagerMediator::getInstance().GetExpansionLocations(*this);
-            if (Observation()->GetVisibility(targets[m_current_base_target]) == ::sc2::Visibility::Visible)
-            {
-                if (m_current_base_target == 0) m_current_base_target = (targets.size() - 1);
-                else if (m_current_base_target == targets.size() - 1) m_current_base_target = 1;
-                else m_current_base_target = (m_current_base_target + 1) % targets.size();
-            }
-            return targets[m_current_base_target];
-        }
-        */
+        m_currentState->micro(*this);
     }
 
     // Custom macro/economy management logic
@@ -510,11 +335,9 @@ namespace Aeolus
     }
     void AeolusBot::BeforeStep()
     {
-
         // Logit to execute before each step begins
         PrepareUnits();
         manager_hub_.UpdateManagers(Observation()->GetGameLoop());
-
     }
 
     // Custom AfterStep logic
@@ -549,5 +372,27 @@ namespace Aeolus
     void AeolusBot::ExecuteBuildOrder()
     {
         m_build_order->execute();
+    }
+
+    void AeolusBot::ChangeState(std::unique_ptr<BotState> new_state)
+    {
+        if (m_currentState) m_currentState->OnExit();
+        m_currentState = std::move(new_state);
+        if (m_currentState) m_currentState->OnEnter();
+    }
+
+    bool AeolusBot::isBuildFinished() const
+    {
+        return m_build_order->isFinished();
+    }
+
+    std::map<::sc2::UNIT_TYPEID, float> AeolusBot::getArmyComp()
+    {
+        return m_armyComp;
+    }
+
+    int AeolusBot::getMoveOutSupply()
+    {
+        return m_move_out_supply;
     }
 }
