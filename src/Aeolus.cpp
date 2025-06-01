@@ -38,6 +38,7 @@
 #include "behaviors/micro_behaviors/pick_unit_up.h"
 
 #include "states/bot_state.h"
+#include "states/build_order_state.h"
 #include "states/forward_pressure.h"
 #include "states/consolidate.h"
 
@@ -202,7 +203,7 @@ namespace Aeolus
         Actions()->SendChat(buildOrderTag.str());
 
         // set state initially to consolidate
-        ChangeState(MakeState<ConsolidateState>());
+        ChangeState(MakeState<BuildOrderState>());
     }
 
     // Game end logic
@@ -304,10 +305,6 @@ namespace Aeolus
 
     // Custom macro logic
     void AeolusBot::Macro() {
-        // std::cout << "Aeolus: Macroing..." << std::endl;
-        // Implement custom logic for gathering resources, expanding, etc.
-        ExecuteBuildOrder();
-
         m_currentState->macro(*this);
     }
 

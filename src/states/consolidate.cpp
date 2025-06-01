@@ -52,31 +52,24 @@ namespace Aeolus
         aeolusbot.RegisterBehavior(std::make_unique<ChronoController>());
         aeolusbot.RegisterBehavior(std::make_unique<RepowerStructures>());
 
-        if (!aeolusbot.isBuildFinished())
-        {
-            if (aeolusbot.Observation()->GetFoodCap() <= aeolusbot.Observation()->GetFoodUsed())
-                aeolusbot.RegisterBehavior(std::make_unique<AutoSupply>());
+        aeolusbot.RegisterBehavior(std::make_unique<BuildGeysers>());
+        aeolusbot.RegisterBehavior(std::make_unique<Expand>());
+        aeolusbot.RegisterBehavior(std::make_unique<AutoSupply>());
+        aeolusbot.RegisterBehavior(std::make_unique<ProductionController>(aeolusbot.getArmyComp()));
+        aeolusbot.RegisterBehavior(std::make_unique<SpawnController>(aeolusbot.getArmyComp()));
+        aeolusbot.RegisterBehavior(std::make_unique<UpgradesController>(
+            std::vector<::sc2::UPGRADE_ID>{
+            ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL1,
+                ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL2,
+                ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL1,
+                ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL3,
+                ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL2,
+                ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL3,
+                ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL1,
+                ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL2,
+                ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL3
         }
-        else {
-            aeolusbot.RegisterBehavior(std::make_unique<BuildGeysers>());
-            aeolusbot.RegisterBehavior(std::make_unique<Expand>());
-            aeolusbot.RegisterBehavior(std::make_unique<AutoSupply>());
-            aeolusbot.RegisterBehavior(std::make_unique<ProductionController>(aeolusbot.getArmyComp()));
-            aeolusbot.RegisterBehavior(std::make_unique<SpawnController>(aeolusbot.getArmyComp()));
-            aeolusbot.RegisterBehavior(std::make_unique<UpgradesController>(
-                std::vector<::sc2::UPGRADE_ID>{
-                ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL1,
-                    ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL2,
-                    ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL1,
-                    ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL3,
-                    ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL2,
-                    ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL3,
-                    ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL1,
-                    ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL2,
-                    ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL3
-            }
-            ));
-        }
+        ));
 
         if (aeolusbot.Observation()->GetGameLoop() % 50 == 0)
             std::cout << "current gameloop: " << aeolusbot.Observation()->GetGameLoop() << std::endl;

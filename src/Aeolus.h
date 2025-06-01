@@ -38,6 +38,9 @@ namespace Aeolus
 
         int getMoveOutSupply();
 
+        // implement the build runner
+        void ExecuteBuildOrder();
+
     private:
         std::string m_opponent_id;
 
@@ -94,8 +97,5 @@ namespace Aeolus
         void Macro();
         void Micro();
         void PrepareUnits();
-
-        // implement the build runner
-        void ExecuteBuildOrder();
     };
 }

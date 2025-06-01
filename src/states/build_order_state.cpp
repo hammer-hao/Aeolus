@@ -1,16 +1,12 @@
-#include "forward_pressure.h"
-#include "../Aeolus.h"
+#include "build_order_state.h"
 
 #include "../behaviors/macro_behaviors/mining.h"
 #include "../behaviors/macro_behaviors/build_workers.h"
 #include "../behaviors/macro_behaviors/chrono_controller.h"
 #include "../behaviors/macro_behaviors/repower_structures.h"
 #include "../behaviors/macro_behaviors/auto_supply.h"
-#include "../behaviors/macro_behaviors/build_geysers.h"
-#include "../behaviors/macro_behaviors/expand.h"
-#include "../behaviors/macro_behaviors/production_controller.h"
-#include "../behaviors/macro_behaviors/spawn_controller.h"
-#include "../behaviors/macro_behaviors/upgrades_controller.h"
+
+#include "forward_pressure.h"
 
 #include "../behaviors/micro_behaviors/micro_behavior.h"
 #include "../behaviors/micro_behaviors/a_move.h"
@@ -21,75 +17,65 @@
 #include "../behaviors/micro_behaviors/unload.h"
 #include "../behaviors/micro_behaviors/pick_unit_up.h"
 
-#include "consolidate.h"
-
 #include "../utils/unit_utils.h"
 
-#include <iostream>
+#include "../Aeolus.h"
 
 namespace Aeolus
 {
-	void ForwardPressureState::OnEnter()
+	void BuildOrderState::OnEnter()
 	{
-		std::cout << "entered FOWARD PRESSURE state" << std::endl;
+		std::cout << "[State] Entered state: BUILDORDER" << std::endl;
 	}
 
-	void ForwardPressureState::OnExit()
+	void BuildOrderState::OnExit()
 	{
-		std::cout << "exited FORWARD PRESSURE state" << std::endl;
+		std::cout << "[State] Exited state: BUILDORDER" << std::endl;
 	}
 
-	void ForwardPressureState::macro(AeolusBot& aeolusbot)
+	void BuildOrderState::macro(AeolusBot& aeolusbot)
 	{
-        // std::cout << "Aeolus: Macroing..." << std::endl;
-        // Implement custom logic for gathering resources, expanding, etc.
-        aeolusbot.RegisterBehavior(std::make_unique<Mining>());
-        aeolusbot.RegisterBehavior(std::make_unique<BuildWorkers>(
-            std::min(ManagerMediator::getInstance().GetOwnReadyTownHalls(aeolusbot).size() * 22, static_cast<size_t>(86))
-        ));
-        aeolusbot.RegisterBehavior(std::make_unique<ChronoController>());
-        aeolusbot.RegisterBehavior(std::make_unique<RepowerStructures>());
+		// execute the build first
+		aeolusbot.ExecuteBuildOrder();
 
-        aeolusbot.RegisterBehavior(std::make_unique<BuildGeysers>());
-        aeolusbot.RegisterBehavior(std::make_unique<Expand>());
-        aeolusbot.RegisterBehavior(std::make_unique<AutoSupply>());
-        aeolusbot.RegisterBehavior(std::make_unique<ProductionController>(aeolusbot.getArmyComp()));
-        aeolusbot.RegisterBehavior(std::make_unique<SpawnController>(aeolusbot.getArmyComp()));
-        aeolusbot.RegisterBehavior(std::make_unique<UpgradesController>(
-            std::vector<::sc2::UPGRADE_ID>{
-            ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL1,
-                ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL2,
-                ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL1,
-                ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL3,
-                ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL2,
-                ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL3,
-                ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL1,
-                ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL2,
-                ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL3
-        }
-        ));
+		// things to keep track of while the build order is running
+		aeolusbot.RegisterBehavior(std::make_unique<Mining>());
+		aeolusbot.RegisterBehavior(std::make_unique<BuildWorkers>(
+			std::min(ManagerMediator::getInstance().GetOwnReadyTownHalls(aeolusbot).size() * 22, static_cast<size_t>(86))
+		));
+		aeolusbot.RegisterBehavior(std::make_unique<ChronoController>());
+		aeolusbot.RegisterBehavior(std::make_unique<RepowerStructures>());
 
-        if (aeolusbot.Observation()->GetGameLoop() % 50 == 0)
-            std::cout << "current gameloop: " << aeolusbot.Observation()->GetGameLoop() << std::endl;
+		// auto supply only when we are somehow supply blocked during executing the build order
+		if (aeolusbot.Observation()->GetFoodCap() <= aeolusbot.Observation()->GetFoodUsed())
+			aeolusbot.RegisterBehavior(std::make_unique<AutoSupply>());
 
-        if (ManagerMediator::getInstance().GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING).size()
-            < aeolusbot.getMoveOutSupply())
-            aeolusbot.ChangeState(MakeState<ConsolidateState>());
+		// done with the build, default to forward pressuring.
+		if (aeolusbot.isBuildFinished()) aeolusbot.ChangeState(MakeState<ForwardPressureState>()); 
 	}
 
-	void ForwardPressureState::micro(AeolusBot& aeolusbot)
+	void BuildOrderState::micro(AeolusBot& aeolusbot)
 	{
-        auto& mediator = ManagerMediator::getInstance();
+        if (aeolusbot.Observation()->GetGameLoop() < 100) return;
+		auto& mediator = ManagerMediator::getInstance();
 
-        ::sc2::Units forces = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
-        if (!forces.empty()) _micro(aeolusbot, forces, mediator.GetAtttackTarget(aeolusbot));
+		// during the build order, we generally want to defend. However, we would still like to move out
+		// if we have enought supply
+		::sc2::Units forces = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
+        
+        if (forces.empty()) return;
 
-        ::sc2::Units prisms = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::PRISM);
-        auto prismTarget = mediator.GetPrismTarget(aeolusbot);
-        if (prismTarget != ::sc2::Point2D(0.0f, 0.0f)) _prismMicro(aeolusbot, prisms, prismTarget);
+		::sc2::Point2D target = (forces.size() >= aeolusbot.getMoveOutSupply()) ?
+			mediator.GetAtttackTarget(aeolusbot) : mediator.GetDefenseTarget(aeolusbot, 1);
+
+		if (!forces.empty()) _micro(aeolusbot, forces, target);
+
+		::sc2::Units prisms = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::PRISM);
+		auto prismTarget = mediator.GetPrismTarget(aeolusbot);
+		if (prismTarget != ::sc2::Point2D(0.0f, 0.0f)) _prismMicro(aeolusbot, prisms, prismTarget);
 	}
 
-    void ForwardPressureState::_micro(AeolusBot& aeolusbot, ::sc2::Units forces, ::sc2::Point2D target)
+    void BuildOrderState::_micro(AeolusBot& aeolusbot, ::sc2::Units forces, ::sc2::Point2D target)
     {
         std::vector<::sc2::Point2D> starting_points;
         float search_radius = 15.0f;
@@ -169,7 +155,7 @@ namespace Aeolus
         }
     }
 
-    void ForwardPressureState::_prismMicro(AeolusBot& aeolusbot, ::sc2::Units prisms, ::sc2::Point2D prismTarget)
+    void BuildOrderState::_prismMicro(AeolusBot& aeolusbot, ::sc2::Units prisms, ::sc2::Point2D prismTarget)
     {
         for (const auto* prism : prisms)
         {
