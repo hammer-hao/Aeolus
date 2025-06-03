@@ -108,7 +108,7 @@ source_group("Header Files\\states" FILES
     states/bot_state.h
     states/consolidate.h
     states/forward_pressure.h
-    states/build_order_state.cpp)
+    states/build_order_state.h)
 
 source_group("Source Files\\Pathing" FILES
     pathing/grid.cpp

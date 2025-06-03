@@ -31,7 +31,7 @@
 
 namespace Aeolus
 {
-	void ConsolidateState::OnEnter()
+	void ConsolidateState::OnEnter(AeolusBot& aeolusbot)
 	{
 		std::cout << "entered CONSOLIDATE state" << std::endl;
 	}
@@ -74,9 +74,18 @@ namespace Aeolus
         if (aeolusbot.Observation()->GetGameLoop() % 50 == 0)
             std::cout << "current gameloop: " << aeolusbot.Observation()->GetGameLoop() << std::endl;
 
-        if (ManagerMediator::getInstance().GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING).size()
-            >= aeolusbot.getMoveOutSupply())
-            aeolusbot.ChangeState(MakeState<ForwardPressureState>());
+        ::sc2::Units allAttacking = ManagerMediator::getInstance().GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
+        if (allAttacking.size() >= aeolusbot.getMoveOutSupply())
+        {
+            int armyValue = 0;
+            for (const auto* unit : allAttacking)
+            {
+                auto cost = ManagerMediator::getInstance().GetUnitCost(aeolusbot, unit->unit_type);
+                armyValue += cost.first; armyValue += cost.second;
+            }
+
+            if (armyValue > m_consolidateValue) aeolusbot.ChangeState(MakeState<ForwardPressureState>());
+        }
 	}
 
 	void ConsolidateState::micro(AeolusBot& aeolusbot)

@@ -277,6 +277,7 @@ namespace Aeolus
     // Handle unit destruction
     void AeolusBot::OnUnitDestroyed(const ::sc2::Unit* unit_) {
         manager_hub_.OnUnitDestroyed(unit_);
+        m_currentState->OnUnitDestroyed(*this, unit_);
 
         // if we have only one building left, record as loss:
         int buildings_left = ManagerMediator::getInstance().GetAllOwnStructures(*this).size();
@@ -375,7 +376,7 @@ namespace Aeolus
     {
         if (m_currentState) m_currentState->OnExit();
         m_currentState = std::move(new_state);
-        if (m_currentState) m_currentState->OnEnter();
+        if (m_currentState) m_currentState->OnEnter(*this);
     }
 
     bool AeolusBot::isBuildFinished() const

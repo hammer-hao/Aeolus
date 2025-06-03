@@ -19,11 +19,13 @@ namespace Aeolus
 	public:
 		BuildOrderState() {}
 
-		void OnEnter() override;
+		void OnEnter(AeolusBot& aeolusbot) override;
 
 		void micro(AeolusBot& aeolusbot) override;
 
 		void macro(AeolusBot& aeolusbot) override;
+
+		void OnUnitDestroyed(AeolusBot& aeolusbot, const ::sc2::Unit*) override {}
 
 		void OnExit() override;
 

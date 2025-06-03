@@ -5,6 +5,7 @@
 #include <sc2api/sc2_data.h>
 #include <any>
 #include <tuple>
+#include <algorithm>
 
 namespace Aeolus
 {
@@ -73,6 +74,13 @@ namespace Aeolus
 		case (constants::ManagerRequestType::GET_ALL_DESTRUCTABLES):
 		{
 			return m_destructables;
+		}
+		case (constants::ManagerRequestType::GET_KNOWN_ENEMY_UNIT_TYPES):
+		{
+			std::vector<::sc2::UNIT_TYPEID> result;
+			std::transform(m_knownEnemyUnits.begin(), m_knownEnemyUnits.end(), std::back_inserter(result),
+				[](const auto& pair) {return pair.second; });
+			return result;
 		}
 		default:
 			return 0;
@@ -184,6 +192,7 @@ namespace Aeolus
 				else
 				{
 					m_enemy_units.push_back(unit);
+					m_knownEnemyUnits.insert({ unit->tag, unit->unit_type });
 				}
 				break;
 			}
@@ -219,5 +228,11 @@ namespace Aeolus
 			if (structure->unit_type == structureType) return true;
 		}
 		return false;
+	}
+
+	void UnitFilterManager::OnUnitDestroyed(const ::sc2::Unit* unit)
+	{
+		if (unit->alliance == ::sc2::Unit::Alliance::Enemy)
+			m_knownEnemyUnits.erase(unit->tag);
 	}
 }

@@ -29,9 +29,10 @@
 
 namespace Aeolus
 {
-	void ForwardPressureState::OnEnter()
+	void ForwardPressureState::OnEnter(AeolusBot& aeolusbot)
 	{
-		std::cout << "entered FOWARD PRESSURE state" << std::endl;
+		std::cout << "entered FOWARD PRESSURE state at gameloop " << aeolusbot.Observation()->GetGameLoop() << std::endl;
+        m_enteredAt = aeolusbot.Observation()->GetGameLoop();
 	}
 
 	void ForwardPressureState::OnExit()
@@ -72,9 +73,11 @@ namespace Aeolus
         if (aeolusbot.Observation()->GetGameLoop() % 50 == 0)
             std::cout << "current gameloop: " << aeolusbot.Observation()->GetGameLoop() << std::endl;
 
+        /*
         if (ManagerMediator::getInstance().GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING).size()
             < aeolusbot.getMoveOutSupply())
             aeolusbot.ChangeState(MakeState<ConsolidateState>());
+        */
 	}
 
 	void ForwardPressureState::micro(AeolusBot& aeolusbot)
@@ -207,6 +210,54 @@ namespace Aeolus
             if (updatePath) combat_behavior->AddBehavior(std::make_unique<PathToTarget>(prismTarget));
 
             aeolusbot.RegisterBehavior(std::move(combat_behavior));
+        }
+    }
+
+    void ForwardPressureState::OnUnitDestroyed(AeolusBot& aeolusbot, const ::sc2::Unit* unit)
+    {
+        const uint64_t window = 672; // 30 seconds window
+        uint64_t currentLoop = aeolusbot.Observation()->GetGameLoop();
+
+        auto cost = ManagerMediator::getInstance().GetUnitCost(aeolusbot, unit->unit_type);
+        if (unit->alliance == ::sc2::Unit::Alliance::Self)
+        {
+            m_ownLosses.push_back({ currentLoop, cost.first + cost.second });
+        }
+        if (unit->alliance == ::sc2::Unit::Alliance::Enemy)
+        {
+            m_opponentLosses.push_back({ currentLoop, cost.first + cost.second });
+        }
+
+        while (!m_ownLosses.empty() && currentLoop - m_ownLosses.front().first > window)
+        {
+            m_ownLosses.pop_front();
+        }
+        while (!m_opponentLosses.empty() && currentLoop - m_opponentLosses.front().first > window)
+        {
+            m_opponentLosses.pop_front();
+        }
+
+        // in this state for more than 60 seconds, check for loss ratio
+        if (currentLoop - m_enteredAt > 1344)
+        {
+            int ownTotalLoss = 0, opponentTotalLoss = 0;
+            for (const auto& loss : m_ownLosses) ownTotalLoss += loss.second;
+            for (const auto& loss : m_opponentLosses) opponentTotalLoss += loss.second;
+
+            std::cout << "own loss in the last 30 seconds: " << ownTotalLoss << std::endl;
+            std::cout << "opponent loss in the last 30 seconds: " << opponentTotalLoss << std::endl;
+            if (static_cast<double>(ownTotalLoss) / static_cast<double>(opponentTotalLoss) > 2.0
+                && static_cast<double>(ownTotalLoss) > 1000)
+            {
+                std::cout << "[State] Forward pressure: trading badly, consolidate and tech switching..." << std::endl;
+                aeolusbot.ChangeState(MakeState<ConsolidateState>(static_cast<int>(ownTotalLoss * 1.5)));
+            }
+
+            std::cout << "known enemy units: " << std::endl;
+            for (const auto& unit_type : ManagerMediator::getInstance().GetAllSeenEnemyUnits(aeolusbot))
+            {
+                std::cout << ::sc2::UnitTypeToName(unit_type) << '\n';
+            }
         }
     }
 }

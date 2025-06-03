@@ -447,6 +447,19 @@ namespace Aeolus
 			);
 		}
 
+		/**
+		* Returns a list of unit types, one for each enemy unit that we have seen alive
+		* and have not killed. INCLUDES WORKERS!
+		*/
+		std::vector<::sc2::UNIT_TYPEID> GetAllSeenEnemyUnits(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<std::vector<::sc2::UNIT_TYPEID>, int>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_KNOWN_ENEMY_UNIT_TYPES,
+				0
+			);
+		}
 
 		// PathManager
 

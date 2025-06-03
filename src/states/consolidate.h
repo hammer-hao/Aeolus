@@ -16,13 +16,15 @@ namespace Aeolus
 	class ConsolidateState : public BotState
 	{
 	public:
-		ConsolidateState() {}
+		ConsolidateState(int consolidateValue) : m_consolidateValue(consolidateValue) {}
 
-		void OnEnter() override;
+		void OnEnter(AeolusBot& aeolusbot) override;
 
 		void micro(AeolusBot& aeolusbot) override;
 
 		void macro(AeolusBot& aeolusbot) override;
+
+		void OnUnitDestroyed(AeolusBot& aeolusbot, const ::sc2::Unit*) override {}
 
 		void OnExit() override;
 
@@ -30,5 +32,7 @@ namespace Aeolus
 		void _micro(AeolusBot& aeolusbot, ::sc2::Units forces, ::sc2::Point2D target);
 
 		void _prismMicro(AeolusBot& aeolusbot, ::sc2::Units prisms, ::sc2::Point2D prismTarget);
+
+		int m_consolidateValue; // don't move out until we have built this many value worth of army
 	};
 }

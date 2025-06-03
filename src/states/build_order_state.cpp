@@ -23,7 +23,7 @@
 
 namespace Aeolus
 {
-	void BuildOrderState::OnEnter()
+	void BuildOrderState::OnEnter(AeolusBot& aeolusbot)
 	{
 		std::cout << "[State] Entered state: BUILDORDER" << std::endl;
 	}

@@ -17,13 +17,15 @@ namespace Aeolus
 	class ForwardPressureState : public BotState
 	{
 	public:
-		ForwardPressureState() {}
+		ForwardPressureState() : m_enteredAt(0) {}
 
-		void OnEnter() override;
+		void OnEnter(AeolusBot& aeolusbot) override;
 
 		void micro(AeolusBot& aeolusbot) override;
 
 		void macro(AeolusBot& aeolusbot) override;
+
+		void OnUnitDestroyed(AeolusBot& aeolusbot, const ::sc2::Unit*) override;
 
 		void OnExit() override;
 
@@ -32,5 +34,10 @@ namespace Aeolus
 		void _micro(AeolusBot& aeolusbot, ::sc2::Units forces, ::sc2::Point2D target);
 
 		void _prismMicro(AeolusBot& aeolusbot, ::sc2::Units prisms, ::sc2::Point2D prismTarget);
+
+		int m_enteredAt;
+
+		std::deque<std::pair<uint64_t, int>> m_ownLosses;
+		std::deque<std::pair<uint64_t, int>> m_opponentLosses;
 	};
 }
