@@ -169,6 +169,7 @@ namespace Aeolus
 
 			std::cout << "BFS Flood fill: Found " << area_points.size() << " points. " << std::endl;
 
+			if (area_points.size() <= 10) continue; // hot fix for pylon AIE, investigate later
 			/*
 			float height = height_map.TerrainHeight(area_points[0]);
 			for (const auto& point : area_points)
