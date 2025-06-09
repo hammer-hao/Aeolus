@@ -17,6 +17,7 @@
 #include <tuple>
 #include <stdexcept>
 #include <optional>
+#include <algorithm>
 
 namespace Aeolus
 {
@@ -102,6 +103,28 @@ namespace Aeolus
 		debug->SendDebug();
 		#endif
 		*/
+
+		/*
+#ifdef BUILD_WITH_RENDERER
+
+		auto* debug = m_bot.Debug();
+
+		auto els = ManagerMediator::getInstance().GetExpansionLocations(m_bot);
+
+		for (const auto& el : els)
+		{
+			float terrain_height = m_height_map.TerrainHeight(::sc2::Point2D(static_cast<int>(el.x), static_cast<int>(el.y)));
+			debug->DebugSphereOut(::sc2::Point3D(el.x, el.y, terrain_height), 1, ::sc2::Colors::Purple);
+			std::stringstream pos;
+			pos << el.x << " " << el.y << "pathing distance to main: " << m_bot.Query()->PathingDistance(m_bot.Observation()->GetStartLocation(), el)
+				<< " euclidean distance to main: " << ::sc2::Distance2D(m_bot.Observation()->GetStartLocation(), el);
+			debug->DebugTextOut(pos.str(), ::sc2::Point3D(el.x, el.y, terrain_height));
+		}
+
+		debug->SendDebug();
+
+#endif
+		*/
 	}
 
 	void PlacementManager::Initialize()
@@ -164,6 +187,8 @@ namespace Aeolus
 				ramp_position = wall_positions[1];
 				max_dist = 22;
 			}
+
+			std::cout << "BFS Flood fill: Finding placement area for base index " << i << std::endl;
 
 			auto area_points = ManagerMediator::getInstance().GetFloodFillArea(m_bot, expansion_locations[i], max_dist);
 
@@ -1337,7 +1362,9 @@ namespace Aeolus
 
 			// Record the chosen expansion location
 			if (best_score < std::numeric_limits<float>::max())
-				expansion_locations.push_back(best_point);
+				if (m_bot.Query()->PathingDistance(m_bot.Observation()->GetStartLocation(), best_point) > 0) 
+					expansion_locations.push_back(best_point);
+					// only add if this is pathable.
 		}
 
 		auto* query = m_bot.Query();
@@ -1348,24 +1375,9 @@ namespace Aeolus
 			return query->PathingDistance(observation->GetStartLocation(), first) < query->PathingDistance(observation->GetStartLocation(), second);
 			});
 
-		::sc2::Point2D enemy_base;
-		for (const auto& location : expansion_locations)
+		for (const auto& location : observation->GetGameInfo().enemy_start_locations)
 		{
-			if (query->PathingDistance(observation->GetStartLocation(), location) == 0)
-			{
-				if (location != ::sc2::Point2D(observation->GetStartLocation()))
-				{
-					enemy_base = location;
-					break;
-				}
-			}
-		}
-
-		// Move the enemy base to the end.
-		auto it = std::find(expansion_locations.begin(), expansion_locations.end(), enemy_base);
-		if (it != expansion_locations.end()) {
-			expansion_locations.erase(it); // Remove the enemy base.
-			expansion_locations.push_back(enemy_base); // Add it to the end.
+			expansion_locations.push_back(location);
 		}
 
 		m_expansion_locations = expansion_locations;

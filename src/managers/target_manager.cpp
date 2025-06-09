@@ -189,6 +189,8 @@ namespace Aeolus
 
 		*/
 
+		/*
+
 #ifdef BUILD_WITH_RENDERER
 
 		if (m_prismTarget != ::sc2::Point2D(0.0f, 0.0f))
@@ -202,6 +204,7 @@ namespace Aeolus
 		}
 
 #endif // 
+		*/
 
 	}
 
