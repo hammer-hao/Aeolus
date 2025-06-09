@@ -1229,6 +1229,8 @@ namespace Aeolus
 		using namespace sc2;
 		std::vector<Point2D> final_locations;
 		std::vector<Point2D> expansion_locations;
+		expansion_locations.push_back(m_bot.Observation()->GetStartLocation());
+
 		Units _resources = ManagerMediator::getInstance().GetAllResources(m_bot);
 		float distance_squared_threshold = 8.5;
 
