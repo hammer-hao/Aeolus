@@ -188,41 +188,42 @@ namespace Aeolus
 
 		// BFS queue
 		std::queue<std::pair<int, int>> q;
-		int start_x = static_cast<int>(std::round(start_point.x));
-		int start_y = static_cast<int>(std::round(start_point.y));
-		q.push({ start_x, start_y });
-		visited[start_x][start_y] = true;
+		int start_col = static_cast<int>(std::round(start_point.x));
+		int start_row = static_cast<int>(std::round(start_point.y));
+		q.push({ start_row, start_col });
+		visited[start_row][start_col] = true;
 
 		const unsigned int maxDistSq = max_distance * max_distance;
 
 		while (!q.empty())
 		{
-			std::pair<int, int> current = q.front();
+			auto [row, col] = q.front();
 			q.pop();
 
 			// add current to result
-			result.push_back(::sc2::Point2D(current.first, current.second));
+			result.push_back(::sc2::Point2D(col, row));
 
 			// check neighbours
 			for (int i = 0; i < 4; ++i)
 			{
 				std::pair<int, int> neighbor =
 				{
-					static_cast<int>(current.first + dirX[i]),
-					static_cast<int>(current.second + dirY[i])
+					static_cast<int>(row + dirY[i]),
+					static_cast<int>(col + dirX[i])
 				};
 
 				// Check boundaries
-				if (neighbor.first < rows && neighbor.second < cols)
+				if (neighbor.first < rows && neighbor.second < cols &&
+					neighbor.first >= 0 && neighbor.second >=0)
 				{
 					// If not visited yet
 					if (!visited[neighbor.first][neighbor.second])
 					{
 						// Check same terrain level
-						if (m_terrain_map.TerrainHeight(::sc2::Point2D(neighbor.first, neighbor.second)) == terrain_height)
+						if (std::abs(m_terrain_map.TerrainHeight(::sc2::Point2D(neighbor.second, neighbor.first)) - terrain_height) < 0.01f)
 						{
 							// check distance
-							if (::sc2::DistanceSquared2D(::sc2::Point2D(neighbor.first, neighbor.second), start_point) <= maxDistSq)
+							if (::sc2::DistanceSquared2D(::sc2::Point2D(neighbor.second, neighbor.first), start_point) <= maxDistSq)
 							{
 								visited[neighbor.first][neighbor.second] = true;
 								q.push(neighbor);
