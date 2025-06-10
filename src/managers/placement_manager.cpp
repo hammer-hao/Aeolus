@@ -63,8 +63,8 @@ namespace Aeolus
 
 	void PlacementManager::update(int iteration)
 	{
-		/*
 		// generate debug outputs for placements
+		/*
 		#ifdef BUILD_WITH_RENDERER
 
 		// const auto height_map = ::sc2::HeightMap(m_bot.Observation()->GetGameInfo());
@@ -74,7 +74,7 @@ namespace Aeolus
 		{
 			for (const auto& building : expansion[BuildingTypes::BUILDING_2X2])
 			{
-				if (building.second.available)
+				if (building.second.is_wall)
 				{
 					float terrain_height = m_height_map.TerrainHeight(::sc2::Point2D(building.first.toWorld().x, building.first.toWorld().y));
 					::sc2::Point3D min = ::sc2::Point3D(building.first.toWorld().x - 1, building.first.toWorld().y - 1, terrain_height);
@@ -87,7 +87,7 @@ namespace Aeolus
 			}
 			for (const auto& building : expansion[BuildingTypes::BUILDING_3X3])
 			{
-				if (building.second.available)
+				if (building.second.is_wall)
 				{
 					float terrain_height = m_height_map.TerrainHeight(::sc2::Point2D(building.first.toWorld().x, building.first.toWorld().y));
 					::sc2::Point3D min = ::sc2::Point3D(building.first.toWorld().x - 1.5, building.first.toWorld().y - 1.5, terrain_height);
@@ -561,6 +561,17 @@ namespace Aeolus
 		::sc2::Point2D bestRef = { 0.0f, 0.0f };
 		double  globalBestScore = std::numeric_limits<double>::infinity();
 
+		auto hasAdjacentFree = [&](const std::pair<int, int>& e) {
+			static const int dx[4] = { 1, -1, 0, 0 };
+			static const int dy[4] = { 0,  0, 1, -1 };
+			for (int d = 0; d < 4; ++d) {
+				::sc2::Point2D p{ e.first + dx[d] + 0.0f, e.second + dy[d] + 0.0f };
+				if (placementGrid.IsPlacable(p))
+					return true;
+			}
+			return false;
+			};
+
 		for (const auto& ref : refs)
 		{
 			// std::cout << "ref: " << ref.x << " " << ref.y << std::endl;
@@ -572,7 +583,9 @@ namespace Aeolus
 				int pos = 0;
 				int neg = 0;
 				bool valid = true;
+
 				int refHeight = heightMap.TerrainHeight({static_cast<int>(ref.x), static_cast<int>(ref.y)});
+				
 				for (int i = 0; i < radius; ++i)
 				{
 					int row = static_cast<int>(ref.x + i * axis.first);
@@ -590,6 +603,7 @@ namespace Aeolus
 						if (pathingGrid.IsPathable({ row, col })) valid = false;
 						break;
 					}
+
 					pos++;
 				}
 				if (!valid) continue;
@@ -614,6 +628,15 @@ namespace Aeolus
 					neg++;
 				}
 				if (!valid) continue;
+
+				// check that our end has at least 1 neighbour placable.
+				int e1x = int(ref.x + pos * axis.first);
+				int e1y = int(ref.y + pos * axis.second);
+				int e2x = int(ref.x - neg * axis.first);
+				int e2y = int(ref.y - neg * axis.second);
+
+				if (!hasAdjacentFree({ e1x, e1y }) || !hasAdjacentFree({ e2x, e2y }))
+					continue;
 
 				int width = pos + neg + 1;
 
@@ -792,8 +815,8 @@ namespace Aeolus
 				break;
 			}
 		}
+		/*
 
-/*
 #ifdef BUILD_WITH_RENDERER
 
 		auto* debug = m_bot.Debug();
@@ -817,7 +840,8 @@ namespace Aeolus
 
 		debug->SendDebug();
 #endif
-*/
+		*/
+
 		std::cout << "solved natural ramp ends: " << end1.first << " " << end1.second << ", "
 			<< end2.first << " " << end2.second << std::endl;
 		return { end1, end2 };
@@ -847,6 +871,17 @@ namespace Aeolus
 
 		for (const auto& offset : offsets)
 		{
+			/*
+#ifdef BUILD_WITH_RENDERER
+
+			auto* debug = m_bot.Debug();
+			int x = startEnd.first + offset.first;
+			int y = startEnd.second + offset.second;
+			float z = m_height_map.TerrainHeight({ x, y });
+			debug->DebugBoxOut({ x - 1.0f, y - 1.0f, z }, { x + 2.0f, y + 2.0f, z + 0.2f }, ::sc2::Colors::Purple);
+			debug->SendDebug();
+#endif // BUILD_WITH_RENDERER
+			*/
 			bool valid = true;
 			for (int i = -1; i < 2; ++i)
 			{
@@ -854,6 +889,12 @@ namespace Aeolus
 				{
 					int x = startEnd.first + offset.first + i;
 					int y = startEnd.second + offset.second + j;
+					/*
+					float z = m_height_map.TerrainHeight({ x, y });
+					debug->DebugBoxOut({ x - 0.0f, y - 0.0f, z }, { x + 1.0f, y + 1.0f, z + 0.2f }, ::sc2::Colors::Purple);
+					debug->SendDebug();
+					*/
+
 					if (!placementGrid.IsPlacable({ x, y }) || m_occupied_points(x, y) == 1)
 					{
 						valid = false;
@@ -1108,8 +1149,6 @@ namespace Aeolus
 			end2 = twoEnds.second;
 		}
 
-		/*
-
 #ifdef BUILD_WITH_RENDERER
 
 		auto* debug = m_bot.Debug();
@@ -1119,7 +1158,7 @@ namespace Aeolus
 			int x = static_cast<int>(pathPoint.x);
 			int y = static_cast<int>(pathPoint.y);
 			float z = m_height_map.TerrainHeight({ x, y });
-			debug->DebugBoxOut({ pathPoint.x - 0.5f, pathPoint.y - 0.5f, z }, { pathPoint.x + 0.5f, pathPoint.y + 0.5f, z + 0.2f }, ::sc2::Colors::Red);
+			debug->DebugBoxOut({ pathPoint.x - 0.0f, pathPoint.y - 0.0f, z }, { pathPoint.x + 1.0f, pathPoint.y + 1.0f, z + 0.2f }, ::sc2::Colors::Red);
 		}
 
 		for (const auto& pathPoint : refs)
@@ -1127,7 +1166,7 @@ namespace Aeolus
 			int x = static_cast<int>(pathPoint.x);
 			int y = static_cast<int>(pathPoint.y);
 			float z = m_height_map.TerrainHeight({ x, y });
-			debug->DebugBoxOut({ pathPoint.x - 0.5f, pathPoint.y - 0.5f, z }, { pathPoint.x + 0.5f, pathPoint.y + 0.5f, z + 0.2f }, ::sc2::Colors::Green);
+			debug->DebugBoxOut({ pathPoint.x - 0.0f, pathPoint.y - 0.0f, z }, { pathPoint.x + 1.0f, pathPoint.y + 1.0f, z + 0.2f }, ::sc2::Colors::Green);
 		}
 
 		if (end1 != std::pair<int, int>(0, 0))
@@ -1135,7 +1174,7 @@ namespace Aeolus
 			int x = end1.first;
 			int y = end1.second;
 			float z = m_height_map.TerrainHeight({ x, y });
-			debug->DebugBoxOut({ x - 0.5f, y - 0.5f, z }, { x + 0.5f, y + 0.5f, z + 0.2f }, ::sc2::Colors::Purple);
+			debug->DebugBoxOut({ x - 0.0f, y - 0.0f, z }, { x + 1.0f, y + 1.0f, z + 0.2f }, ::sc2::Colors::Purple);
 		}
 
 		if (end2 != std::pair<int, int>(0, 0))
@@ -1143,10 +1182,11 @@ namespace Aeolus
 			int x = end2.first;
 			int y = end2.second;
 			float z = m_height_map.TerrainHeight({ x, y });
-			debug->DebugBoxOut({ x - 0.5f, y - 0.5f, z }, { x + 0.5f, y + 0.5f, z + 0.2f }, ::sc2::Colors::Purple);
+			debug->DebugBoxOut({ x - 0.0f, y - 0.0f, z }, { x + 1.0f, y + 1.0f, z + 0.2f }, ::sc2::Colors::Purple);
 		}
+
+		debug->SendDebug();
 #endif
-		*/
 
 		std::pair<int, int> pylonPos = { 0 , 0 };
 
