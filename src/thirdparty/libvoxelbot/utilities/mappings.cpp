@@ -452,7 +452,7 @@ UNIT_TYPEID simplifyUnitType(UNIT_TYPEID type) {
 ABILITY_ID buffToAbility(BUFF_ID type) {
     switch (type) {
         case BUFF_ID::INVALID:
-            return ABILITY_ID::INVALID;
+            return ABILITY_ID::SMART;
         case BUFF_ID::GRAVITONBEAM:
             return ABILITY_ID::EFFECT_GRAVITONBEAM;
         case BUFF_ID::GHOSTCLOAK:
@@ -460,19 +460,19 @@ ABILITY_ID buffToAbility(BUFF_ID type) {
         case BUFF_ID::BANSHEECLOAK:
             return ABILITY_ID::BEHAVIOR_CLOAKON_BANSHEE;
         case BUFF_ID::POWERUSERWARPABLE:
-            return ABILITY_ID::INVALID;
+            return ABILITY_ID::SMART;
         case BUFF_ID::QUEENSPAWNLARVATIMER:
-            return ABILITY_ID::INVALID;
+            return ABILITY_ID::SMART;
         case BUFF_ID::GHOSTHOLDFIRE:
-            return ABILITY_ID::INVALID;
+            return ABILITY_ID::SMART;
         case BUFF_ID::GHOSTHOLDFIREB:
-            return ABILITY_ID::INVALID;
+            return ABILITY_ID::SMART;
         case BUFF_ID::EMPDECLOAK:
             return ABILITY_ID::EFFECT_EMP;
         case BUFF_ID::FUNGALGROWTH:
             return ABILITY_ID::EFFECT_FUNGALGROWTH;
         case BUFF_ID::GUARDIANSHIELD:
-            return ABILITY_ID::INVALID;
+            return ABILITY_ID::SMART;
         case BUFF_ID::TIMEWARPPRODUCTION:
             return ABILITY_ID::EFFECT_TIMEWARP;
         case BUFF_ID::NEURALPARASITE:
@@ -480,17 +480,17 @@ ABILITY_ID buffToAbility(BUFF_ID type) {
         case BUFF_ID::STIMPACKMARAUDER:
             return ABILITY_ID::EFFECT_STIM_MARAUDER;
         case BUFF_ID::SUPPLYDROP:
-            return ABILITY_ID::INVALID;
+            return ABILITY_ID::SMART;
         case BUFF_ID::STIMPACK:
             return ABILITY_ID::EFFECT_STIM_MARINE;
         case BUFF_ID::PSISTORM:
             return ABILITY_ID::EFFECT_PSISTORM;
         case BUFF_ID::CLOAKFIELDEFFECT:
-            return ABILITY_ID::INVALID;
+            return ABILITY_ID::SMART;
         case BUFF_ID::CHARGING:
             return ABILITY_ID::EFFECT_CHARGE;
         case BUFF_ID::SLOW:
-            return ABILITY_ID::INVALID;
+            return ABILITY_ID::SMART;
         case BUFF_ID::CONTAMINATED:
             return ABILITY_ID::EFFECT_CONTAMINATE;
         case BUFF_ID::BLINDINGCLOUDSTRUCTURE:
@@ -506,7 +506,7 @@ ABILITY_ID buffToAbility(BUFF_ID type) {
         case BUFF_ID::PURIFY:
             return ABILITY_ID::EFFECT_PURIFICATIONNOVA;
         case BUFF_ID::ORACLEWEAPON:
-            return ABILITY_ID::INVALID;
+            return ABILITY_ID::SMART;
         case BUFF_ID::IMMORTALOVERLOAD:
             return ABILITY_ID::EFFECT_IMMORTALBARRIER;
         case BUFF_ID::LOCKON:
@@ -514,7 +514,7 @@ ABILITY_ID buffToAbility(BUFF_ID type) {
         case BUFF_ID::SEEKERMISSILE:
             return ABILITY_ID::EFFECT_HUNTERSEEKERMISSILE;
         case BUFF_ID::TEMPORALFIELD:
-            return ABILITY_ID::INVALID;
+            return ABILITY_ID::SMART;
         case BUFF_ID::VOIDRAYSWARMDAMAGEBOOST:
             return ABILITY_ID::EFFECT_VOIDRAYPRISMATICALIGNMENT;
         case BUFF_ID::ORACLESTASISTRAPTARGET:
@@ -528,18 +528,18 @@ ABILITY_ID buffToAbility(BUFF_ID type) {
         case BUFF_ID::LURKERHOLDFIREB:
             return ABILITY_ID::BURROWDOWN_LURKER;
         case BUFF_ID::CHANNELSNIPECOMBAT:
-            return ABILITY_ID::INVALID;
+            return ABILITY_ID::SMART;
         case BUFF_ID::TEMPESTDISRUPTIONBLASTSTUNBEHAVIOR:
             return ABILITY_ID::EFFECT_TEMPESTDISRUPTIONBLAST;
         case BUFF_ID::CARRYMINERALFIELDMINERALS:
-            return ABILITY_ID::INVALID;
+            return ABILITY_ID::SMART;
         case BUFF_ID::CARRYHIGHYIELDMINERALFIELDMINERALS:
-            return ABILITY_ID::INVALID;
+            return ABILITY_ID::SMART;
         case BUFF_ID::CARRYHARVESTABLEVESPENEGEYSERGAS:
-            return ABILITY_ID::INVALID;
+            return ABILITY_ID::SMART;
         case BUFF_ID::CARRYHARVESTABLEVESPENEGEYSERGASPROTOSS:
-            return ABILITY_ID::INVALID;
+            return ABILITY_ID::SMART;
         case BUFF_ID::CARRYHARVESTABLEVESPENEGEYSERGASZERG:
-            return ABILITY_ID::INVALID;
+            return ABILITY_ID::SMART;
     }
 }
