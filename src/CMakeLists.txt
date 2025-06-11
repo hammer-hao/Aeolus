@@ -81,7 +81,8 @@ source_group("Source Files\\Managers" FILES
     managers/defense_manager.cpp
     managers/unit_role_manager.cpp
     managers/budget_manager.cpp
-    managers/building_manager.cpp)
+    managers/building_manager.cpp
+    managers/combat_sim_manager.cpp)
 
 source_group("Header Files\\Managers" FILES 
     managers/hub.h
@@ -97,7 +98,8 @@ source_group("Header Files\\Managers" FILES
     managers/defense_manager.h
     managers/unit_role_manager.h
     managers/building_manager.h
-    managers/budget_manager.h)
+    managers/budget_manager.h
+    managers/combat_sim_manager.h)
 
 source_group("Source Files\\states" FILES
     states/forward_pressure.cpp
@@ -194,6 +196,7 @@ set(bot_sources
     managers/door_manager.cpp
     managers/target_manager.cpp
     managers/building_manager.cpp
+    managers/combat_sim_manager.cpp
     states/consolidate.cpp
     states/forward_pressure.cpp
     states/build_order_state.cpp
@@ -256,6 +259,7 @@ set(bot_headers
     managers/door_manager.h
     managers/target_manager.h
     managers/building_manager.h
+    managers/combat_sim_manager.h
     states/bot_state.h
     states/consolidate.h
     states/forward_pressure.h
@@ -284,7 +288,56 @@ set(bot_headers
 
 include(FetchContent)
 
+### 0.  Gather all voxelbot sources, including caching.cpp  #############
+file(GLOB_RECURSE VOXELBOT_SOURCES CONFIGURE_DEPENDS
+     thirdparty/libvoxelbot/*.cpp
+     thirdparty/libvoxelbot/*.cxx
+     thirdparty/libvoxelbot/*.c
+     thirdparty/libvoxelbot/*.h
+     thirdparty/libvoxelbot/*.hpp)
+
+# !!  remove the filter that used to throw caching.cpp away  !!
+# list(FILTER VOXELBOT_SOURCES EXCLUDE REGEX ".*caching\\.cpp$")
+
+########################################################################
+### 1.  Build libvoxelbot once as a static library (no main) ###########
+########################################################################
+add_library(voxelbot_core STATIC ${VOXELBOT_SOURCES})
+
+# 1) Pull in cpp-sc2’s include path & link flags
+target_link_libraries(voxelbot_core PUBLIC cpp_sc2)
+
+# 2) If you’re building with the renderer, add SDL as well
+if(BUILD_WITH_RENDERER)
+    target_include_directories(voxelbot_core PUBLIC ${SDL2_INCLUDE_DIR})
+    target_link_libraries(voxelbot_core PUBLIC ${SDL2_LIBRARIES})
+endif()
+
+# Hide the main() that lives inside caching.cpp
+target_compile_definitions(voxelbot_core PRIVATE VOXELBOT_CACHE_LIB)
+
+target_include_directories(voxelbot_core PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/libvoxelbot  # already there
+    ${CMAKE_SOURCE_DIR}/thirdparty/cereal               # <-- ADD THIS
+)
+
+# Group files in Visual Studio filter
+foreach(file_path IN LISTS VOXELBOT_SOURCES)
+    file(RELATIVE_PATH relative_path ${CMAKE_SOURCE_DIR} ${file_path})
+    get_filename_component(dir ${relative_path} DIRECTORY)
+    string(REPLACE "/" "\\" group "${dir}")
+    source_group("${group}" FILES ${file_path})
+endforeach()
+
+########################################################################
+### 2.  Your bot executable ###########################################
+########################################################################
 add_executable(Aeolus ${bot_sources} ${bot_headers})
+target_link_libraries(Aeolus
+    PRIVATE
+        voxelbot_core       # <--- all voxelbot logic, no main()
+        cpp_sc2
+        eigen)
 
 option(BUILD_FOR_LADDER "Build Aeolus for ladder mode" OFF)
 
@@ -312,14 +365,34 @@ if (BUILD_WITH_RENDERER)
     target_link_libraries(Aeolus PRIVATE sc2renderer)
 endif ()
 
+########################################################################
+### 3.  Stand-alone caching tool  ######################################
+########################################################################
+add_executable(cache_mappings
+    thirdparty/libvoxelbot/caching/caching.cpp)   # compiles a 2nd time, now *with* main()
+
+target_include_directories(cache_mappings PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/libvoxelbot
+    ${CMAKE_SOURCE_DIR}/thirdparty/cereal)
+
+target_link_libraries(cache_mappings
+    PRIVATE
+        voxelbot_core       # uses the same object code
+        cpp_sc2)
+
+########################################################################
+### 4.  Convenience “build everything” target  #########################
+########################################################################
+add_custom_target(all_binaries DEPENDS Aeolus cache_mappings)
+
 if (MSVC)
     target_compile_options(Aeolus PRIVATE /W4 /EHsc)
 else ()
     target_compile_options(Aeolus PRIVATE -Wall -Wextra -pedantic)
 endif ()
 
-target_link_libraries(Aeolus PRIVATE cpp_sc2)
-target_link_libraries(Aeolus PRIVATE eigen)
+# cereal
+target_include_directories(Aeolus PRIVATE ${CMAKE_SOURCE_DIR}/thirdparty/cereal)
 
 if (MINGW)
     target_link_libraries(Aeolus PRIVATE ssp)

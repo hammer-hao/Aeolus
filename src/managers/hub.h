@@ -16,6 +16,7 @@
 #include "door_manager.h"
 #include "building_manager.h"
 #include "budget_manager.h"
+#include "combat_sim_manager.h"
 
 namespace Aeolus
 {
@@ -44,6 +45,7 @@ namespace Aeolus
 			managers.push_back(std::make_unique<PlacementManager>(aeolusbot));
 			managers.push_back(std::make_unique<TargetManager>(aeolusbot));
 			managers.push_back(std::make_unique<BuildingManager>(aeolusbot));
+			managers.push_back(std::make_unique<CombatSimManager>(aeolusbot));
 
 			// Store raw pointers before transferring ownership
 			m_unit_filter_manager_ref = static_cast<UnitFilterManager*>(managers[0].get());
@@ -57,6 +59,7 @@ namespace Aeolus
 			m_placement_manager_ref = static_cast<PlacementManager*>(managers[8].get());
 			m_target_manager_ref = static_cast<TargetManager*>(managers[9].get());
 			m_building_manager_ref = static_cast<BuildingManager*>(managers[10].get());
+			m_combat_sim_manager_ref = static_cast<CombatSimManager*>(managers[11].get());
 
 			m_managers.push_back(m_unit_filter_manager_ref);
 			m_managers.push_back(m_unit_role_manager_ref);
@@ -69,6 +72,7 @@ namespace Aeolus
 			m_managers.push_back(m_placement_manager_ref);
 			m_managers.push_back(m_target_manager_ref);
 			m_managers.push_back(m_building_manager_ref);
+			m_managers.push_back(m_combat_sim_manager_ref);
 
 			ManagerMediator::getInstance().AddManagers(managers);
 
@@ -125,6 +129,7 @@ namespace Aeolus
 		{
 			m_placement_manager_ref->Initialize();
 			m_target_manager_ref->Initialize();
+			m_combat_sim_manager_ref->Initialize();
 		}
 
 	private:
@@ -142,5 +147,6 @@ namespace Aeolus
 		PlacementManager* m_placement_manager_ref;
 		TargetManager* m_target_manager_ref;
 		BuildingManager* m_building_manager_ref;
+		CombatSimManager* m_combat_sim_manager_ref;
 	};
 }
