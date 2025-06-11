@@ -1,8 +1,8 @@
 #include <map>
 #include <stack>
-#include <libvoxelbot/caching/dependency_analyzer.h>
-#include <libvoxelbot/utilities/mappings.h>
-#include <libvoxelbot/utilities/predicates.h>
+#include "dependency_analyzer.h"
+#include "../utilities/mappings.h"
+#include "../utilities/predicates.h"
 #include <iostream>
 
 using namespace std;
