@@ -1240,7 +1240,7 @@ void unitTestBuildOptimizer() {
             startState.chronoInfo.addNexusWithEnergy(startState.time, 50);
             // Initial delay before harvesters start mining properly
             startState.makeUnitsBusy(UNIT_TYPEID::PROTOSS_PROBE, UNIT_TYPEID::INVALID, 12);
-            for (int i = 0; i < 12; i++) startState.addEvent(BuildEvent(BuildEventType::MakeUnitAvailable, 4, UNIT_TYPEID::PROTOSS_PROBE, ABILITY_ID::INVALID));
+            for (int i = 0; i < 12; i++) startState.addEvent(BuildEvent(BuildEventType::MakeUnitAvailable, 4, UNIT_TYPEID::PROTOSS_PROBE, ABILITY_ID::SMART));
 
             startState.baseInfos = { BaseInfo(10800, 1000, 1000) };
 
