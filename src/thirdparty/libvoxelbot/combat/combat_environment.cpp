@@ -275,13 +275,7 @@ WeaponInfo::WeaponInfo(const Weapon* weapon, UNIT_TYPEID type, const CombatUpgra
 
     auto& unitTypes = getUnitTypes();
     for (size_t i = 0; i < unitTypes.size(); i++) {
-        try {
-            dpsCache.push_back(calculateDPS(type, (UNIT_TYPEID)i, *weapon, upgrades, targetUpgrades));
-        }
-        catch (std::exception& e) {
-            std::cerr << "Crash at i = " << i << " (" << UnitTypeToName((UNIT_TYPEID)i) << "): " << e.what() << std::endl;
-            __debugbreak();  // <- will trigger debugger here
-        }
+        dpsCache.push_back(calculateDPS(type, (UNIT_TYPEID)i, *weapon, upgrades, targetUpgrades));
     }
 }
 
