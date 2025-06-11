@@ -1,4 +1,6 @@
 #pragma once
+
+#ifdef BUILD_WITH_RENDERER
 #include "sc2api/sc2_api.h"
 #include <vector>
 
@@ -110,3 +112,5 @@ struct InfluenceMap {
 
     void print() const;
 };
+
+#endif

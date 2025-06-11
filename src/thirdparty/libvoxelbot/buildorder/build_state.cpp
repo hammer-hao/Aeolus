@@ -3,6 +3,8 @@
 #include "../common/unit_lists.h"
 #include "../utilities/predicates.h"
 
+#include <cassert>
+
 using namespace std;
 using namespace sc2;
 

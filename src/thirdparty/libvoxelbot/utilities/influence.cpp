@@ -1,3 +1,4 @@
+#ifdef BUILD_WITH_RENDERER
 #include "influence.h"
 #include <cmath>
 #include <ctime>
@@ -461,3 +462,4 @@ Point2DI InfluenceMap::samplePointFromProbabilityDistribution() const {
     // Should in theory not happen, but it may actually happen because of floating point errors
     return Point2DI(w - 1, h - 1);
 }
+#endif

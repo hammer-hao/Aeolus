@@ -1,3 +1,5 @@
+#ifdef BUILD_WITH_RENDERER
+
 #pragma once
 #include "influence.h"
 #include "sc2api/sc2_api.h"
@@ -5,3 +7,5 @@
 
 std::vector<sc2::Point2DI> getPath (const sc2::Point2DI from, const sc2::Point2DI to, const InfluenceMap& costs);
 InfluenceMap getDistances (const InfluenceMap& startingPoints, const InfluenceMap& costs);
+
+#endif

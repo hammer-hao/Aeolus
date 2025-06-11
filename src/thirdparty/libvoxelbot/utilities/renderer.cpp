@@ -1,3 +1,4 @@
+#ifdef BUILD_WITH_RENDERER
 #include "renderer.h"
 #include "influence.h"
 
@@ -11,14 +12,14 @@ using namespace std;
 
 namespace {
 
-SDL_Rect CreateRect(int x, int y, int w, int h) {
-    SDL_Rect r;
-    r.x = x;
-    r.y = y;
-    r.w = w;
-    r.h = h;
-    return r;
-}
+    SDL_Rect CreateRect(int x, int y, int w, int h) {
+        SDL_Rect r;
+        r.x = x;
+        r.y = y;
+        r.w = w;
+        r.h = h;
+        return r;
+    }
 }  // namespace
 
 struct Pixel {
@@ -122,29 +123,29 @@ void MapRenderer::renderMatrix8BPPPlayers(const char* bytes, int w_mat, int h_ma
 
             int index = x + y * w_mat;
             switch (bytes[index]) {
-                case 0:
-                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                    break;
-                case 1:
-                    // Self.
-                    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-                    break;
-                case 2:
-                    // Enemy.
-                    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-                    break;
-                case 3:
-                    // Neutral.
-                    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-                    break;
-                case 4:
-                    SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-                    break;
-                case 5:
-                    SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
-                    break;
-                default:
-                    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            case 0:
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                break;
+            case 1:
+                // Self.
+                SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+                break;
+            case 2:
+                // Enemy.
+                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+                break;
+            case 3:
+                // Neutral.
+                SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+                break;
+            case 4:
+                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+                break;
+            case 5:
+                SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
+                break;
+            default:
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
             }
             SDL_RenderFillRect(renderer, &rect);
         }
@@ -174,14 +175,17 @@ void MapRenderer::renderImageGrayscale(const double* values, int width, int heig
     for (int i = 0; i < width * height; i++) {
         if (isfinite(values[i])) {
             converted[i] = colormap[max(min((int)(values[i] * multiplier), 255), 0)];
-        } else {
+        }
+        else {
             if (values[i] < 0) {
                 // Neg inf
                 converted[i] = { 0, 0, 200 };
-            } else if (values[i] > 0) {
+            }
+            else if (values[i] > 0) {
                 // Pos inf
                 converted[i] = { 200, 0, 0 };
-            } else {
+            }
+            else {
                 // NaN
                 converted[i] = { 255, 0, 255 };
             }
@@ -214,3 +218,5 @@ void MapRenderer::present() {
     SDL_RenderPresent(renderer);
     SDL_RenderClear(renderer);
 }
+
+#endif

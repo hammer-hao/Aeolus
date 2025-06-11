@@ -1,13 +1,15 @@
 #pragma once
+
+#ifdef BUILD_WITH_RENDERER
 #include "SDL.h"
 
 struct InfluenceMap;
 
 struct MapRenderer {
-  private:
+private:
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
-  public:
+public:
 
     MapRenderer() {}
     MapRenderer(const char* title, int x, int y, int w, int h, unsigned int flags = 0);
@@ -21,3 +23,4 @@ struct MapRenderer {
     void renderImageGrayscale(const double* values, int width, int height, int off_x, int off_y, int scale, bool normalized);
     void present();
 };
+#endif

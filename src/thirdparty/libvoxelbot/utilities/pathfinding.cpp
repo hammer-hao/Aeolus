@@ -1,3 +1,5 @@
+#ifdef BUILD_WITH_RENDERER
+
 #include "pathfinding.h"
 #include <cmath>
 #include <iostream>
@@ -160,3 +162,4 @@ vector<Point2DI> getPath(const Point2DI from, const Point2DI to, const Influence
     reverse(path.begin(), path.end());
     return path;
 }
+#endif
