@@ -366,24 +366,30 @@ if (BUILD_WITH_RENDERER)
 endif ()
 
 ########################################################################
-### 3.  Stand-alone caching tool  ######################################
+### 3.  Stand-alone caching tool  (skip when BUILD_FOR_LADDER=ON) ######
 ########################################################################
-add_executable(cache_mappings
-    thirdparty/libvoxelbot/caching/caching.cpp)   # compiles a 2nd time, now *with* main()
+if(NOT BUILD_FOR_LADDER)          # only build the tool in dev builds
+    add_executable(cache_mappings
+        thirdparty/libvoxelbot/caching/caching.cpp)   # keeps its main()
 
-target_include_directories(cache_mappings PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/libvoxelbot
-    ${CMAKE_SOURCE_DIR}/thirdparty/cereal)
+    target_include_directories(cache_mappings PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/libvoxelbot
+        ${CMAKE_SOURCE_DIR}/thirdparty/cereal)
 
-target_link_libraries(cache_mappings
-    PRIVATE
-        voxelbot_core       # uses the same object code
-        cpp_sc2)
+    target_link_libraries(cache_mappings
+        PRIVATE
+            voxelbot_core
+            cpp_sc2)
+endif()
 
 ########################################################################
 ### 4.  Convenience “build everything” target  #########################
 ########################################################################
-add_custom_target(all_binaries DEPENDS Aeolus cache_mappings)
+if(TARGET cache_mappings)
+    add_custom_target(all_binaries DEPENDS Aeolus cache_mappings)
+else()                            # ladder build only the bot
+    add_custom_target(all_binaries DEPENDS Aeolus)
+endif()
 
 if (MSVC)
     target_compile_options(Aeolus PRIVATE /W4 /EHsc)
