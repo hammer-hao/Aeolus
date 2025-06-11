@@ -118,6 +118,7 @@ namespace Aeolus
 			m_building_manager_ref->OnUnitDestroyed(unit);
 			m_door_manager_ref->onUnitDestroyed(unit);
 			m_placement_manager_ref->OnUnitDestroyed(unit);
+			m_unit_filter_manager_ref->OnUnitDestroyed(unit);
 		}
 
 		void _initializeManagers()
