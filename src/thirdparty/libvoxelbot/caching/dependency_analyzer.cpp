@@ -60,7 +60,7 @@ void DependencyAnalyzer::analyze() {
             continue;
         // if (unitType.unit_type_id != UNIT_TYPEID::ZERG_GREATERSPIRE) continue;
 
-        if (unitType.ability_id != ABILITY_ID::INVALID) {
+        if (unitType.ability_id != ABILITY_ID::SMART) {
             // cout << "Ability: " << AbilityTypeToName(unitType.ability_id) << endl;
             try {
                 auto requiredUnitOptions = abilityToCasterUnit(unitType.ability_id);
