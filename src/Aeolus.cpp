@@ -307,27 +307,6 @@ namespace Aeolus
     // Custom macro logic
     void AeolusBot::Macro() {
         m_currentState->macro(*this);
-
-        if (Observation()->GetGameLoop() % 100 == 50)
-        {
-            auto ownAttacking = ManagerMediator::getInstance().GetUnitsFromRole(*this, constants::UnitRole::ATTACKING);
-            std::vector<::sc2::UNIT_TYPEID> own_army;
-            std::vector<::sc2::UNIT_TYPEID> opponent_army;
-
-            for (const auto* unit : ownAttacking) own_army.push_back(unit->unit_type);
-            auto opponent_units = ManagerMediator::getInstance().GetAllSeenEnemyUnits(*this);
-
-            for (const auto& unit_type : opponent_units)
-            {
-                if (unit_type != ::sc2::UNIT_TYPEID::PROTOSS_PROBE &&
-                    unit_type != ::sc2::UNIT_TYPEID::TERRAN_SCV &&
-                    unit_type != ::sc2::UNIT_TYPEID::ZERG_DRONE)
-                    opponent_army.push_back(unit_type);
-            }
-
-            ManagerMediator::getInstance().PredictEngagement(*this, own_army, opponent_army);
-
-        }
     }
 
     void AeolusBot::Micro()

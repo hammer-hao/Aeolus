@@ -74,17 +74,27 @@ namespace Aeolus
         if (aeolusbot.Observation()->GetGameLoop() % 50 == 0)
             std::cout << "current gameloop: " << aeolusbot.Observation()->GetGameLoop() << std::endl;
 
-        ::sc2::Units allAttacking = ManagerMediator::getInstance().GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
-        if (allAttacking.size() >= aeolusbot.getMoveOutSupply())
+        if (aeolusbot.Observation()->GetGameLoop() % 100 == 0)
         {
-            int armyValue = 0;
-            for (const auto* unit : allAttacking)
+            auto ownAttacking = ManagerMediator::getInstance().GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
+            std::vector<::sc2::UNIT_TYPEID> own_army;
+            std::vector<::sc2::UNIT_TYPEID> opponent_army;
+
+            for (const auto* unit : ownAttacking) own_army.push_back(unit->unit_type);
+            auto opponent_units = ManagerMediator::getInstance().GetAllSeenEnemyUnits(aeolusbot);
+
+            for (const auto& unit_type : opponent_units)
             {
-                auto cost = ManagerMediator::getInstance().GetUnitCost(aeolusbot, unit->unit_type);
-                armyValue += cost.first; armyValue += cost.second;
+                if (unit_type != ::sc2::UNIT_TYPEID::PROTOSS_PROBE &&
+                    unit_type != ::sc2::UNIT_TYPEID::TERRAN_SCV &&
+                    unit_type != ::sc2::UNIT_TYPEID::ZERG_DRONE &&
+                    unit_type != ::sc2::UNIT_TYPEID::TERRAN_MULE &&
+                    unit_type != ::sc2::UNIT_TYPEID::ZERG_OVERLORD)
+                    opponent_army.push_back(unit_type);
             }
 
-            if (armyValue > m_consolidateValue) aeolusbot.ChangeState(MakeState<ForwardPressureState>());
+            bool won_engagement = ManagerMediator::getInstance().PredictEngagement(aeolusbot, own_army, opponent_army);
+            if (won_engagement) aeolusbot.ChangeState(MakeState<ForwardPressureState>());
         }
 	}
 

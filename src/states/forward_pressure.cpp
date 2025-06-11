@@ -78,6 +78,27 @@ namespace Aeolus
             < aeolusbot.getMoveOutSupply())
             aeolusbot.ChangeState(MakeState<ConsolidateState>());
         */
+
+        if (aeolusbot.Observation()->GetGameLoop() % 100 == 50)
+        {
+            auto ownAttacking = ManagerMediator::getInstance().GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
+            std::vector<::sc2::UNIT_TYPEID> own_army;
+            std::vector<::sc2::UNIT_TYPEID> opponent_army;
+
+            for (const auto* unit : ownAttacking) own_army.push_back(unit->unit_type);
+            auto opponent_units = ManagerMediator::getInstance().GetAllSeenEnemyUnits(aeolusbot);
+
+            for (const auto& unit_type : opponent_units)
+            {
+                if (unit_type != ::sc2::UNIT_TYPEID::PROTOSS_PROBE &&
+                    unit_type != ::sc2::UNIT_TYPEID::TERRAN_SCV &&
+                    unit_type != ::sc2::UNIT_TYPEID::ZERG_DRONE)
+                    opponent_army.push_back(unit_type);
+            }
+
+            bool won_engagement = ManagerMediator::getInstance().PredictEngagement(aeolusbot, own_army, opponent_army);
+            if (!won_engagement) aeolusbot.ChangeState(MakeState<ConsolidateState>());
+        }
 	}
 
 	void ForwardPressureState::micro(AeolusBot& aeolusbot)
@@ -215,6 +236,7 @@ namespace Aeolus
 
     void ForwardPressureState::OnUnitDestroyed(AeolusBot& aeolusbot, const ::sc2::Unit* unit)
     {
+        /*
         const uint64_t window = 672; // 30 seconds window
         uint64_t currentLoop = aeolusbot.Observation()->GetGameLoop();
 
@@ -252,13 +274,12 @@ namespace Aeolus
                 std::cout << "[State] Forward pressure: trading badly, consolidate and tech switching..." << std::endl;
                 aeolusbot.ChangeState(MakeState<ConsolidateState>(static_cast<int>(ownTotalLoss * 1.5)));
             }
-            /*
             std::cout << "known enemy units: " << std::endl;
             for (const auto& unit_type : ManagerMediator::getInstance().GetAllSeenEnemyUnits(aeolusbot))
             {
                 std::cout << ::sc2::UnitTypeToName(unit_type) << '\n';
             }
-            */
         }
+        */
     }
 }
