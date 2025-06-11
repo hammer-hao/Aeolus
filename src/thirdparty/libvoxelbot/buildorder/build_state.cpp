@@ -103,7 +103,7 @@ BuildState::BuildState(const ObservationInterface* observation, Unit::Alliance a
                 if (event.caster == UNIT_TYPEID::PROTOSS_PROBE) {
                     // Probes are special cased as they are not busy for the whole duration of the build.
                     // Assume the probe will be free in a few seconds
-                    addEvent(BuildEvent(BuildEventType::MakeUnitAvailable, time + min(remainingTime, 4.0f), event.caster, sc2::ABILITY_ID::INVALID));
+                    addEvent(BuildEvent(BuildEventType::MakeUnitAvailable, time + min(remainingTime, 4.0f), event.caster, sc2::ABILITY_ID::SMART));
                 }
 
                 addEvent(event);
@@ -721,7 +721,7 @@ bool BuildState::simulateBuildOrder(BuildOrderState& buildOrder, const function<
             lastEventInBuildOrder = max(lastEventInBuildOrder, newEvent.time);
             addEvent(newEvent);
             if (casterUnit->type == UNIT_TYPEID::PROTOSS_PROBE) {
-                addEvent(BuildEvent(BuildEventType::MakeUnitAvailable, time + 6, UNIT_TYPEID::PROTOSS_PROBE, ABILITY_ID::INVALID));
+                addEvent(BuildEvent(BuildEventType::MakeUnitAvailable, time + 6, UNIT_TYPEID::PROTOSS_PROBE, ABILITY_ID::SMART));
             }
 
             if (callback != nullptr)
