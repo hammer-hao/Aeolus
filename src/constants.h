@@ -121,6 +121,9 @@ namespace Aeolus {
 			BUILD_WITH_SPECIFIC_WORKER,
 			GET_NUMBER_PENDING,
 			GET_BUILDING_TRACKER,
+
+			// CombatSimManager
+			PREDICT_ENGAGEMENT,
 		};
 
 		enum class UnitRole

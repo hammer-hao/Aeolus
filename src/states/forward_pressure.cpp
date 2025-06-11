@@ -252,12 +252,13 @@ namespace Aeolus
                 std::cout << "[State] Forward pressure: trading badly, consolidate and tech switching..." << std::endl;
                 aeolusbot.ChangeState(MakeState<ConsolidateState>(static_cast<int>(ownTotalLoss * 1.5)));
             }
-
+            /*
             std::cout << "known enemy units: " << std::endl;
             for (const auto& unit_type : ManagerMediator::getInstance().GetAllSeenEnemyUnits(aeolusbot))
             {
                 std::cout << ::sc2::UnitTypeToName(unit_type) << '\n';
             }
+            */
         }
     }
 }

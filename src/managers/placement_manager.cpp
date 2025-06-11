@@ -1149,6 +1149,8 @@ namespace Aeolus
 			end2 = twoEnds.second;
 		}
 
+		/*
+
 #ifdef BUILD_WITH_RENDERER
 
 		auto* debug = m_bot.Debug();
@@ -1187,6 +1189,8 @@ namespace Aeolus
 
 		debug->SendDebug();
 #endif
+		
+		*/
 
 		std::pair<int, int> pylonPos = { 0 , 0 };
 

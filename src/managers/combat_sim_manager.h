@@ -3,6 +3,7 @@
 #include <memory>
 #include "manager.h"
 #include "../thirdparty/libvoxelbot/combat/simulator.h"
+#include <sc2api/sc2_typeenums.h>
 
 namespace Aeolus
 {
@@ -35,5 +36,7 @@ namespace Aeolus
 		AeolusBot& m_bot;
 
 		std::unique_ptr<CombatPredictor> m_simulator;
+
+		bool _predictEngagement(std::vector<::sc2::UNIT_TYPEID> own_army, std::vector<::sc2::UNIT_TYPEID> opponent_army);
 	};
 }

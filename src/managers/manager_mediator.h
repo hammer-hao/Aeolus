@@ -985,6 +985,24 @@ namespace Aeolus
 				baseIndex
 			);
 		}
+
+		// combat sim manager
+
+		/**
+		* @brief Given a list of unit types for our own army and the opponent army,
+		* simulates the engagement and returns whether our army is predicted to come out
+		* on top.
+		*/
+		bool PredictEngagement(AeolusBot& aeolusbot, std::vector<::sc2::UNIT_TYPEID> own_army, std::vector<::sc2::UNIT_TYPEID> opponent_army)
+		{
+			return ManagerRequest<bool, std::vector<::sc2::UNIT_TYPEID>, std::vector<::sc2::UNIT_TYPEID>>(
+				aeolusbot,
+				constants::ManagerName::COMBAT_SIM_MANAGER,
+				constants::ManagerRequestType::PREDICT_ENGAGEMENT,
+				own_army,
+				opponent_army
+			);
+		}
 	};
 }
 
