@@ -22,6 +22,7 @@ namespace Aeolus {
 			PLACEMENT_MANAGER,
 			BUILDING_MANAGER,
 			BUDGET_MANAGER,
+			COMBAT_SIM_MANAGER
 		};
 
 		enum class ManagerRequestType
