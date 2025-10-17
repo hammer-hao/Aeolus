@@ -25,7 +25,7 @@ namespace Aeolus
 		m_height_map(aeolusbot.Observation()->GetGameInfo()),
 		m_placement_grid(aeolusbot.Observation()->GetGameInfo())
 	{
-		m_expansion_map.resize(16);
+		m_expansion_map.resize(24); // leylines has WAYY to many bases lol, bumping this up
 	}
 
 	std::any PlacementManager::ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args)
