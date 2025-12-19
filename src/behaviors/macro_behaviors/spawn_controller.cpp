@@ -292,6 +292,8 @@ namespace Aeolus
 					continue;
 				}
 
+				if (position == m_lastWarpInSpot) continue;
+
 				if (utils::canPlaceStructure(static_cast<int>(std::round(position.x - 1)), static_cast<int>(std::round(position.y - 1)), 2,
 					placementGrid))
 				{
@@ -304,6 +306,8 @@ namespace Aeolus
 						::sc2::Colors::Blue);
 					aeolusbot.Debug()->SendDebug();
 					*/
+
+					m_lastWarpInSpot = position;
 
 					return position;
 				}

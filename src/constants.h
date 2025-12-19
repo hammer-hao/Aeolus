@@ -124,6 +124,7 @@ namespace Aeolus {
 
 			// CombatSimManager
 			PREDICT_ENGAGEMENT,
+			GET_OPTIMAL_ARMY_COMPOSITION,
 		};
 
 		enum class UnitRole

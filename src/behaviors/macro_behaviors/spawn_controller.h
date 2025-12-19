@@ -20,6 +20,7 @@ namespace Aeolus
 			m_army_composition_map(army_composition_map),
 			m_spawn_target(spawn_target)
 		{
+			m_lastWarpInSpot = ::sc2::Point2D(0, 0);
 		}
 		~SpawnController() override = default;
 
@@ -44,5 +45,7 @@ namespace Aeolus
 		::sc2::Point2D _calculateWarpInSpot(AeolusBot& aeolusbot, ::sc2::Point2D target);
 
 		bool _spawnUnits(AeolusBot& aeolusbot);
+
+		::sc2::Point2D m_lastWarpInSpot;
 	};
 }

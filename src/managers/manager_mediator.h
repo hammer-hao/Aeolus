@@ -1003,6 +1003,20 @@ namespace Aeolus
 				opponent_army
 			);
 		}
+
+		/**
+		* 
+		*/
+		std::pair<std::pair<::sc2::UNIT_TYPEID, int>, std::vector<::sc2::UPGRADE_ID>> 
+			getOptimalArmyComp(AeolusBot& aeolusbot, std::vector<::sc2::UNIT_TYPEID> opponent_army)
+		{
+			return ManagerRequest<std::pair<std::pair<::sc2::UNIT_TYPEID, int>, std::vector<::sc2::UPGRADE_ID>>, std::vector<::sc2::UNIT_TYPEID>>(
+				aeolusbot,
+				constants::ManagerName::COMBAT_SIM_MANAGER,
+				constants::ManagerRequestType::GET_OPTIMAL_ARMY_COMPOSITION,
+				opponent_army
+			);
+		}
 	};
 }
 

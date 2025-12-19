@@ -97,7 +97,13 @@ namespace Aeolus
             }
 
             bool won_engagement = ManagerMediator::getInstance().PredictEngagement(aeolusbot, own_army, opponent_army);
-            if (!won_engagement) aeolusbot.ChangeState(MakeState<ConsolidateState>());
+            if (!won_engagement)
+            {
+                aeolusbot.ChangeState(MakeState<ConsolidateState>());
+                std::cout << "Consolidating: Calculating best army composition..." << std::endl;
+
+                
+            }
         }
 	}
 
