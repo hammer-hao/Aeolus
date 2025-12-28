@@ -340,6 +340,7 @@ namespace Aeolus
 		if (unit_type == ::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL || unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPPRISM) result = ::sc2::UNIT_TYPEID::PROTOSS_ROBOTICSFACILITY;
 		else if (unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS) result = ::sc2::UNIT_TYPEID::PROTOSS_ROBOTICSFACILITY;
 		else if (unit_type == ::sc2::UNIT_TYPEID::PROTOSS_VOIDRAY) result = ::sc2::UNIT_TYPEID::PROTOSS_STARGATE;
+		else if (unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ORACLE) result = ::sc2::UNIT_TYPEID::PROTOSS_STARGATE;
 		else result = m_unit_data_cache[id].tech_requirement;
 		m_tech_requirement_cache[id] = result;
 		return result;

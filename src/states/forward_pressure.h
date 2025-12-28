@@ -35,6 +35,8 @@ namespace Aeolus
 
 		void _prismMicro(AeolusBot& aeolusbot, ::sc2::Units prisms, ::sc2::Point2D prismTarget);
 
+		void _oracleHarassMicro(AeolusBot& aeolusbot, ::sc2::Units oracles, std::vector<::sc2::Point2D> harassLocations);
+
 		int m_enteredAt;
 
 		std::deque<std::pair<uint64_t, int>> m_ownLosses;

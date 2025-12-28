@@ -133,7 +133,8 @@ namespace Aeolus {
 			BUILDING,
 			ATTACKING,
 			DOOR,
-			PRISM
+			PRISM,
+			ORACLE
 		};
 		std::string ManagerNameToString(ManagerName name);
 		std::string ManagerRequestTypeToString(ManagerRequestType requestType);

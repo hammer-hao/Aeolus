@@ -100,6 +100,10 @@ namespace Aeolus {
 		{
 			AssignRole(unit, constants::UnitRole::PRISM);
 		}
+		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ORACLE)
+		{
+			AssignRole(unit, constants::UnitRole::ORACLE);
+		}
 	}
 
 	void UnitRoleManager::OnUnitDestroyed(const ::sc2::Unit* unit)

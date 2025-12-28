@@ -13,6 +13,18 @@ namespace Aeolus
 		for (const auto& nexus : mediator.GetOwnReadyTownHalls(aeolusbot))
 		{
 			if (nexus->energy < 50) continue;
+			if (aeolusbot.Observation()->GetGameLoop() < 120) continue;
+
+			std::vector<::sc2::Point2D> startingPoints = { nexus->pos };
+			const auto nearUnits = ManagerMediator::getInstance().GetOwnUnitsInRange(aeolusbot, startingPoints, 12.0f);
+			for (const auto unit : nearUnits)
+			{
+				if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ORACLE)
+				{
+					aeolusbot.Actions()->UnitCommand(nexus, 4126, unit); // 4126 for energy recharge
+					return true;
+				}
+			}
 
 			for (const auto& structure : mediator.GetAllOwnStructures(aeolusbot))
 			{
