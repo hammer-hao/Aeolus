@@ -36,7 +36,8 @@ behaviors/micro_behaviors/stutter_unit_back.cpp
 behaviors/micro_behaviors/move.cpp
 behaviors/micro_behaviors/attack_target_unit.cpp
 behaviors/micro_behaviors/pick_unit_up.cpp
-behaviors/micro_behaviors/unload.cpp)
+behaviors/micro_behaviors/unload.cpp
+behaviors/micro_behaviors/use_ability.cpp)
 
 
 source_group("Header Files\\behaviors" FILES behaviors/behavior.h)
@@ -66,7 +67,8 @@ behaviors/micro_behaviors/stutter_unit_back.h
 behaviors/micro_behaviors/move.h
 behaviors/micro_behaviors/attack_target_unit.h
 behaviors/micro_behaviors/pick_unit_up.h
-behaviors/micro_behaviors/unload.h)
+behaviors/micro_behaviors/unload.h
+behaviors/micro_behaviors/use_ability.h)
 
 source_group("Source Files\\Managers" FILES 
     managers/hub.cpp
@@ -183,6 +185,7 @@ set(bot_sources
     behaviors/micro_behaviors/attack_target_unit.cpp
     behaviors/micro_behaviors/pick_unit_up.cpp
     behaviors/micro_behaviors/unload.cpp
+    behaviors/micro_behaviors/use_ability.cpp
     managers/hub.cpp
     managers/manager_mediator.cpp
     managers/path_manager.cpp
@@ -244,6 +247,7 @@ set(bot_headers
     behaviors/micro_behaviors/attack_target_unit.h
     behaviors/micro_behaviors/pick_unit_up.h
     behaviors/micro_behaviors/unload.h
+    behaviors/micro_behaviors/use_ability.h
     behaviors/behavior.h
     managers/hub.h
     managers/manager.h
