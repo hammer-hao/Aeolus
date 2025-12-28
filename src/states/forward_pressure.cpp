@@ -264,7 +264,7 @@ namespace Aeolus
             auto availableAbilities = aeolusbot.Query()->GetAbilitiesForUnit(oracle);
 
             // 1st priority: keep oracle safe
-            oracle_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+            if (oracle->shield / oracle->shield_max < 0.3) oracle_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
 
             ::sc2::Units workersInRange;
             std::copy_if(enemies_in_range[i].begin(), enemies_in_range[i].end(), std::back_inserter(workersInRange), [](const ::sc2::Unit* unit)
@@ -272,11 +272,16 @@ namespace Aeolus
                     return (constants::WORKER_TYPES.find(unit->unit_type) != constants::WORKER_TYPES.end());
                 }
             );
+            for (const auto enemy : enemies_in_range[i])
+            {
+                std::cout << ::sc2::UnitTypeToName(enemy->unit_type) << std::endl;
+            }
 
             if (!workersInRange.empty() && oracle->energy > 55.0) {
                 std::cout << "workers in range! " << std::endl;
                 for (const auto& availableAbility : availableAbilities.abilities)
                 {
+                    std::cout << ::sc2::AbilityTypeToName(availableAbility.ability_id) << std::endl;
                     if (availableAbility.ability_id == ::sc2::ABILITY_ID::BEHAVIOR_PULSARBEAMON)
                     {
                         // add activate pulsar beam to behavior
@@ -300,23 +305,22 @@ namespace Aeolus
             // 2nd priority: go to harass target / home for recharge
             ::sc2::Point2D pathTarget = harassLocation;
 
-            bool hasPulsarBeamOn = false;
-            bool hasPulsarBeamOff = false;
-
             for (const auto& availableAbility : availableAbilities.abilities)
             {
-                if (availableAbility.ability_id == ::sc2::ABILITY_ID::BEHAVIOR_PULSARBEAMON) hasPulsarBeamOn = true;
-                if (availableAbility.ability_id == ::sc2::ABILITY_ID::BEHAVIOR_PULSARBEAMOFF) hasPulsarBeamOff = true;
+                std::cout << ::sc2::AbilityTypeToName(availableAbility.ability_id) << std::endl;
+                if (availableAbility.ability_id == ::sc2::ABILITY_ID::BEHAVIOR_PULSARBEAMON)
+                {
+                    // currently no beam activated
+                    if (oracle->energy < 50.0f)
+                    {
+                        pathTarget = utils::GetClosestUnitTo(
+                            oracle->pos,
+                            ManagerMediator::getInstance().GetOwnReadyTownHalls(aeolusbot)
+                        )->pos;
+                    }
+                    break;
+                }
             }
-
-            if (!hasPulsarBeamOff && (!hasPulsarBeamOn || (hasPulsarBeamOn && oracle->energy < 50.0f))) 
-            {
-                pathTarget = utils::GetClosestUnitTo(
-                    oracle->pos,
-                    ManagerMediator::getInstance().GetOwnReadyTownHalls(aeolusbot)
-                )->pos;
-            }
-
             oracle_behavior->AddBehavior(std::make_unique<PathToTarget>(pathTarget));
 
             aeolusbot.RegisterBehavior(std::move(oracle_behavior));

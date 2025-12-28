@@ -227,7 +227,6 @@ namespace Aeolus
 			}
 
 			// return the chosen strategy
-			return BuildOrderEnum::STALKER_VOIDRAY;
 			return mab.chooseStrategy();
 		}
 	} // namespace utils

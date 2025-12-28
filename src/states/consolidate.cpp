@@ -255,7 +255,7 @@ namespace Aeolus
             auto availableAbilities = aeolusbot.Query()->GetAbilitiesForUnit(oracle);
 
             // 1st priority: keep oracle safe
-            oracle_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+            if (oracle->shield / oracle->shield_max < 0.3) oracle_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
 
             ::sc2::Units workersInRange;
             std::copy_if(enemies_in_range[i].begin(), enemies_in_range[i].end(), std::back_inserter(workersInRange), [](const ::sc2::Unit* unit)
