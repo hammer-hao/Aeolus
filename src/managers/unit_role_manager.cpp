@@ -104,6 +104,10 @@ namespace Aeolus {
 		{
 			AssignRole(unit, constants::UnitRole::ORACLE);
 		}
+		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_OBSERVER)
+		{
+			AssignRole(unit, constants::UnitRole::MOBILE_DETECTION);
+		}
 	}
 
 	void UnitRoleManager::OnUnitDestroyed(const ::sc2::Unit* unit)

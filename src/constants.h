@@ -22,7 +22,8 @@ namespace Aeolus {
 			PLACEMENT_MANAGER,
 			BUILDING_MANAGER,
 			BUDGET_MANAGER,
-			COMBAT_SIM_MANAGER
+			COMBAT_SIM_MANAGER,
+			ARMY_COMPOSITION_MANAGER
 		};
 
 		enum class ManagerRequestType
@@ -134,7 +135,8 @@ namespace Aeolus {
 			ATTACKING,
 			DOOR,
 			PRISM,
-			ORACLE
+			ORACLE,
+			MOBILE_DETECTION,
 		};
 		std::string ManagerNameToString(ManagerName name);
 		std::string ManagerRequestTypeToString(ManagerRequestType requestType);

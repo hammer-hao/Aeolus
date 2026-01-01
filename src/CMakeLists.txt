@@ -18,6 +18,7 @@ behaviors/macro_behaviors/mining.cpp
 behaviors/macro_behaviors/build_workers.cpp
 behaviors/macro_behaviors/build_structure.cpp
 behaviors/macro_behaviors/build_geysers.cpp
+behaviors/macro_behaviors/build_detection.cpp
 behaviors/macro_behaviors/auto_supply.cpp
 behaviors/macro_behaviors/production_controller.cpp
 behaviors/macro_behaviors/spawn_controller.cpp
@@ -47,6 +48,7 @@ behaviors/macro_behaviors/mining.h
 behaviors/macro_behaviors/build_workers.h
 behaviors/macro_behaviors/build_structure.h
 behaviors/macro_behaviors/build_geysers.h
+behaviors/macro_behaviors/build_detection.h
 behaviors/macro_behaviors/auto_supply.h
 behaviors/macro_behaviors/production_controller.h
 behaviors/macro_behaviors/spawn_controller.h
@@ -84,7 +86,8 @@ source_group("Source Files\\Managers" FILES
     managers/unit_role_manager.cpp
     managers/budget_manager.cpp
     managers/building_manager.cpp
-    managers/combat_sim_manager.cpp)
+    managers/combat_sim_manager.cpp
+    managers/army_composition_manager.cpp)
 
 source_group("Header Files\\Managers" FILES 
     managers/hub.h
@@ -101,7 +104,8 @@ source_group("Header Files\\Managers" FILES
     managers/unit_role_manager.h
     managers/building_manager.h
     managers/budget_manager.h
-    managers/combat_sim_manager.h)
+    managers/combat_sim_manager.h
+    managers/army_composition_manager.h)
 
 source_group("Source Files\\states" FILES
     states/forward_pressure.cpp
@@ -168,6 +172,7 @@ set(bot_sources
     behaviors/macro_behaviors/build_workers.cpp
     behaviors/macro_behaviors/build_structure.cpp
     behaviors/macro_behaviors/build_geysers.cpp
+    behaviors/macro_behaviors/build_detection.cpp
     behaviors/macro_behaviors/expand.cpp
     behaviors/macro_behaviors/auto_supply.cpp
     behaviors/macro_behaviors/production_controller.cpp
@@ -200,6 +205,7 @@ set(bot_sources
     managers/target_manager.cpp
     managers/building_manager.cpp
     managers/combat_sim_manager.cpp
+    managers/army_composition_manager.cpp
     states/consolidate.cpp
     states/forward_pressure.cpp
     states/build_order_state.cpp
@@ -228,6 +234,7 @@ set(bot_headers
     behaviors/macro_behaviors/build_workers.h
     behaviors/macro_behaviors/build_structure.h
     behaviors/macro_behaviors/build_geysers.h
+    behaviors/macro_behaviors/build_detection.h
     behaviors/macro_behaviors/expand.h
     behaviors/macro_behaviors/auto_supply.h
     behaviors/macro_behaviors/production_controller.h
@@ -264,6 +271,7 @@ set(bot_headers
     managers/target_manager.h
     managers/building_manager.h
     managers/combat_sim_manager.h
+    managers/army_composition_manager.h
     states/bot_state.h
     states/consolidate.h
     states/forward_pressure.h

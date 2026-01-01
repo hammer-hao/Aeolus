@@ -228,16 +228,10 @@ namespace Aeolus
                     return (constants::WORKER_TYPES.find(unit->unit_type) != constants::WORKER_TYPES.end());
                 }
             );
-            for (const auto enemy : enemies_in_range[i])
-            {
-                std::cout << ::sc2::UnitTypeToName(enemy->unit_type) << std::endl;
-            }
 
             if (!workersInRange.empty() && oracle->energy > 55.0) {
-                std::cout << "workers in range! " << std::endl;
                 for (const auto& availableAbility : availableAbilities.abilities)
                 {
-                    std::cout << ::sc2::AbilityTypeToName(availableAbility.ability_id) << std::endl;
                     if (availableAbility.ability_id == ::sc2::ABILITY_ID::BEHAVIOR_PULSARBEAMON)
                     {
                         // add activate pulsar beam to behavior
@@ -263,14 +257,13 @@ namespace Aeolus
 
             for (const auto& availableAbility : availableAbilities.abilities)
             {
-                std::cout << ::sc2::AbilityTypeToName(availableAbility.ability_id) << std::endl;
                 if (availableAbility.ability_id == ::sc2::ABILITY_ID::BEHAVIOR_PULSARBEAMON)
                 {
                     // currently no beam activated
                     if (oracle->energy < 50.0f)
                     {
                         pathTarget = utils::GetClosestUnitTo(
-                            oracle->pos, 
+                            oracle->pos,
                             ManagerMediator::getInstance().GetOwnReadyTownHalls(aeolusbot)
                         )->pos;
                     }

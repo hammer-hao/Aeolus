@@ -8,9 +8,11 @@
 #include "../behaviors/macro_behaviors/auto_supply.h"
 #include "../behaviors/macro_behaviors/build_geysers.h"
 #include "../behaviors/macro_behaviors/expand.h"
+#include "../behaviors/macro_behaviors/tech_up.h"
 #include "../behaviors/macro_behaviors/production_controller.h"
 #include "../behaviors/macro_behaviors/spawn_controller.h"
 #include "../behaviors/macro_behaviors/upgrades_controller.h"
+#include "../behaviors/macro_behaviors/build_detection.h"
 
 #include "../behaviors/micro_behaviors/micro_behavior.h"
 #include "../behaviors/micro_behaviors/a_move.h"
@@ -56,6 +58,7 @@ namespace Aeolus
         aeolusbot.RegisterBehavior(std::make_unique<BuildGeysers>());
         aeolusbot.RegisterBehavior(std::make_unique<Expand>());
         aeolusbot.RegisterBehavior(std::make_unique<AutoSupply>());
+        aeolusbot.RegisterBehavior(std::make_unique<BuildDetection>()); // don't force detection
         aeolusbot.RegisterBehavior(std::make_unique<ProductionController>(aeolusbot.getArmyComp()));
         aeolusbot.RegisterBehavior(std::make_unique<SpawnController>(aeolusbot.getArmyComp()));
         aeolusbot.RegisterBehavior(std::make_unique<UpgradesController>(
@@ -103,8 +106,6 @@ namespace Aeolus
             {
                 aeolusbot.ChangeState(MakeState<ConsolidateState>());
                 std::cout << "Consolidating: Calculating best army composition..." << std::endl;
-
-                
             }
         }
 	}
@@ -123,6 +124,16 @@ namespace Aeolus
         std::vector<::sc2::Point2D> harassLocations = aeolusbot.Observation()->GetGameInfo().enemy_start_locations;
         ::sc2::Units oracles = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::ORACLE);
         _oracleHarassMicro(aeolusbot, oracles, harassLocations);
+
+        // observer micro
+        ::sc2::Units observers = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::MOBILE_DETECTION);
+        for (const auto* observer : observers)
+        {
+            auto observer_behavior = std::make_unique<MicroBehavior>(observer);
+            observer_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+            observer_behavior->AddBehavior(std::make_unique<PathToTarget>(mediator.GetAtttackTarget(aeolusbot)));
+            aeolusbot.RegisterBehavior(std::move(observer_behavior));
+        }
 	}
 
     void ForwardPressureState::_micro(AeolusBot& aeolusbot, ::sc2::Units forces, ::sc2::Point2D target)
@@ -272,16 +283,10 @@ namespace Aeolus
                     return (constants::WORKER_TYPES.find(unit->unit_type) != constants::WORKER_TYPES.end());
                 }
             );
-            for (const auto enemy : enemies_in_range[i])
-            {
-                std::cout << ::sc2::UnitTypeToName(enemy->unit_type) << std::endl;
-            }
 
             if (!workersInRange.empty() && oracle->energy > 55.0) {
-                std::cout << "workers in range! " << std::endl;
                 for (const auto& availableAbility : availableAbilities.abilities)
                 {
-                    std::cout << ::sc2::AbilityTypeToName(availableAbility.ability_id) << std::endl;
                     if (availableAbility.ability_id == ::sc2::ABILITY_ID::BEHAVIOR_PULSARBEAMON)
                     {
                         // add activate pulsar beam to behavior
@@ -307,7 +312,6 @@ namespace Aeolus
 
             for (const auto& availableAbility : availableAbilities.abilities)
             {
-                std::cout << ::sc2::AbilityTypeToName(availableAbility.ability_id) << std::endl;
                 if (availableAbility.ability_id == ::sc2::ABILITY_ID::BEHAVIOR_PULSARBEAMON)
                 {
                     // currently no beam activated
