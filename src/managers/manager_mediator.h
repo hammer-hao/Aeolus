@@ -1017,6 +1017,38 @@ namespace Aeolus
 				opponent_army
 			);
 		}
+
+		// Scouting Manager
+
+		/**
+		* @brief Registers a worker unit as the scout.
+		* @param scoutUnit: The unit to send out as the scout.
+		* @param basesToScout: bases indices we want scouted.
+		*/
+		bool registerScout(AeolusBot& aeolusbot, const ::sc2::Unit* scoutUnit, std::vector<int> basesToScout)
+		{
+			return ManagerRequest<bool, const ::sc2::Unit*, std::vector<int>>(
+				aeolusbot,
+				constants::ManagerName::SCOUTING_MANAGER,
+				constants::ManagerRequestType::REGISTER_SCOUT,
+				scoutUnit,
+				basesToScout
+			);
+		}
+
+		/**
+		* @brief Checks the status of a scouting worker, returns its current next waypoint. Will return {0, 0} if all waypoint has completed.
+		* @param scoutingUnit: The scouting Unit to check waypoint for.
+		*/
+		::sc2::Point2D checkScoutingWayPoint(AeolusBot& aeolusbot, const ::sc2::Unit* scoutUnit)
+		{
+			return ManagerRequest<::sc2::Point2D, const ::sc2::Unit*> (
+				aeolusbot,
+				constants::ManagerName::SCOUTING_MANAGER,
+				constants::ManagerRequestType::CHECK_SCOUT_TO_NEXT_WAYPOINT,
+				scoutUnit
+				);
+		}
 	};
 }
 

@@ -13,6 +13,7 @@
 #include "../behaviors/macro_behaviors/spawn_controller.h"
 #include "../behaviors/macro_behaviors/upgrades_controller.h"
 #include "../behaviors/macro_behaviors/build_detection.h"
+#include "../behaviors/macro_behaviors/scout.h"
 
 #include "../behaviors/micro_behaviors/micro_behavior.h"
 #include "../behaviors/micro_behaviors/a_move.h"
@@ -49,6 +50,7 @@ namespace Aeolus
         // std::cout << "Aeolus: Macroing..." << std::endl;
         // Implement custom logic for gathering resources, expanding, etc.
         aeolusbot.RegisterBehavior(std::make_unique<Mining>());
+        aeolusbot.RegisterBehavior(std::make_unique<Scout>());
         aeolusbot.RegisterBehavior(std::make_unique<BuildWorkers>(
             std::min(ManagerMediator::getInstance().GetOwnReadyTownHalls(aeolusbot).size() * 22, static_cast<size_t>(86))
         ));

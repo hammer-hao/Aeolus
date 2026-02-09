@@ -22,6 +22,7 @@ namespace Aeolus {
 			case ManagerName::BUDGET_MANAGER: return "BudgetManager";
 			case ManagerName::COMBAT_SIM_MANAGER: return "CombatSimManager";
 			case ManagerName::ARMY_COMPOSITION_MANAGER: return "ArmyCompositionManager";
+			case ManagerName::SCOUTING_MANAGER: return "ScoutingManager";
 			default: throw std::invalid_argument("Unknown Manager Name");
 			}
 		}

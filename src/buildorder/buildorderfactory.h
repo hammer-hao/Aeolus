@@ -7,6 +7,7 @@
 #include "upgradebuildorderstep.h"
 #include "unitbuildorderstep.h"
 #include "chronobuildorderstep.h"
+#include "scoutingbuildorderstep.h"
 #include <stdexcept>
 
 #include <sc2api/sc2_unit.h>
@@ -23,6 +24,7 @@ namespace Aeolus
 			{
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(13, ::sc2::UNIT_TYPEID::PROTOSS_PYLON, true));
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(15, ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, true));
+				toAdd.push_back(std::make_unique<ScoutingBuildOrderStep>(15, true, true));
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(16, ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR, false));
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(16, ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR, false));
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(18, ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, true));

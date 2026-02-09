@@ -23,7 +23,8 @@ namespace Aeolus {
 			BUILDING_MANAGER,
 			BUDGET_MANAGER,
 			COMBAT_SIM_MANAGER,
-			ARMY_COMPOSITION_MANAGER
+			ARMY_COMPOSITION_MANAGER,
+			SCOUTING_MANAGER,
 		};
 
 		enum class ManagerRequestType
@@ -126,6 +127,10 @@ namespace Aeolus {
 			// CombatSimManager
 			PREDICT_ENGAGEMENT,
 			GET_OPTIMAL_ARMY_COMPOSITION,
+
+			// ScoutingManager
+			REGISTER_SCOUT,
+			CHECK_SCOUT_TO_NEXT_WAYPOINT,
 		};
 
 		enum class UnitRole
@@ -137,6 +142,7 @@ namespace Aeolus {
 			PRISM,
 			ORACLE,
 			MOBILE_DETECTION,
+			SCOUTING,
 		};
 		std::string ManagerNameToString(ManagerName name);
 		std::string ManagerRequestTypeToString(ManagerRequestType requestType);

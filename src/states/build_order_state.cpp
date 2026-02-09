@@ -5,6 +5,7 @@
 #include "../behaviors/macro_behaviors/chrono_controller.h"
 #include "../behaviors/macro_behaviors/repower_structures.h"
 #include "../behaviors/macro_behaviors/auto_supply.h"
+#include "../behaviors/macro_behaviors/scout.h"
 
 #include "forward_pressure.h"
 
@@ -42,6 +43,7 @@ namespace Aeolus
 
 		// things to keep track of while the build order is running
 		aeolusbot.RegisterBehavior(std::make_unique<Mining>());
+        aeolusbot.RegisterBehavior(std::make_unique<Scout>());
 		aeolusbot.RegisterBehavior(std::make_unique<BuildWorkers>(
 			std::min(ManagerMediator::getInstance().GetOwnReadyTownHalls(aeolusbot).size() * 22, static_cast<size_t>(86))
 		));

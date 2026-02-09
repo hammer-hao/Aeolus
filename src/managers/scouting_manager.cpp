@@ -1,0 +1,142 @@
+#include "scouting_manager.h"
+
+#include "manager.h"
+#include "manager_mediator.h"
+#include "../../utils/position_utils.h"
+#include "../../utils/unit_utils.h"
+#include "../../Aeolus.h"
+#include <tuple>
+#include <unordered_map>
+#include <any>
+
+
+namespace Aeolus 
+{
+	std::any ScoutingManager::ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args)
+	{
+		switch (request)
+		{
+		case constants::ManagerRequestType::REGISTER_SCOUT:
+		{
+			auto params = std::any_cast<std::tuple<const ::sc2::Unit*, std::vector<int>>>(args);
+			const ::sc2::Unit* scoutUnit = std::get<0>(params);
+			std::vector<int> basesToScout = std::get<1>(params);
+			return _registerScout(scoutUnit, basesToScout);
+		}
+		case constants::ManagerRequestType::CHECK_SCOUT_TO_NEXT_WAYPOINT:
+		{
+			auto params = std::any_cast<std::tuple<const ::sc2::Unit*>>(args);
+			const ::sc2::Unit* scoutUnit = std::get<0>(params);
+			return _checkScoutToNextWaypoint(scoutUnit);
+		}
+		default:
+			return 0;
+		}
+	}
+
+	void ScoutingManager::update(int iteration)
+	{
+	}
+
+	void ScoutingManager::Initialize()
+	{
+		auto& mediator = ManagerMediator::getInstance();
+		for (const auto& expansionLocation : mediator.GetExpansionLocations(m_bot))
+		{
+			m_behind_mineral_pos_cache.push_back(_getBehindMineralPositions(expansionLocation));
+		}
+	}
+
+	std::vector<::sc2::Point2D> ScoutingManager::_getBehindMineralPositions(::sc2::Point2D expansion_location)
+	{
+		auto& mediator = ManagerMediator::getInstance();
+
+		::sc2::Units mineralFields = mediator.GetAllMineralPatches(m_bot);
+		::sc2::Units closeMineralFields = utils::GetCloserThan(mineralFields, 10.0f, expansion_location);
+
+		std::vector<::sc2::Point2D> result;
+
+		if (closeMineralFields.size() >= 2)
+		{
+			// get the center pos of all mineral fields
+			float tot_x = 0.0f, tot_y = 0.0f;
+			size_t sizeMineralFields = closeMineralFields.size();
+			for (const auto* mineralField : closeMineralFields)
+			{
+				tot_x += mineralField->pos.x;
+				tot_y += mineralField->pos.y;
+			}
+			::sc2::Point2D centerMf(tot_x / sizeMineralFields, tot_y / sizeMineralFields);
+			auto furthestMfs = utils::SortByDistanceTo(closeMineralFields, centerMf, true);
+			result.push_back(utils::GetPositionTowards(
+				expansion_location, 
+				::sc2::Point2D(furthestMfs[0]->pos.x, furthestMfs[0]->pos.y), 
+				9.0f));
+			result.push_back(utils::GetPositionTowards(
+				expansion_location,
+				centerMf,
+				9.0f));
+			result.push_back(utils::GetPositionTowards(
+				expansion_location,
+				::sc2::Point2D(furthestMfs[1]->pos.x, furthestMfs[1]->pos.y),
+				9.0f));
+		}
+		else
+		{
+			// give up if something goes wrong lol
+			::sc2::Point2D pMax = m_bot.Observation()->GetGameInfo().playable_max;
+			::sc2::Point2D pMin = m_bot.Observation()->GetGameInfo().playable_min;
+			::sc2::Point2D mapCenter((pMax.x + pMin.x) / 2, (pMax.y + pMin.y) / 2);
+			result.push_back(utils::GetPositionTowards(expansion_location, mapCenter, 5.0f));
+			result.push_back(utils::GetPositionTowards(expansion_location, mapCenter, 5.0f));
+			result.push_back(utils::GetPositionTowards(expansion_location, mapCenter, 5.0f));
+		}
+		return result;
+	}
+
+	bool ScoutingManager::_registerScout(const ::sc2::Unit* scoutUnit, std::vector<int> expansionsToScout)
+	{
+		std::queue<::sc2::Point2D> posQueue;
+		for (const auto& exp : expansionsToScout)
+		{
+			for (const auto& pos : m_behind_mineral_pos_cache[exp])
+			{
+				posQueue.push(pos);
+			}
+		}
+		m_scouting_paths.insert({ scoutUnit->tag, posQueue });
+		return true;
+	}
+
+	::sc2::Point2D ScoutingManager::_checkScoutToNextWaypoint(const ::sc2::Unit* scoutUnit)
+	{
+		auto& mediator = ManagerMediator::getInstance();
+
+		auto& wayPointQueue = m_scouting_paths[scoutUnit->tag];
+		
+		if (wayPointQueue.empty())
+		{
+			// scout unit has cleared all the waypoints, it has fulfilled
+			// its duty and is no longer a scout unit
+			mediator.AssignRole(m_bot, scoutUnit, constants::UnitRole::GATHERING);
+			return ::sc2::Point2D({ 0.0f, 0.0f });
+		}
+		else if (::sc2::DistanceSquared2D(scoutUnit->pos, wayPointQueue.front()) > 1.0f)
+		{
+			// scout unit has not yet reached current waypoint, return current waypoint
+			return wayPointQueue.front();
+		}
+		else
+		{
+			// scout unit is reaching the next available waypoint
+			// move to the next waypoint
+			wayPointQueue.pop();
+			if (wayPointQueue.empty()) {
+				mediator.AssignRole(m_bot, scoutUnit, constants::UnitRole::GATHERING);
+				return { 0.0f, 0.0f };
+			}
+			return wayPointQueue.front();
+		}
+	}
+
+} // namespace aeolus

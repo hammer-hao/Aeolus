@@ -154,13 +154,15 @@ source_group("Header Files\\buildorder" FILES
     buildorder/buildorderstep.h
     buildorder/structurebuildorderstep.h
     buildorder/unitbuildorderstep.h
-    buildorder/upgradebuildorderstep.h)
+    buildorder/upgradebuildorderstep.h
+    buildorder/scoutingbuildorderstep.h)
 
 source_group("Source Files\\buildorder" FILES 
     buildorder/buildorder.cpp
     buildorder/structurebuildorderstep.cpp
     buildorder/unitbuildorderstep.cpp
-    buildorder/upgradebuildorderstep.cpp)
+    buildorder/upgradebuildorderstep.cpp
+    buildorder/scoutingbuildorderstep.cpp)
 
 set(bot_sources
     Aeolus.cpp
@@ -221,6 +223,7 @@ set(bot_sources
     buildorder/structurebuildorderstep.cpp
     buildorder/unitbuildorderstep.cpp
     buildorder/upgradebuildorderstep.cpp
+    buildorder/scoutingbuildorderstep.cpp
 )
 
 set(bot_headers
@@ -296,7 +299,8 @@ set(bot_headers
     buildorder/buildorderstep.h
     buildorder/structurebuildorderstep.h
     buildorder/unitbuildorderstep.h
-    buildorder/upgradebuildorderstep.h)
+    buildorder/upgradebuildorderstep.h
+    buildorder/scoutingbuildorderstep.h)
 
 include(FetchContent)
 
