@@ -4,10 +4,12 @@
 #include "manager_mediator.h"
 #include "../../utils/position_utils.h"
 #include "../../utils/unit_utils.h"
+#include "../../pathing/grid.h"
 #include "../../Aeolus.h"
 #include <tuple>
 #include <unordered_map>
 #include <any>
+#include <sc2api/sc2_map_info.h>
 
 
 namespace Aeolus 
@@ -121,7 +123,14 @@ namespace Aeolus
 			mediator.AssignRole(m_bot, scoutUnit, constants::UnitRole::GATHERING);
 			return ::sc2::Point2D({ 0.0f, 0.0f });
 		}
-		else if (::sc2::DistanceSquared2D(scoutUnit->pos, wayPointQueue.front()) > 1.0f)
+
+		auto pathingGrid = ::sc2::PathingGrid(m_bot.Observation()->GetGameInfo());
+		int goal_x = static_cast<int>(std::round(wayPointQueue.front().x));
+		int goal_y = static_cast<int>(std::round(wayPointQueue.front().y));
+		auto pathable = pathingGrid.IsPathable({ goal_x, goal_y });
+
+		if (::sc2::DistanceSquared2D(scoutUnit->pos, wayPointQueue.front()) > 1.0f
+			&& pathable)
 		{
 			// scout unit has not yet reached current waypoint, return current waypoint
 			return wayPointQueue.front();

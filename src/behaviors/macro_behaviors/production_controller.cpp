@@ -69,11 +69,6 @@ namespace Aeolus
 		return true;
 	}
 
-	bool ProductionController::_techUp(AeolusBot& aeolusbot, ::sc2::UNIT_TYPEID unit_type, int base_location)
-	{
-		return false;
-	}
-
 	bool ProductionController::_buildProductionDueToBank(AeolusBot& aeolusbot,
 		::sc2::UNIT_TYPEID unit_type,
 		float mineral_collection_rate,

@@ -39,8 +39,6 @@ namespace Aeolus
 		float m_ignore_below;
 		bool m_repower_structures;
 
-		bool _techUp(AeolusBot& aeolusbot, ::sc2::UNIT_TYPEID unit_type, int base_location = 0);
-
 		bool _buildProductionDueToBank(AeolusBot& aeolusbot,
 			::sc2::UNIT_TYPEID unit_type,
 			float mineral_collection_rate,
