@@ -26,7 +26,8 @@ behaviors/macro_behaviors/chrono_controller.cpp
 behaviors/macro_behaviors/repower_structures.cpp
 behaviors/macro_behaviors/expand.cpp
 behaviors/macro_behaviors/tech_up.cpp
-behaviors/macro_behaviors/upgrades_controller.cpp)
+behaviors/macro_behaviors/upgrades_controller.cpp
+behaviors/macro_behaviors/scout.cpp)
 
 source_group("Source Files\\behaviors\\micro_behaviors" FILES 
 behaviors/micro_behaviors/a_move.cpp
@@ -56,7 +57,8 @@ behaviors/macro_behaviors/chrono_controller.h
 behaviors/macro_behaviors/repower_structures.h
 behaviors/macro_behaviors/expand.h
 behaviors/macro_behaviors/tech_up.h
-behaviors/macro_behaviors/upgrades_controller.h)
+behaviors/macro_behaviors/upgrades_controller.h
+behaviors/macro_behaviors/scout.h)
 
 source_group("Header Files\\behaviors\\micro_behaviors" FILES
 behaviors/micro_behaviors/a_move.h
@@ -87,7 +89,8 @@ source_group("Source Files\\Managers" FILES
     managers/budget_manager.cpp
     managers/building_manager.cpp
     managers/combat_sim_manager.cpp
-    managers/army_composition_manager.cpp)
+    managers/army_composition_manager.cpp
+    managers/scouting_manager.cpp)
 
 source_group("Header Files\\Managers" FILES 
     managers/hub.h
@@ -105,7 +108,8 @@ source_group("Header Files\\Managers" FILES
     managers/building_manager.h
     managers/budget_manager.h
     managers/combat_sim_manager.h
-    managers/army_composition_manager.h)
+    managers/army_composition_manager.h
+    managers/scouting_manager.h)
 
 source_group("Source Files\\states" FILES
     states/forward_pressure.cpp
@@ -183,6 +187,7 @@ set(bot_sources
     behaviors/macro_behaviors/repower_structures.cpp
     behaviors/macro_behaviors/tech_up.cpp
     behaviors/macro_behaviors/upgrades_controller.cpp
+    behaviors/macro_behaviors/scout.cpp
     behaviors/micro_behaviors/a_move.cpp
     behaviors/micro_behaviors/keep_unit_safe.cpp
     behaviors/micro_behaviors/path_to_target.cpp
@@ -208,6 +213,7 @@ set(bot_sources
     managers/building_manager.cpp
     managers/combat_sim_manager.cpp
     managers/army_composition_manager.cpp
+    managers/scouting_manager.cpp
     states/consolidate.cpp
     states/forward_pressure.cpp
     states/build_order_state.cpp
@@ -246,6 +252,7 @@ set(bot_headers
     behaviors/macro_behaviors/repower_structures.h
     behaviors/macro_behaviors/tech_up.h
     behaviors/macro_behaviors/upgrades_controller.h
+    behaviors/macro_behaviors/scout.h
     behaviors/micro_behaviors/a_move.h
     behaviors/micro_behaviors/keep_unit_safe.h
     behaviors/micro_behaviors/micro_behavior.h
@@ -275,6 +282,7 @@ set(bot_headers
     managers/building_manager.h
     managers/combat_sim_manager.h
     managers/army_composition_manager.h
+    managers/scouting_manager.h
     states/bot_state.h
     states/consolidate.h
     states/forward_pressure.h
