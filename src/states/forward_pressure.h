@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bot_state.h"
+#include "base_state.h"
 #include <sc2api/sc2_common.h>
 #include <sc2api/sc2_unit.h>
 
@@ -14,12 +15,12 @@ namespace Aeolus
 	* We want this state if: 1) we have a better economy than the opponent and 2) our trade is not terrible,
 	* i.e. not trading 10 stalkers for 1 marine.
 	*/
-	class ForwardPressureState : public BotState
+	class ForwardPressureState : public BaseState
 	{
 	public:
-		ForwardPressureState() : m_enteredAt(0) {}
+		ForwardPressureState() {}
 
-		void OnEnter(AeolusBot& aeolusbot) override;
+		std::string_view getName() const override;
 
 		void micro(AeolusBot& aeolusbot) override;
 
@@ -27,19 +28,7 @@ namespace Aeolus
 
 		void OnUnitDestroyed(AeolusBot& aeolusbot, const ::sc2::Unit*) override;
 
-		void OnExit() override;
-
 	private:
-
-		void _micro(AeolusBot& aeolusbot, ::sc2::Units forces, ::sc2::Point2D target);
-
-		void _prismMicro(AeolusBot& aeolusbot, ::sc2::Units prisms, ::sc2::Point2D prismTarget);
-
-		void _oracleHarassMicro(AeolusBot& aeolusbot, ::sc2::Units oracles, std::vector<::sc2::Point2D> harassLocations);
-
-		int m_enteredAt;
-
-		std::deque<std::pair<uint64_t, int>> m_ownLosses;
-		std::deque<std::pair<uint64_t, int>> m_opponentLosses;
+		void _transitionIntoConsolidateIfNeeded(AeolusBot& aeolusbot);
 	};
 }
