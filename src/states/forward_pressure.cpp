@@ -34,81 +34,21 @@
 
 namespace Aeolus
 {
-	void ForwardPressureState::OnEnter(AeolusBot& aeolusbot)
-	{
-		std::cout << "entered FOWARD PRESSURE state at gameloop " << aeolusbot.Observation()->GetGameLoop() << std::endl;
-        m_enteredAt = aeolusbot.Observation()->GetGameLoop();
-	}
-
-	void ForwardPressureState::OnExit()
-	{
-		std::cout << "exited FORWARD PRESSURE state" << std::endl;
-	}
+    std::string_view ForwardPressureState::getName() const {
+        return "FORWARD_PRESSURE";
+    }
 
 	void ForwardPressureState::macro(AeolusBot& aeolusbot)
 	{
-        // std::cout << "Aeolus: Macroing..." << std::endl;
-        // Implement custom logic for gathering resources, expanding, etc.
-        aeolusbot.RegisterBehavior(std::make_unique<Mining>());
-        aeolusbot.RegisterBehavior(std::make_unique<Scout>());
-        aeolusbot.RegisterBehavior(std::make_unique<BuildWorkers>(
-            std::min(ManagerMediator::getInstance().GetOwnReadyTownHalls(aeolusbot).size() * 22, static_cast<size_t>(86))
-        ));
-        aeolusbot.RegisterBehavior(std::make_unique<ChronoController>());
-        aeolusbot.RegisterBehavior(std::make_unique<RepowerStructures>());
+        // Bookkeeping tasks first
+        doBookKeepingMacroTasks(aeolusbot);
 
-        aeolusbot.RegisterBehavior(std::make_unique<BuildGeysers>());
-        aeolusbot.RegisterBehavior(std::make_unique<Expand>());
-        aeolusbot.RegisterBehavior(std::make_unique<AutoSupply>());
-        aeolusbot.RegisterBehavior(std::make_unique<BuildDetection>()); // don't force detection
-        aeolusbot.RegisterBehavior(std::make_unique<ProductionController>(aeolusbot.getArmyComp()));
-        aeolusbot.RegisterBehavior(std::make_unique<SpawnController>(aeolusbot.getArmyComp()));
-        aeolusbot.RegisterBehavior(std::make_unique<UpgradesController>(
-            std::vector<::sc2::UPGRADE_ID>{
-            ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL1,
-                ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL2,
-                ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL1,
-                ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL3,
-                ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL2,
-                ::sc2::UPGRADE_ID::PROTOSSSHIELDSLEVEL3,
-                ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL1,
-                ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL2,
-                ::sc2::UPGRADE_ID::PROTOSSGROUNDARMORSLEVEL3
-        }
-        ));
-
-        if (aeolusbot.Observation()->GetGameLoop() % 50 == 0)
-            std::cout << "current gameloop: " << aeolusbot.Observation()->GetGameLoop() << std::endl;
-
-        /*
-        if (ManagerMediator::getInstance().GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING).size()
-            < aeolusbot.getMoveOutSupply())
-            aeolusbot.ChangeState(MakeState<ConsolidateState>());
-        */
+        // high economy macro tasks
+        doHighEconomyMacroTasks(aeolusbot, false); // forceDetection = false, don't force detection when we don't need it
 
         if (aeolusbot.Observation()->GetGameLoop() % 100 == 50)
         {
-            auto ownAttacking = ManagerMediator::getInstance().GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
-            std::vector<::sc2::UNIT_TYPEID> own_army;
-            std::vector<::sc2::UNIT_TYPEID> opponent_army;
-
-            for (const auto* unit : ownAttacking) own_army.push_back(unit->unit_type);
-            auto opponent_units = ManagerMediator::getInstance().GetAllSeenEnemyUnits(aeolusbot);
-
-            for (const auto& unit_type : opponent_units)
-            {
-                if (unit_type != ::sc2::UNIT_TYPEID::PROTOSS_PROBE &&
-                    unit_type != ::sc2::UNIT_TYPEID::TERRAN_SCV &&
-                    unit_type != ::sc2::UNIT_TYPEID::ZERG_DRONE)
-                    opponent_army.push_back(unit_type);
-            }
-
-            bool won_engagement = ManagerMediator::getInstance().PredictEngagement(aeolusbot, own_army, opponent_army);
-            if (!won_engagement)
-            {
-                aeolusbot.ChangeState(MakeState<ConsolidateState>());
-                std::cout << "Consolidating: Calculating best army composition..." << std::endl;
-            }
+            _transitionIntoConsolidateIfNeeded(aeolusbot);
         }
 	}
 
@@ -117,268 +57,42 @@ namespace Aeolus
         auto& mediator = ManagerMediator::getInstance();
 
         ::sc2::Units forces = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
-        if (!forces.empty()) _micro(aeolusbot, forces, mediator.GetAtttackTarget(aeolusbot));
+        if (!forces.empty()) doGeneralMicro(aeolusbot, forces, mediator.GetAtttackTarget(aeolusbot));
 
-        ::sc2::Units prisms = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::PRISM);
-        auto prismTarget = mediator.GetPrismTarget(aeolusbot);
-        if (prismTarget != ::sc2::Point2D(0.0f, 0.0f)) _prismMicro(aeolusbot, prisms, prismTarget);
+        doPrismPickUpMicro(aeolusbot);
 
-        std::vector<::sc2::Point2D> harassLocations = aeolusbot.Observation()->GetGameInfo().enemy_start_locations;
-        ::sc2::Units oracles = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::ORACLE);
-        _oracleHarassMicro(aeolusbot, oracles, harassLocations);
+        doOracleHarassMicro(aeolusbot);
 
-        // observer micro
-        ::sc2::Units observers = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::MOBILE_DETECTION);
-        for (const auto* observer : observers)
-        {
-            auto observer_behavior = std::make_unique<MicroBehavior>(observer);
-            observer_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-            observer_behavior->AddBehavior(std::make_unique<PathToTarget>(mediator.GetAtttackTarget(aeolusbot)));
-            aeolusbot.RegisterBehavior(std::move(observer_behavior));
-        }
+        doObserverMicro(aeolusbot);
 	}
 
-    void ForwardPressureState::_micro(AeolusBot& aeolusbot, ::sc2::Units forces, ::sc2::Point2D target)
+    void ForwardPressureState::_transitionIntoConsolidateIfNeeded(AeolusBot& aeolusbot)
     {
-        std::vector<::sc2::Point2D> starting_points;
-        float search_radius = 15.0f;
-        for (const auto& unit : forces) starting_points.push_back(unit->pos);
-        auto enemies_in_range = ManagerMediator::getInstance().GetEnemyUnitsInRangeMap(aeolusbot,
-            starting_points, search_radius);
+        auto ownAttacking = ManagerMediator::getInstance().GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
+        std::vector<::sc2::UNIT_TYPEID> own_army;
+        std::vector<::sc2::UNIT_TYPEID> opponent_army;
 
-        for (int i = 0; i < forces.size(); ++i)
+        for (const auto* unit : ownAttacking) own_army.push_back(unit->unit_type);
+        auto opponent_units = ManagerMediator::getInstance().GetAllSeenEnemyUnits(aeolusbot);
+
+        for (const auto& unit_type : opponent_units)
         {
-            const ::sc2::Unit* unit = forces[i];
+            if (unit_type != ::sc2::UNIT_TYPEID::PROTOSS_PROBE &&
+                unit_type != ::sc2::UNIT_TYPEID::TERRAN_SCV &&
+                unit_type != ::sc2::UNIT_TYPEID::ZERG_DRONE)
+                opponent_army.push_back(unit_type);
+        }
 
-            // 1) Create the MicroBehavior as a unique_ptr
-            auto combat_behavior = std::make_unique<MicroBehavior>(unit);
-
-            // 2) Filter out close enemies
-            ::sc2::Units close_units;
-            for (const auto& enemy : enemies_in_range[i])
-                if (enemy->display_type != ::sc2::Unit::DisplayType::Snapshot
-                    && constants::IGNORED_UNITS.find(enemy->unit_type) == constants::IGNORED_UNITS.end())
-                    close_units.push_back(enemy);
-
-            ::sc2::Units close_non_structures;
-            for (const auto& enemy : close_units) if (constants::ALL_STRUCTURES.find(enemy->unit_type) == constants::ALL_STRUCTURES.end())
-                close_non_structures.push_back(enemy);
-
-            // Add the path behavior if no close enemy is spotted
-            if (!close_units.empty())
-            {
-                auto in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, unit, close_non_structures);
-                if (!in_attack_range.empty())
-                {
-                    combat_behavior->AddBehavior(
-                        std::make_unique<ShootTargetInRange>(
-                            in_attack_range
-                        )
-                    );
-                }
-                else
-                {
-                    auto all_in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, unit, close_units);
-                    if (!all_in_attack_range.empty())
-                    {
-                        combat_behavior->AddBehavior(
-                            std::make_unique<ShootTargetInRange>(
-                                all_in_attack_range
-                            )
-                        );
-                    }
-                }
-
-                auto enemy_target = utils::PickAttackTarget(close_units);
-
-                if ((unit->shield / unit->shield_max) < 0.1)
-                {
-                    combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-                }
-                else
-                {
-                    combat_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
-                }
-            }
-            else
-            {
-                combat_behavior->AddBehavior(
-                    std::make_unique<PathToTarget>(
-                        target
-                    ));
-
-                combat_behavior->AddBehavior(
-                    std::make_unique<AMove>(
-                        target
-                    ));
-            }
-
-            // Now register the combat behavior
-            aeolusbot.RegisterBehavior(std::move(combat_behavior));
+        bool won_engagement = ManagerMediator::getInstance().PredictEngagement(aeolusbot, own_army, opponent_army);
+        if (!won_engagement)
+        {
+            aeolusbot.ChangeState(MakeState<ConsolidateState>());
+            std::cout << "Consolidating: Calculating best army composition..." << std::endl;
         }
     }
 
-    void ForwardPressureState::_prismMicro(AeolusBot& aeolusbot, ::sc2::Units prisms, ::sc2::Point2D prismTarget)
+    void ForwardPressureState::OnUnitDestroyed(AeolusBot& aeolusbot, const ::sc2::Unit*)
     {
-        for (const auto* prism : prisms)
-        {
-            auto combat_behavior = std::make_unique<MicroBehavior>(prism);
-
-            // 1st priority: keep prism safe
-            combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-
-            // 2nd priority: unload all units inside
-            combat_behavior->AddBehavior(std::make_unique<Unload>());
-
-            // 3rd/main priority: prick up endangered units
-            ::sc2::Units inPickupRange = ManagerMediator::getInstance().GetOwnAttackingUnitsInRange(aeolusbot, { prism->pos }, 5.0f);
-            if (!inPickupRange.empty())
-            {
-                for (const auto* unit : inPickupRange)
-                {
-                    if ((unit->shield / unit->shield_max) <= 0.01f && !ManagerMediator::getInstance().IsGroundPositionSafe(aeolusbot, unit->pos))
-                    {
-                        combat_behavior->AddBehavior(std::make_unique<PickUnitUp>(unit));
-                        break;
-                    }
-                }
-            }
-
-            bool updatePath = true;
-            if (prism->orders.size() == 1)
-            {
-                if (prism->orders.front().ability_id == ::sc2::ABILITY_ID::GENERAL_MOVE
-                    && ::sc2::DistanceSquared2D(prism->orders.front().target_pos, prismTarget) < 4.0f)
-                    updatePath = false;
-            }
-
-            // nothing else to do: path the prism to our optimal position
-            if (updatePath) combat_behavior->AddBehavior(std::make_unique<PathToTarget>(prismTarget));
-
-            aeolusbot.RegisterBehavior(std::move(combat_behavior));
-        }
-    }
-
-    void ForwardPressureState::_oracleHarassMicro(AeolusBot& aeolusbot, ::sc2::Units oracles, std::vector<::sc2::Point2D> harassLocations)
-    {
-        // use single harass location for now
-        ::sc2::Point2D harassLocation = harassLocations.front();
-
-        std::vector<::sc2::Point2D> starting_points;
-        float search_radius = 12.0f;
-        for (const auto& unit : oracles) starting_points.push_back(unit->pos);
-        auto enemies_in_range = ManagerMediator::getInstance().GetEnemyUnitsInRangeMap(aeolusbot,
-            starting_points, search_radius);
-
-        for (int i = 0; i < oracles.size(); ++i)
-        {
-            const ::sc2::Unit* oracle = oracles[i];
-            auto oracle_behavior = std::make_unique<MicroBehavior>(oracle);
-            auto availableAbilities = aeolusbot.Query()->GetAbilitiesForUnit(oracle);
-
-            // 1st priority: keep oracle safe
-            if (oracle->shield / oracle->shield_max < 0.3) oracle_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-
-            ::sc2::Units workersInRange;
-            std::copy_if(enemies_in_range[i].begin(), enemies_in_range[i].end(), std::back_inserter(workersInRange), [](const ::sc2::Unit* unit)
-                {
-                    return (constants::WORKER_TYPES.find(unit->unit_type) != constants::WORKER_TYPES.end());
-                }
-            );
-
-            if (!workersInRange.empty() && oracle->energy > 55.0) {
-                for (const auto& availableAbility : availableAbilities.abilities)
-                {
-                    if (availableAbility.ability_id == ::sc2::ABILITY_ID::BEHAVIOR_PULSARBEAMON)
-                    {
-                        // add activate pulsar beam to behavior
-                        oracle_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::BEHAVIOR_PULSARBEAMON));
-                        break;
-                    }
-                }
-
-                // no activate pulsar beam available means we have already done it.
-                auto in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, oracle, workersInRange);
-                if (!in_attack_range.empty())
-                {
-                    oracle_behavior->AddBehavior(
-                        std::make_unique<ShootTargetInRange>(
-                            in_attack_range
-                        )
-                    );
-                }
-            }
-
-            // 2nd priority: go to harass target / home for recharge
-            ::sc2::Point2D pathTarget = harassLocation;
-
-            for (const auto& availableAbility : availableAbilities.abilities)
-            {
-                if (availableAbility.ability_id == ::sc2::ABILITY_ID::BEHAVIOR_PULSARBEAMON)
-                {
-                    // currently no beam activated
-                    if (oracle->energy < 50.0f)
-                    {
-                        pathTarget = utils::GetClosestUnitTo(
-                            oracle->pos,
-                            ManagerMediator::getInstance().GetOwnReadyTownHalls(aeolusbot)
-                        )->pos;
-                    }
-                    break;
-                }
-            }
-            oracle_behavior->AddBehavior(std::make_unique<PathToTarget>(pathTarget));
-
-            aeolusbot.RegisterBehavior(std::move(oracle_behavior));
-        }
-    }
-
-    void ForwardPressureState::OnUnitDestroyed(AeolusBot& aeolusbot, const ::sc2::Unit* unit)
-    {
-        /*
-        const uint64_t window = 672; // 30 seconds window
-        uint64_t currentLoop = aeolusbot.Observation()->GetGameLoop();
-
-        auto cost = ManagerMediator::getInstance().GetUnitCost(aeolusbot, unit->unit_type);
-        if (unit->alliance == ::sc2::Unit::Alliance::Self)
-        {
-            m_ownLosses.push_back({ currentLoop, cost.first + cost.second });
-        }
-        if (unit->alliance == ::sc2::Unit::Alliance::Enemy)
-        {
-            m_opponentLosses.push_back({ currentLoop, cost.first + cost.second });
-        }
-
-        while (!m_ownLosses.empty() && currentLoop - m_ownLosses.front().first > window)
-        {
-            m_ownLosses.pop_front();
-        }
-        while (!m_opponentLosses.empty() && currentLoop - m_opponentLosses.front().first > window)
-        {
-            m_opponentLosses.pop_front();
-        }
-
-        // in this state for more than 60 seconds, check for loss ratio
-        if (currentLoop - m_enteredAt > 1344)
-        {
-            int ownTotalLoss = 0, opponentTotalLoss = 0;
-            for (const auto& loss : m_ownLosses) ownTotalLoss += loss.second;
-            for (const auto& loss : m_opponentLosses) opponentTotalLoss += loss.second;
-
-            std::cout << "own loss in the last 30 seconds: " << ownTotalLoss << std::endl;
-            std::cout << "opponent loss in the last 30 seconds: " << opponentTotalLoss << std::endl;
-            if (static_cast<double>(ownTotalLoss) / static_cast<double>(opponentTotalLoss) > 2.0
-                && static_cast<double>(ownTotalLoss) > 1000)
-            {
-                std::cout << "[State] Forward pressure: trading badly, consolidate and tech switching..." << std::endl;
-                aeolusbot.ChangeState(MakeState<ConsolidateState>(static_cast<int>(ownTotalLoss * 1.5)));
-            }
-            std::cout << "known enemy units: " << std::endl;
-            for (const auto& unit_type : ManagerMediator::getInstance().GetAllSeenEnemyUnits(aeolusbot))
-            {
-                std::cout << ::sc2::UnitTypeToName(unit_type) << '\n';
-            }
-        }
-        */
+        return;
     }
 }

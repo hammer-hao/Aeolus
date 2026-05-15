@@ -114,13 +114,15 @@ source_group("Header Files\\Managers" FILES
 source_group("Source Files\\states" FILES
     states/forward_pressure.cpp
     states/consolidate.cpp
-    states/build_order_state.cpp)
+    states/build_order_state.cpp
+    states/base_state.cpp)
 
 source_group("Header Files\\states" FILES
     states/bot_state.h
     states/consolidate.h
     states/forward_pressure.h
-    states/build_order_state.h)
+    states/build_order_state.h
+    states/base_state.h)
 
 source_group("Source Files\\Pathing" FILES
     pathing/grid.cpp
@@ -217,6 +219,7 @@ set(bot_sources
     states/consolidate.cpp
     states/forward_pressure.cpp
     states/build_order_state.cpp
+    states/base_state.cpp
     pathing/grid.cpp
     pathing/map_data.cpp
     utils/feature_layer_utils.cpp
@@ -287,6 +290,7 @@ set(bot_headers
     states/consolidate.h
     states/forward_pressure.h
     states/build_order_state.h
+    states/base_state.h
     pathing/grid.h
     pathing/map_data.h
     pathing/weight_costs.h

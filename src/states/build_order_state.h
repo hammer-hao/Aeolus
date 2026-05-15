@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bot_state.h"
+#include "base_state.h"
 #include "sc2api/sc2_unit.h"
 #include "sc2api/sc2_common.h"
 
@@ -14,12 +15,12 @@ namespace Aeolus
 	* The bot will exit the build order state when 1) the build order is completed or 2) when we scout
 	* something that requires a specific response state.
 	*/
-	class BuildOrderState : public BotState
+	class BuildOrderState : public BaseState
 	{
 	public:
 		BuildOrderState() {}
 
-		void OnEnter(AeolusBot& aeolusbot) override;
+		std::string_view getName() const override;
 
 		void micro(AeolusBot& aeolusbot) override;
 
@@ -27,14 +28,7 @@ namespace Aeolus
 
 		void OnUnitDestroyed(AeolusBot& aeolusbot, const ::sc2::Unit*) override {}
 
-		void OnExit() override;
-
 	private:
-
-		void _micro(AeolusBot& aeolusbot, ::sc2::Units forces, ::sc2::Point2D target);
-
-		void _prismMicro(AeolusBot& aeolusbot, ::sc2::Units prisms, ::sc2::Point2D prismTarget);
-
 		void _oracleHarassMicro(AeolusBot& aeolusbot, ::sc2::Units oracles, std::vector<::sc2::Point2D> harassLocations);
 	};
 }
