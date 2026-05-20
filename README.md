@@ -1,6 +1,6 @@
 # Aeolus
 
-[![Build](https://github.com/cpp-sc2/blank-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/cpp-sc2/blank-bot/actions/workflows/ci.yml)
+[![Build](https://github.com/hammer-hao/Aeolus/actions/workflows/ci.yml/badge.svg)](https://github.com/cpp-sc2/blank-bot/actions/workflows/ci.yml)
 [![CMake](https://img.shields.io/badge/CMake-3.15-blue.svg)](https://cmake.org/)
 [![Eigen 3.3.9](https://img.shields.io/badge/Eigen-3.4.0-blue.svg)](https://eigen.tuxfamily.org/)
 [![nanoflann 1.3.3](https://img.shields.io/badge/nanoflann-1.3.3-blue.svg)](https://github.com/jlblancoc/nanoflann)
