@@ -36,6 +36,8 @@ namespace Aeolus
 
 		std::unordered_map<::sc2::Tag, std::queue<::sc2::Point2D>> m_scouting_paths;
 
+		std::unordered_map<::sc2::Tag, sc2::Point2D> m_last_seen;
+
 		std::vector<std::vector<::sc2::Point2D>> m_behind_mineral_pos_cache;
 
 		std::vector<::sc2::Point2D> _getBehindMineralPositions(::sc2::Point2D expansion_location);
@@ -43,5 +45,7 @@ namespace Aeolus
 		bool _registerScout(const ::sc2::Unit* scoutUnit, std::vector<int> expansionsToScout);
 
 		::sc2::Point2D _checkScoutToNextWaypoint(const ::sc2::Unit* scoutUnit);
+
+		void _clearScout(const ::sc2::Unit* unit);
 	};
 }

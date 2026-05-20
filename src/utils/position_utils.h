@@ -61,5 +61,10 @@ namespace Aeolus
 		Returns whether the give structure can be placed at the given position
 		*/
 		bool canPlaceStructure(int start_x, int start_y, int building_size, ::sc2::PlacementGrid& placement_grid);
+
+		/*
+		Returns wheter the two point2D value point to effectively the same position in the map
+		*/
+		bool Point2Dcmp(::sc2::Point2D posA, ::sc2::Point2D posB, float epsilon = 1e-3);
 	}
 }

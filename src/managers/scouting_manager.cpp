@@ -129,23 +129,35 @@ namespace Aeolus
 		int goal_y = static_cast<int>(std::round(wayPointQueue.front().y));
 		auto pathable = pathingGrid.IsPathable({ goal_x, goal_y });
 
-		if (::sc2::DistanceSquared2D(scoutUnit->pos, wayPointQueue.front()) > 1.0f
-			&& pathable)
+		bool reachedNextWayPoint = ::sc2::DistanceSquared2D(scoutUnit->pos, wayPointQueue.front()) < 1.0f;
+		bool isStaticScout = false;
+		if (m_last_seen.find(scoutUnit->tag) != m_last_seen.end())
 		{
-			// scout unit has not yet reached current waypoint, return current waypoint
-			return wayPointQueue.front();
+			isStaticScout = utils::Point2Dcmp(m_last_seen[scoutUnit->tag], scoutUnit->pos);
 		}
-		else
+
+		if (reachedNextWayPoint || !pathable || isStaticScout)
 		{
-			// scout unit is reaching the next available waypoint
+			// scout unit is reaching the next available waypoint, or the waypoint is not pathable, or if it has not moved (probably stuck)
 			// move to the next waypoint
 			wayPointQueue.pop();
 			if (wayPointQueue.empty()) {
-				mediator.AssignRole(m_bot, scoutUnit, constants::UnitRole::GATHERING);
+				_clearScout(scoutUnit);
 				return { 0.0f, 0.0f };
 			}
-			return wayPointQueue.front();
 		}
+
+		m_last_seen[scoutUnit->tag] = scoutUnit->pos;
+
+		return wayPointQueue.front();
+	}
+
+	void ScoutingManager::_clearScout(const ::sc2::Unit* unit)
+	{
+		auto& mediator = ManagerMediator::getInstance();
+		mediator.AssignRole(m_bot, unit, constants::UnitRole::GATHERING);
+		m_scouting_paths.erase(unit->tag);
+		m_last_seen.erase(unit->tag);
 	}
 
 } // namespace aeolus

@@ -255,5 +255,16 @@ namespace Aeolus
 			}
 			return true;
 		}
+
+		bool Point2Dcmp(::sc2::Point2D posA, ::sc2::Point2D posB, float epsilon)
+		{
+			float diffX = std::fabs(posA.x - posB.x);
+			float diffY = std::fabs(posA.y - posB.y);
+			if (diffX < epsilon && diffY < epsilon) 
+			{
+				return true;
+			}
+			return false;
+		}
 	}
 }

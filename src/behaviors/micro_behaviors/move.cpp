@@ -6,6 +6,7 @@
 
 #include "../../Aeolus.h"
 #include "../../managers/manager_mediator.h"
+#include "../../utils/position_utils.h"
 
 namespace Aeolus
 {
@@ -19,7 +20,7 @@ namespace Aeolus
 			//	<< std::endl;
 			// std::cout << "New order target: " << m_target.x << " " << m_target.y << std::endl;
  			if (unit->orders.front().ability_id == ::sc2::ABILITY_ID::GENERAL_MOVE
-				&& unit->orders.front().target_pos == m_target)
+				&& utils::Point2Dcmp(unit->orders.front().target_pos, m_target))
 				// already performing the exact command
 				// std::cout << "duplicate command detected!" << std::endl;
 				return true;
