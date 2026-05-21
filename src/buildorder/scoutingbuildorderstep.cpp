@@ -11,9 +11,9 @@
 
 namespace Aeolus
 {
-	ScoutingBuildOrderStep::ScoutingBuildOrderStep(int supply_threshold, bool scout_enemy_base, bool scout_own_half_of_map) :
+	ScoutingBuildOrderStep::ScoutingBuildOrderStep(int supply_threshold, bool scout_enemy_base, bool scout_own_half_of_map, bool scout_enemy_base_first) :
 		m_supply_threshold(supply_threshold), m_scout_enemy_base(scout_enemy_base),
-		m_scout_own_half_of_map(scout_own_half_of_map), m_started(false)
+		m_scout_own_half_of_map(scout_own_half_of_map), m_started(false), m_scout_enemy_base_first(scout_enemy_base_first)
 	{
 	}
 
@@ -50,7 +50,13 @@ namespace Aeolus
 		}
 		if (m_scout_enemy_base)
 		{
-			basesToScout = { static_cast<int>(numBases) - 1, 5, 4, 3, 2, 1 };
+			if (m_scout_enemy_base_first) {
+				basesToScout = { static_cast<int>(numBases) - 1, 5, 4, 3, 2, 1 };
+			}
+			else {
+				basesToScout = { 1, 2, 3, 4, 5, static_cast<int>(numBases) - 1 };
+			}
+			
 		}
 		mediator.registerScout(aeolusbot, bestCandidate, basesToScout);
 		return true;

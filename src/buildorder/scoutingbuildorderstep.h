@@ -17,7 +17,7 @@ namespace Aeolus
 		/**
 		* Create a build order step in charge of scouting the targeted base locations
 		*/
-		ScoutingBuildOrderStep(int supply_threshold, bool scout_enemy_base, bool scout_own_half_of_map);
+		ScoutingBuildOrderStep(int supply_threshold, bool scout_enemy_base, bool scout_own_half_of_map, bool scout_enemy_base_first);
 
 		/**
 		* @brief Returns the supply threshold of this build order.
@@ -44,6 +44,7 @@ namespace Aeolus
 		int m_supply_threshold;
 		bool m_scout_enemy_base; // whether we want to scout 
 		bool m_scout_own_half_of_map; // 
+		bool m_scout_enemy_base_first;
 		bool m_started;
 	};
 }

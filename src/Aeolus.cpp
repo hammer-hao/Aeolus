@@ -63,7 +63,7 @@ namespace Aeolus
     AeolusBot::AeolusBot(std::string opponent_id) : m_opponent_id(opponent_id), m_won_game(true)
     {
         m_build_order_enum = _chooseBuildOrder();
-        m_build_order = BuildOrderFactory::makeBuildOrder(*this, m_build_order_enum);
+
         m_move_out_supply = _getMoveOutTiming();
 
         std::cout << "Aeolus bot initialized!" << std::endl;
@@ -188,6 +188,21 @@ namespace Aeolus
         buildOrderTag << "Tag:";
         buildOrderTag << buildOrderToString(m_build_order_enum);
         Actions()->SendChat(buildOrderTag.str());
+
+        const ::sc2::Race opponentRace = Observation()->GetGameInfo().player_info.back().race_requested;
+        m_build_order = BuildOrderFactory::makeBuildOrder(*this, m_build_order_enum, opponentRace);
+        std::stringstream opponentRaceTag;
+        opponentRaceTag << "Tag:";
+        if (opponentRace == ::sc2::Race::Protoss) {
+            opponentRaceTag << "opponent: Protoss";
+        } else if (opponentRace == ::sc2::Race::Terran) {
+            opponentRaceTag << "opponent: Terran";
+        } else if (opponentRace == ::sc2::Race::Zerg) {
+            opponentRaceTag << "opponent: Zerg";
+        } else if (opponentRace == ::sc2::Race::Random) {
+            opponentRaceTag << "opponent: Random";
+        }
+        Actions()->SendChat(opponentRaceTag.str());
 
         // set state initially to consolidate
         ChangeState(MakeState<BuildOrderState>());
