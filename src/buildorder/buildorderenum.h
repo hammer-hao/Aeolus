@@ -12,7 +12,7 @@ namespace Aeolus
 		STALKER_IMMORTAL,
 		BLINK_STALKERS,
 		MASS_ROBO,
-		STALKER_VOIDRAY,
+		STALKER_STARGATE,
 		FORGE_EXPAND,
 		COUNT // helper for randomization, do not use!
 	};
@@ -37,9 +37,9 @@ namespace Aeolus
 		{
 			return "MASS_ROBO";
 		}
-		case (BuildOrderEnum::STALKER_VOIDRAY):
+		case (BuildOrderEnum::STALKER_STARGATE):
 		{
-			return "STALKER_VOIDRAY";
+			return "STALKER_STARGATE";
 		}
 		case (BuildOrderEnum::FORGE_EXPAND):
 			return "FORGE_EXPAND";
@@ -52,7 +52,7 @@ namespace Aeolus
 		if (string == "STALKER_IMMORTAL") return BuildOrderEnum::STALKER_IMMORTAL;
 		if (string == "BLINK_STALKERS") return BuildOrderEnum::BLINK_STALKERS;
 		if (string == "MASS_ROBO") return BuildOrderEnum::MASS_ROBO;
-		if (string == "STALKER_VOIDRAY") return BuildOrderEnum::STALKER_VOIDRAY;
+		if (string == "STALKER_STARGATE") return BuildOrderEnum::STALKER_STARGATE;
 		if (string == "FORGE_EXPAND") return BuildOrderEnum::FORGE_EXPAND;
 		std::cout << "Invalid build order name:" << string << std::endl;
 		return std::nullopt;

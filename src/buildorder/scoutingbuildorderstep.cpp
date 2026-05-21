@@ -50,7 +50,7 @@ namespace Aeolus
 		}
 		if (m_scout_enemy_base)
 		{
-			basesToScout.push_back(numBases - 1);
+			basesToScout = { static_cast<int>(numBases) - 1, 5, 4, 3, 2, 1 };
 		}
 		mediator.registerScout(aeolusbot, bestCandidate, basesToScout);
 		return true;

@@ -45,7 +45,6 @@
 #include "utils/unit_utils.h"
 #include "utils/position_utils.h"
 #include "utils/file_io_utils.h"
-#include "utils/strategy_utils.h"
 
 #include "buildorder/buildorderfactory.h"
 
@@ -78,22 +77,10 @@ namespace Aeolus
 
     BuildOrderEnum AeolusBot::_chooseBuildOrder()
     {
-        std::cout << "Aeolust: choosing build order..." << std::endl;
-        //static std::random_device rd;
-        //static std::mt19937 gen(rd());
-        //std::uniform_int_distribution<int> dist(0, static_cast<int>(BuildOrderEnum::COUNT) - 1);
-#ifdef BUILD_FOR_LADDER
-        std::string opponent = m_opponent_id;
-#else
-        std::string opponent = "";
-#endif // BUILD_FOR_LADDER
-        std::cout << "Opponent id: " << opponent << std::endl;
-        BuildOrderEnum result = utils::chooseBestStrateGyFromHistory(utils::getMatchesForOpponent(opponent));
-        m_build_order_enum = result;
-        std::cout << "choosing army comp..." << std::endl;
+
+        m_build_order_enum = BuildOrderEnum::STALKER_STARGATE;
         m_armyComp = _chooseArmyComp();
-        std::cout << "chosen army comp!" << std::endl;
-        return result;
+        return m_build_order_enum;
     }
 
     std::map<::sc2::UNIT_TYPEID, float> AeolusBot::_chooseArmyComp()
@@ -114,7 +101,7 @@ namespace Aeolus
         {
             return std::map<::sc2::UNIT_TYPEID, float>{{::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.0f}};
         }
-        case (BuildOrderEnum::STALKER_VOIDRAY):
+        case (BuildOrderEnum::STALKER_STARGATE):
         {
             return std::map < ::sc2::UNIT_TYPEID, float>
             {
@@ -179,7 +166,7 @@ namespace Aeolus
         {
             return 6;
         }
-        case (BuildOrderEnum::STALKER_VOIDRAY):
+        case (BuildOrderEnum::STALKER_STARGATE):
         {
             return 10;
         }
