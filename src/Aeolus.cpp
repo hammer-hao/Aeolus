@@ -189,7 +189,14 @@ namespace Aeolus
         buildOrderTag << buildOrderToString(m_build_order_enum);
         Actions()->SendChat(buildOrderTag.str());
 
-        const ::sc2::Race opponentRace = Observation()->GetGameInfo().player_info.back().race_requested;
+        const auto own_id = Observation()->GetPlayerID();
+
+        ::sc2::Race opponentRace = ::sc2::Race::Random;
+        for (const auto& player : Observation()->GetGameInfo().player_info) {
+            if (player.player_id != own_id) {
+                opponentRace = player.race_requested;
+            }
+        }
         m_build_order = BuildOrderFactory::makeBuildOrder(*this, m_build_order_enum, opponentRace);
         std::stringstream opponentRaceTag;
         opponentRaceTag << "Tag:";
