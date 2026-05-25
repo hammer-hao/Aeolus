@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -41,8 +41,19 @@ jobs:
           mkdir -p artifacts
           cp "${{ env.BUILD_DIR }}/bin/Aeolus" artifacts/Aeolus
 
-      - name: Upload Artifact
+      - name: Upload Executable Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Aeolus
           path: artifacts/Aeolus
+
+      - name: Archive Config
+        run: |
+          mkdir -p artifacts/config
+          cp -r config/* artifacts/config/
+
+      - name: Upload Config Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Aeolus-config
+          path: artifacts/config
