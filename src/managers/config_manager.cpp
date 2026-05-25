@@ -29,6 +29,10 @@ namespace Aeolus
         }
     }
 
+    void ConfigManager::update(int iteration)
+    {
+    }
+
     std::vector<ContingencyPlan> ConfigManager::_getContingencyPlans() {
         auto& mediator = ManagerMediator::getInstance();
         ::sc2::Race opponentRace = mediator.getOpponentRace(m_bot);
