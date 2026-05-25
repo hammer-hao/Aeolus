@@ -1,0 +1,28 @@
+{
+  "contingency_plans": {
+    "zerg": [
+      {
+        "name": "early_pool_rush",
+        "conditions": [
+          {
+            "name": "SPAWNING_POOL",
+            "count": 1,
+            "before_seconds": 90,
+            "is_proxied": false
+          }
+        ],
+        "army_composition": {
+          "STALKER": 1.0
+        },
+        "move_out_supply": 120,
+        "cannons_to_add": 2
+      }
+    ],
+    "terran": [
+
+    ],
+    "protoss": [
+
+    ]
+  }
+}

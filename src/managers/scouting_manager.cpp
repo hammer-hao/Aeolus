@@ -31,6 +31,8 @@ namespace Aeolus
 			const ::sc2::Unit* scoutUnit = std::get<0>(params);
 			return _checkScoutToNextWaypoint(scoutUnit);
 		}
+		case constants::ManagerRequestType::GET_OPPONENT_RACE:
+			return _getOpponentRace();
 		default:
 			return 0;
 		}
@@ -158,6 +160,20 @@ namespace Aeolus
 		mediator.AssignRole(m_bot, unit, constants::UnitRole::GATHERING);
 		m_scouting_paths.erase(unit->tag);
 		m_last_seen.erase(unit->tag);
+	}
+
+	::sc2::Race ScoutingManager::_getOpponentRace()
+	{
+		const auto own_id = m_bot.Observation()->GetPlayerID();
+
+		::sc2::Race opponentRace = ::sc2::Race::Random;
+		for (const auto& player : m_bot.Observation()->GetGameInfo().player_info) {
+			if (player.player_id != own_id) {
+				opponentRace = player.race_requested;
+			}
+		}
+
+		return opponentRace;
 	}
 
 } // namespace aeolus

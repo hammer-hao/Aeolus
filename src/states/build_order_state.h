@@ -5,6 +5,8 @@
 #include "sc2api/sc2_unit.h"
 #include "sc2api/sc2_common.h"
 
+#include "../buildorder/contingency_plan.h"
+
 namespace Aeolus
 {
 	class AeolusBot;
@@ -29,6 +31,7 @@ namespace Aeolus
 		void OnUnitDestroyed(AeolusBot& aeolusbot, const ::sc2::Unit*) override {}
 
 	private:
-		void _oracleHarassMicro(AeolusBot& aeolusbot, ::sc2::Units oracles, std::vector<::sc2::Point2D> harassLocations);
+		void _ensureContingencyResponse(AeolusBot& aeolusbot);
+		bool _isConditionSatisfied(const ScoutingCondition& condition, AeolusBot& aeolusbot, const ::sc2::Units& enemyUnits);
 	};
 }

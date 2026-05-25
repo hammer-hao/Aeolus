@@ -49,11 +49,11 @@ jobs:
 
       - name: Archive Config
         run: |
-          mkdir -p artifacts/config
-          cp -r config/* artifacts/config/
+          mkdir -p config_artifact/config
+          cp -r config/* config_artifact/config/
 
       - name: Upload Config Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Aeolus-config
-          path: artifacts/config
+          path: config_artifact

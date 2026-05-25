@@ -47,5 +47,7 @@ namespace Aeolus
 		::sc2::Point2D _checkScoutToNextWaypoint(const ::sc2::Unit* scoutUnit);
 
 		void _clearScout(const ::sc2::Unit* unit);
+
+		::sc2::Race _getOpponentRace();
 	};
 }
