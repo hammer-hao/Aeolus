@@ -6,6 +6,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(bot_data
+    ../config/contingency_plans.json
+)
+
+source_group("Data Files\\config" FILES ${bot_data})
+
 # Group files into folders
 
 source_group("Source Files" FILES main.cpp bot.cpp constants.cpp behavior_executor.cpp Aeolus.cpp build_order_executor.cpp)
@@ -330,10 +336,10 @@ file(GLOB_RECURSE VOXELBOT_SOURCES CONFIGURE_DEPENDS
 ########################################################################
 add_library(voxelbot_core STATIC ${VOXELBOT_SOURCES})
 
-# 1) Pull in cpp-sc2’s include path & link flags
+# 1) Pull in cpp-sc2 s include path & link flags
 target_link_libraries(voxelbot_core PUBLIC cpp_sc2)
 
-# 2) If you’re building with the renderer, add SDL as well
+# 2) If you re building with the renderer, add SDL as well
 if(BUILD_WITH_RENDERER)
     target_include_directories(voxelbot_core PUBLIC ${SDL2_INCLUDE_DIR})
     target_link_libraries(voxelbot_core PUBLIC ${SDL2_LIBRARIES})
@@ -358,7 +364,7 @@ endforeach()
 ########################################################################
 ### 2.  Your bot executable ###########################################
 ########################################################################
-add_executable(Aeolus ${bot_sources} ${bot_headers})
+add_executable(Aeolus ${bot_sources} ${bot_headers} ${bot_data})
 target_link_libraries(Aeolus
     PRIVATE
         voxelbot_core       # <--- all voxelbot logic, no main()
@@ -409,7 +415,7 @@ if(NOT BUILD_FOR_LADDER)          # only build the tool in dev builds
 endif()
 
 ########################################################################
-### 4.  Convenience “build everything” target  #########################
+### 4.  Convenience  build everything  target  #########################
 ########################################################################
 if(TARGET cache_mappings)
     add_custom_target(all_binaries DEPENDS Aeolus cache_mappings)
@@ -425,6 +431,11 @@ endif ()
 
 # cereal
 target_include_directories(Aeolus PRIVATE ${CMAKE_SOURCE_DIR}/thirdparty/cereal)
+
+# json
+target_include_directories(Aeolus PRIVATE
+    ${CMAKE_SOURCE_DIR}/thirdparty
+)
 
 if (MINGW)
     target_link_libraries(Aeolus PRIVATE ssp)
