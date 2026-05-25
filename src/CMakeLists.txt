@@ -96,7 +96,8 @@ source_group("Source Files\\Managers" FILES
     managers/building_manager.cpp
     managers/combat_sim_manager.cpp
     managers/army_composition_manager.cpp
-    managers/scouting_manager.cpp)
+    managers/scouting_manager.cpp
+    managers/config_manager.cpp)
 
 source_group("Header Files\\Managers" FILES 
     managers/hub.h
@@ -115,7 +116,8 @@ source_group("Header Files\\Managers" FILES
     managers/budget_manager.h
     managers/combat_sim_manager.h
     managers/army_composition_manager.h
-    managers/scouting_manager.h)
+    managers/scouting_manager.h
+    managers/config_manager.h)
 
 source_group("Source Files\\states" FILES
     states/forward_pressure.cpp
@@ -166,7 +168,8 @@ source_group("Header Files\\buildorder" FILES
     buildorder/structurebuildorderstep.h
     buildorder/unitbuildorderstep.h
     buildorder/upgradebuildorderstep.h
-    buildorder/scoutingbuildorderstep.h)
+    buildorder/scoutingbuildorderstep.h
+    buildorder/contingency_plan.h)
 
 source_group("Source Files\\buildorder" FILES 
     buildorder/buildorder.cpp
@@ -221,6 +224,7 @@ set(bot_sources
     managers/combat_sim_manager.cpp
     managers/army_composition_manager.cpp
     managers/scouting_manager.cpp
+    managers/config_manager.cpp
     states/consolidate.cpp
     states/forward_pressure.cpp
     states/build_order_state.cpp
@@ -291,6 +295,7 @@ set(bot_headers
     managers/combat_sim_manager.h
     managers/army_composition_manager.h
     managers/scouting_manager.h
+    managers/config_manager.h
     states/bot_state.h
     states/consolidate.h
     states/forward_pressure.h
@@ -316,7 +321,8 @@ set(bot_headers
     buildorder/structurebuildorderstep.h
     buildorder/unitbuildorderstep.h
     buildorder/upgradebuildorderstep.h
-    buildorder/scoutingbuildorderstep.h)
+    buildorder/scoutingbuildorderstep.h
+    buildorder/contingency_plan.h)
 
 include(FetchContent)
 

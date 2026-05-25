@@ -25,6 +25,7 @@ namespace Aeolus {
 			COMBAT_SIM_MANAGER,
 			ARMY_COMPOSITION_MANAGER,
 			SCOUTING_MANAGER,
+			CONFIG_MANAGER
 		};
 
 		enum class ManagerRequestType
@@ -131,6 +132,10 @@ namespace Aeolus {
 			// ScoutingManager
 			REGISTER_SCOUT,
 			CHECK_SCOUT_TO_NEXT_WAYPOINT,
+			GET_OPPONENT_RACE,
+
+			// ConfigManager
+			GET_CONTINGENCY_PLANS,
 		};
 
 		enum class UnitRole

@@ -13,6 +13,7 @@
 #include "manager.h"
 #include "../pathing/grid.h"
 #include "../enums.h"
+#include "../buildorder/contingency_plan.h"
 
 namespace Aeolus
 {
@@ -1005,7 +1006,7 @@ namespace Aeolus
 		}
 
 		/**
-		* 
+		* Get the optimal army composition
 		*/
 		std::pair<std::pair<::sc2::UNIT_TYPEID, int>, std::vector<::sc2::UPGRADE_ID>> 
 			getOptimalArmyComp(AeolusBot& aeolusbot, std::vector<::sc2::UNIT_TYPEID> opponent_army)
@@ -1048,6 +1049,39 @@ namespace Aeolus
 				constants::ManagerRequestType::CHECK_SCOUT_TO_NEXT_WAYPOINT,
 				scoutUnit
 				);
+		}
+
+		/**
+		* Returns the opponent's race. Note: if the opponent has randomed a race, this will return sc2::Race::RANDOM
+		* instead of the race they randomed into.
+		*/
+		::sc2::Race getOpponentRace(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Race, int>(
+				aeolusbot,
+				constants::ManagerName::SCOUTING_MANAGER,
+				constants::ManagerRequestType::GET_OPPONENT_RACE,
+				0
+			);
+		}
+
+		// Config Manager
+
+		/**
+		* Returns the current contingency plans.
+		* Contingency plans are a list of potential rush/cheese strategies what we
+		* are actively scouting for in the early game, mapped to the detailed response
+		* (army composition, when to move out, whether to build cannons or not)
+		* to those strategies.
+		*/
+		std::vector<ContingencyPlan> getContingencyPlans(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<std::vector<ContingencyPlan>, int>(
+				aeolusbot,
+				constants::ManagerName::CONFIG_MANAGER,
+				constants::ManagerRequestType::GET_CONTINGENCY_PLANS,
+				0
+			);
 		}
 	};
 }

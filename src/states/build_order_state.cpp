@@ -1,6 +1,8 @@
 #include "build_order_state.h"
 #include "base_state.h"
 
+#include "../buildorder/contingency_plan.h"
+
 #include "../behaviors/macro_behaviors/mining.h"
 #include "../behaviors/macro_behaviors/build_workers.h"
 #include "../behaviors/macro_behaviors/chrono_controller.h"
@@ -43,8 +45,13 @@ namespace Aeolus
 		if (aeolusbot.Observation()->GetFoodCap() <= aeolusbot.Observation()->GetFoodUsed())
 			aeolusbot.RegisterBehavior(std::make_unique<AutoSupply>());
 
+		if (aeolusbot.Observation()->GetGameLoop() % 22 == 0)
+		{
+			_ensureContingencyResponse(aeolusbot);
+		}
+
 		// done with the build, default to forward pressuring.
-		if (aeolusbot.isBuildFinished()) aeolusbot.ChangeState(MakeState<ForwardPressureState>()); 
+		if (aeolusbot.isBuildFinished()) aeolusbot.ChangeState(MakeState<ForwardPressureState>());
 	}
 
 	void BuildOrderState::micro(AeolusBot& aeolusbot)
@@ -68,5 +75,49 @@ namespace Aeolus
 
 		// We are open to doing Oracle harass during the build order stage
 		doOracleHarassMicro(aeolusbot);
+	}
+
+	void BuildOrderState::_ensureContingencyResponse(AeolusBot& aeolusbot)
+	{
+		auto& mediator = ManagerMediator::getInstance();
+		::sc2::Units enemyUnits = mediator.GetAllEnemyUnits(aeolusbot);
+		std::vector<ContingencyPlan> contingencyPlans = mediator.getContingencyPlans(aeolusbot);
+
+		for (const auto& contingencyPlan : contingencyPlans)
+		{
+			bool meets_criteria = true;
+			for (const auto& condition : contingencyPlan.conditions)
+			{
+				if (!_isConditionSatisfied(condition, aeolusbot, enemyUnits)) 
+				{
+					meets_criteria = false;
+					break;
+				}
+			}
+			if (meets_criteria) {
+				std::stringstream scoutedTag;
+				scoutedTag << "Tag:";
+				scoutedTag << contingencyPlan.name;
+				aeolusbot.Actions()->SendChat(scoutedTag.str());
+			}
+		}
+	}
+
+	bool BuildOrderState::_isConditionSatisfied(const ScoutingCondition& condition, AeolusBot& aeolusbot, const ::sc2::Units& enemyUnits)
+	{
+		int before_gameloop = static_cast<int>(condition.before_seconds * 22.4f);
+		if (aeolusbot.Observation()->GetGameLoop() > before_gameloop) return false;
+
+		int count = 0;
+		for (const auto& unit : enemyUnits)
+		{
+			if (unit->unit_type == condition.unitType 
+				&& (!condition.is_proxied 
+					|| ::sc2::DistanceSquared2D(unit->pos, aeolusbot.Observation()->GetStartLocation()) < 5000.0f ))
+			{
+				count++;
+			}
+		}
+		return count >= condition.count;
 	}
 }
