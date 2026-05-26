@@ -80,7 +80,8 @@ namespace Aeolus
 	void BuildOrderState::_ensureContingencyResponse(AeolusBot& aeolusbot)
 	{
 		auto& mediator = ManagerMediator::getInstance();
-		::sc2::Units enemyUnits = mediator.GetAllEnemyUnits(aeolusbot);
+		std::vector<::sc2::UNIT_TYPEID> enemyUnits = mediator.GetAllSeenEnemyUnits(aeolusbot);
+		::sc2::Units enemyStructures = mediator.GetAllEnemyStructures(aeolusbot);
 		std::vector<ContingencyPlan> contingencyPlans = mediator.getContingencyPlans(aeolusbot);
 
 		for (const auto& contingencyPlan : contingencyPlans)
@@ -88,7 +89,8 @@ namespace Aeolus
 			bool meets_criteria = true;
 			for (const auto& condition : contingencyPlan.conditions)
 			{
-				if (!_isConditionSatisfied(condition, aeolusbot, enemyUnits)) 
+				if (!_isConditionSatisfied(condition, aeolusbot, enemyUnits) 
+					&& !_isConditionSatisfied(condition, aeolusbot, enemyStructures)) 
 				{
 					meets_criteria = false;
 					break;
@@ -103,7 +105,7 @@ namespace Aeolus
 		}
 	}
 
-	bool BuildOrderState::_isConditionSatisfied(const ScoutingCondition& condition, AeolusBot& aeolusbot, const ::sc2::Units& enemyUnits)
+	bool BuildOrderState::_isConditionSatisfied(const ScoutingCondition& condition, AeolusBot& aeolusbot, const std::vector<::sc2::UNIT_TYPEID>& enemyUnits)
 	{
 		int before_gameloop = static_cast<int>(condition.before_seconds * 22.4f);
 		if (aeolusbot.Observation()->GetGameLoop() > before_gameloop) return false;
@@ -111,9 +113,24 @@ namespace Aeolus
 		int count = 0;
 		for (const auto& unit : enemyUnits)
 		{
-			if (unit->unit_type == condition.unitType 
-				&& (!condition.is_proxied 
-					|| ::sc2::DistanceSquared2D(unit->pos, aeolusbot.Observation()->GetStartLocation()) < 5000.0f ))
+			if (unit == condition.unitType)
+			{
+				count++;
+			}
+		}
+		return count >= condition.count;
+	}
+
+	bool BuildOrderState::_isConditionSatisfied(const ScoutingCondition& condition, AeolusBot& aeolusbot, const ::sc2::Units& enemyStructures)
+	{
+		int before_gameloop = static_cast<int>(condition.before_seconds * 22.4f);
+		if (aeolusbot.Observation()->GetGameLoop() > before_gameloop) return false;
+
+		int count = 0;
+		for (const auto& structure : enemyStructures)
+		{
+			if (structure->unit_type == condition.unitType && structure->build_progress > 0.9f &&
+				(!condition.is_proxied || sc2::DistanceSquared2D(structure->pos, aeolusbot.Observation()->GetStartLocation()) < 5000.0f))
 			{
 				count++;
 			}
