@@ -11,9 +11,15 @@ namespace Aeolus
 
 	ConfigManager::ConfigManager(AeolusBot& aeolusbot) : m_bot(aeolusbot)
 	{
-		std::ifstream f("data/config/contingency_plans.json");
-		json contingency_plans = json::parse(f)["contingency_plans"];
-        _loadContingencyPlans(contingency_plans);
+        std::ifstream f("data/config/contingency_plans.json");
+
+        if (!f.is_open())
+        {
+            throw std::runtime_error("Failed to open data/config/contingency_plans.json");
+        }
+
+        json config = json::parse(f);
+        _loadContingencyPlans(config);
 	}
 
     std::any ConfigManager::ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args)
