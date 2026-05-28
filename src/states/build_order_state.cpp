@@ -11,6 +11,7 @@
 #include "../behaviors/macro_behaviors/scout.h"
 
 #include "forward_pressure.h"
+#include "contingency.h"
 
 #include "../behaviors/micro_behaviors/micro_behavior.h"
 #include "../behaviors/micro_behaviors/a_move.h"
@@ -101,6 +102,8 @@ namespace Aeolus
 				scoutedTag << "Tag:";
 				scoutedTag << contingencyPlan.name;
 				aeolusbot.Actions()->SendChat(scoutedTag.str());
+
+				aeolusbot.ChangeState(MakeState<ContingencyState>(contingencyPlan));
 			}
 		}
 	}
