@@ -11,6 +11,7 @@
 #include "../behaviors/macro_behaviors/production_controller.h"
 #include "../behaviors/macro_behaviors/spawn_controller.h"
 #include "../behaviors/macro_behaviors/build_structure.h"
+#include "../behaviors/macro_behaviors/tech_up.h"
 
 namespace Aeolus
 {
@@ -32,7 +33,8 @@ namespace Aeolus
 	{
 		doBookKeepingMacroTasks(aeolusbot);
 
-		if (!m_build_defense_queued)
+		bool stillBuildingForge = std::make_unique<TechUp>(::sc2::UNIT_TYPEID::PROTOSS_FORGE)->execute(aeolusbot);
+		if (!m_build_defense_queued && !stillBuildingForge)
 		{
 			for (int i = 0; i < m_plan.cannons_to_add; ++i)
 			{
