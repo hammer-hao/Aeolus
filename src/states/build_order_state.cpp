@@ -97,7 +97,7 @@ namespace Aeolus
 					break;
 				}
 			}
-			if (meets_criteria || aeolusbot.Observation()->GetGameLoop() > 1760) {
+			if (meets_criteria) {
 				std::stringstream scoutedTag;
 				scoutedTag << "Tag:";
 				scoutedTag << contingencyPlan.name;
