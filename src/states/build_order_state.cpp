@@ -97,12 +97,13 @@ namespace Aeolus
 					break;
 				}
 			}
-			if (meets_criteria) {
+			if (meets_criteria || aeolusbot.Observation()->GetGameLoop() > 1760) {
 				std::stringstream scoutedTag;
 				scoutedTag << "Tag:";
 				scoutedTag << contingencyPlan.name;
 				aeolusbot.Actions()->SendChat(scoutedTag.str());
 
+				mediator.ClearBuildingOrders(aeolusbot);
 				aeolusbot.ChangeState(MakeState<ContingencyState>(contingencyPlan));
 			}
 		}

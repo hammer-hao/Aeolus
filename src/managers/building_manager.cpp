@@ -32,6 +32,11 @@ namespace Aeolus
 			::sc2::UNIT_TYPEID structure_type = std::get<0>(params);
 			return _getNumPending(structure_type);
 		}
+		case (constants::ManagerRequestType::CLEAR_BUILDING_ORDERS):
+		{
+			_clearBuildingOrders();
+			return 0;
+		}
 		default: return 0;
 		}
 	}
@@ -197,5 +202,39 @@ namespace Aeolus
 				ManagerMediator::getInstance().AssignRole(m_bot, worker.value(), constants::UnitRole::BUILDING);
 			}
 		}
+	}
+
+	void BuildingManager::_clearBuildingOrders()
+	{
+		auto& mediator = ManagerMediator::getInstance();
+
+		for (const auto& [unit, order] : m_building_tracker)
+		{
+			auto cost = mediator.GetUnitCost(m_bot, order.building_id);
+			mediator.FreeMinerals(m_bot, cost.first);
+			mediator.FreeVespene(m_bot, cost.second);
+
+			auto counter_it = m_building_counter.find(order.building_id);
+
+			if (counter_it == m_building_counter.end() || counter_it->second == 0)
+			{
+				std::cerr << "WARNING: BuildingManager::_clearBuildingOrders() attempted "
+					<< "to decrement building counter below zero for building type "
+					<< static_cast<int>(order.building_id) << std::endl;
+			}
+			else
+			{
+				counter_it->second--;
+
+				if (counter_it->second == 0)
+				{
+					m_building_counter.erase(counter_it);
+				}
+			}
+
+			mediator.AssignRole(m_bot, unit, constants::UnitRole::GATHERING);
+		}
+
+		m_building_tracker.clear();
 	}
 }

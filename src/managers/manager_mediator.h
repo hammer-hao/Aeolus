@@ -943,6 +943,19 @@ namespace Aeolus
 			);
 		}
 
+		/**
+		* @brief Clear all building orders that is currently pending
+		*/
+		int ClearBuildingOrders(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<int, int>(
+				aeolusbot,
+				constants::ManagerName::BUILDING_MANAGER,
+				constants::ManagerRequestType::CLEAR_BUILDING_ORDERS,
+				0
+			);
+		}
+
 		// TargetManager
 
 		/**

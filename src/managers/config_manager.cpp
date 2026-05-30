@@ -158,12 +158,15 @@ namespace Aeolus
 
     ::sc2::UNIT_TYPEID ConfigManager::_unitNameToType(const std::string& name)
     {
+        std::cout << "Parsing unit: [" << name << "]" << std::endl;
         static const std::unordered_map<
             std::string,
             ::sc2::UNIT_TYPEID> unit_map =
         {
             {"SPAWNING_POOL", ::sc2::UNIT_TYPEID::ZERG_SPAWNINGPOOL},
             {"STALKER", ::sc2::UNIT_TYPEID::PROTOSS_STALKER},
+            {"ZEALOT", ::sc2::UNIT_TYPEID::PROTOSS_ZEALOT},
+            {"ZERGLING", ::sc2::UNIT_TYPEID::ZERG_ZERGLING}
         };
 
         auto it = unit_map.find(name);

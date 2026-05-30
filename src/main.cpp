@@ -154,8 +154,8 @@ int main(int argc, char* argv[])
             CreateParticipant(sc2::Race::Protoss, &aeolus_bot, "Aeolus"),
             CreateComputer(
                 sc2::Race::Zerg,
-                sc2::Difficulty::Easy,
-                sc2::AIBuild::Macro,
+                sc2::Difficulty::Hard,
+                sc2::AIBuild::Rush,
                 "BOYNEXTDOOR"
                 )
         });

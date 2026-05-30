@@ -29,44 +29,58 @@ namespace Aeolus
 		size_t total_unit_count = 0;
 
 		for (const auto& unit : all_own_units)
+		{
 			if (m_army_composition_map.find(unit->unit_type) != m_army_composition_map.end())
 			{
 				unit_count_map[unit->unit_type]++;
 				total_unit_count++;
 			}
+		}
 
 		for (const auto& item : m_army_composition_map)
 		{
 			::sc2::UNIT_TYPEID unit_type = item.first;
-			float proportion = item.second;
+			float target_proportion = item.second;
 
 			int num_units = 0;
 			for (const auto& unit : all_own_units) if (unit->unit_type == unit_type) ++num_units;
 
-			float current_proportion = static_cast<float>(unit_count_map[unit_type]) / static_cast<float>(total_unit_count);
+			float current_proportion = 0.0f;
+
+			if (total_unit_count > 0)
+			{
+				current_proportion =
+					static_cast<float>(unit_count_map[unit_type]) / static_cast<float>(total_unit_count);
+			}
+
+			/*if (current_proportion >= target_proportion)
+			{
+				continue;
+			}*/
+			// skipping proportion check because it is accounted for in _buildProductionDueToBank()
 
 			auto trained_from = utils::_isTrainedFrom(unit_type);
+			auto unit_cost = mediator.GetUnitCost(aeolusbot, unit_type);
 			if (trained_from.has_value())
 			{
 				TechUp techUp(unit_type);
 				bool techingUp = techUp.execute(aeolusbot);
 				if (techingUp) return true;
 
-				if (minerals > m_add_production_at_bank.first
-					&& vespene > m_add_production_at_bank.second)
+				size_t existing_production_count = 0;
+
+				for (const auto& structure : all_own_structures)
+					if (structure->unit_type == trained_from.value()) existing_production_count++;
+				existing_production_count += mediator.GetNumberPending(aeolusbot, trained_from.value());
+
+				if (_buildProductionDueToBank(aeolusbot, unit_type, mineral_collection_rate, gas_collection_rate,
+					existing_production_count, trained_from.value(), target_proportion))
 				{
-					size_t existing_production_count = 0;
-
-					for (const auto& structure : all_own_structures)
-						if (structure->unit_type == trained_from) existing_production_count++;
-					existing_production_count += mediator.GetNumberPending(aeolusbot, trained_from.value());
-
-					_buildProductionDueToBank(aeolusbot, unit_type, mineral_collection_rate, gas_collection_rate,
-						existing_production_count, trained_from.value(), proportion);
+					return true;
 				}
 			}
 		}
-		return true;
+		return false;
 	}
 
 	bool ProductionController::_buildProductionDueToBank(AeolusBot& aeolusbot,
@@ -99,11 +113,13 @@ namespace Aeolus
 			<< " simutaneous productions." << std::endl;
 		std::cout << "Existing production count: " << existing_production_count << std::endl;*/
 
-		if (existing_production_count < rate_supported_by_minerals
-			&& existing_production_count < rate_supported_by_gas)
+		bool mineral_ok = existing_production_count < rate_supported_by_minerals;
+		bool gas_ok = unit_cost.second == 0 || existing_production_count < rate_supported_by_gas;
+
+		if (mineral_ok && gas_ok)
 		{
-			return std::make_unique<BuildStructure>(production_structure_id, m_base_location, false).get()->execute(aeolusbot);
-			// std::cout << "Building more production to match our income... " << std::endl;
+			BuildStructure build(production_structure_id, m_base_location, false);
+			return build.execute(aeolusbot);
 		}
 		return false;
 	}

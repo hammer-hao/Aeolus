@@ -50,5 +50,7 @@ namespace Aeolus
 		const std::unordered_map<const ::sc2::Unit*, BuildingOrder>& getBuildingTracker() const;
 
 		void _handleConstructionOrders();
+
+		void _clearBuildingOrders();
 	};
 }

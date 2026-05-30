@@ -12,7 +12,25 @@
           }
         ],
         "army_composition": {
-          "STALKER": 1.0
+          "STALKER": 0.9,
+          "ZEALOT": 0.1
+        },
+        "move_out_supply": 120,
+        "cannons_to_add": 2
+      },
+      {
+        "name": "zergling_rush",
+        "conditions": [
+          {
+            "name": "ZERGLING",
+            "count": 1,
+            "before_seconds": 110,
+            "is_proxied": false
+          }
+        ],
+        "army_composition": {
+          "STALKER": 0.9,
+          "ZEALOT": 0.1
         },
         "move_out_supply": 120,
         "cannons_to_add": 2
