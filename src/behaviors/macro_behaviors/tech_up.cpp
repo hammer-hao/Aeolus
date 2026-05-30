@@ -34,7 +34,8 @@ namespace Aeolus
 		else
 		{
 			// case 3: the target is a unit
-			::sc2::UNIT_TYPEID structureId = utils::_isTrainedFrom(std::get<::sc2::UNIT_TYPEID>(m_target)).value();
+			::sc2::UNIT_TYPEID structureId = mediator.GetRequiredTech(aeolusbot, std::get<::sc2::UNIT_TYPEID>(m_target));
+			// ::sc2::UNIT_TYPEID structureId = utils::_isTrainedFrom(std::get<::sc2::UNIT_TYPEID>(m_target)).value();
 			techTreeRoute = constants::UNIT_TECH_REQUIREMENT.at(structureId);
 		}
 

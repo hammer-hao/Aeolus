@@ -23,7 +23,7 @@ namespace Aeolus
 
 		std::any ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args) override;
 
-		void update(int iteration) override = 0;
+		void update(int iteration) override;
 
 	private:
 		AeolusBot& m_bot;

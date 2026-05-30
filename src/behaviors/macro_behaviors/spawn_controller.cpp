@@ -96,7 +96,7 @@ namespace Aeolus
 			if (build_structures.empty()) continue;
 
 			// already have enough of this unit, continue
-			// if (current_proportions[spawn_type.first] > proportion) continue;
+			if (current_proportions[spawn_type.first] > proportion) continue;
 			
 			// not enough of this unit, build it
 			int supply_left = observation->GetFoodCap() - observation->GetFoodUsed();

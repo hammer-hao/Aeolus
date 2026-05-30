@@ -19,6 +19,7 @@
 #include "combat_sim_manager.h"
 #include "army_composition_manager.h"
 #include "scouting_manager.h"
+#include "config_manager.h"
 
 namespace Aeolus
 {
@@ -50,6 +51,7 @@ namespace Aeolus
 			managers.push_back(std::make_unique<CombatSimManager>(aeolusbot));
 			managers.push_back(std::make_unique<ArmyCompositionManager>(aeolusbot));
 			managers.push_back(std::make_unique<ScoutingManager>(aeolusbot));
+			managers.push_back(std::make_unique<ConfigManager>(aeolusbot));
 
 			// Store raw pointers before transferring ownership
 			m_unit_filter_manager_ref = static_cast<UnitFilterManager*>(managers[0].get());
@@ -66,6 +68,7 @@ namespace Aeolus
 			m_combat_sim_manager_ref = static_cast<CombatSimManager*>(managers[11].get());
 			m_army_composition_manager_ref = static_cast<ArmyCompositionManager*>(managers[12].get());
 			m_scouting_manager_ref = static_cast<ScoutingManager*>(managers[13].get());
+			m_config_manager_ref = static_cast<ConfigManager*>(managers[14].get());
 
 			m_managers.push_back(m_unit_filter_manager_ref);
 			m_managers.push_back(m_unit_role_manager_ref);
@@ -81,6 +84,7 @@ namespace Aeolus
 			m_managers.push_back(m_combat_sim_manager_ref);
 			m_managers.push_back(m_army_composition_manager_ref);
 			m_managers.push_back(m_scouting_manager_ref);
+			m_managers.push_back(m_config_manager_ref);
 
 			ManagerMediator::getInstance().AddManagers(managers);
 
@@ -160,5 +164,6 @@ namespace Aeolus
 		CombatSimManager* m_combat_sim_manager_ref;
 		ArmyCompositionManager* m_army_composition_manager_ref;
 		ScoutingManager* m_scouting_manager_ref;
+		ConfigManager* m_config_manager_ref;
 	};
 }

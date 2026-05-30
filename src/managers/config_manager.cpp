@@ -11,9 +11,15 @@ namespace Aeolus
 
 	ConfigManager::ConfigManager(AeolusBot& aeolusbot) : m_bot(aeolusbot)
 	{
-		std::ifstream f("data/config/contingency_plans.json");
-		json contingency_plans = json::parse(f)["contingency_plans"];
-        _loadContingencyPlans(contingency_plans);
+        std::ifstream f("data/config/contingency_plans.json");
+
+        if (!f.is_open())
+        {
+            throw std::runtime_error("Failed to open data/config/contingency_plans.json");
+        }
+
+        json config = json::parse(f);
+        _loadContingencyPlans(config);
 	}
 
     std::any ConfigManager::ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args)
@@ -27,6 +33,10 @@ namespace Aeolus
         default:
             return 0;
         }
+    }
+
+    void ConfigManager::update(int iteration)
+    {
     }
 
     std::vector<ContingencyPlan> ConfigManager::_getContingencyPlans() {
@@ -148,12 +158,15 @@ namespace Aeolus
 
     ::sc2::UNIT_TYPEID ConfigManager::_unitNameToType(const std::string& name)
     {
+        std::cout << "Parsing unit: [" << name << "]" << std::endl;
         static const std::unordered_map<
             std::string,
             ::sc2::UNIT_TYPEID> unit_map =
         {
             {"SPAWNING_POOL", ::sc2::UNIT_TYPEID::ZERG_SPAWNINGPOOL},
             {"STALKER", ::sc2::UNIT_TYPEID::PROTOSS_STALKER},
+            {"ZEALOT", ::sc2::UNIT_TYPEID::PROTOSS_ZEALOT},
+            {"ZERGLING", ::sc2::UNIT_TYPEID::ZERG_ZERGLING}
         };
 
         auto it = unit_map.find(name);

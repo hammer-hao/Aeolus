@@ -56,7 +56,9 @@ namespace Aeolus
 			}
 			catch (...) {
 				std::cerr << "Behavior executor: Unknown exception during behavior execution at index "
-					<< behaviorIndex << "!" << std::endl;
+					<< behaviorIndex
+					<< " behavior type: " << typeid(*behavior).name()
+					<< std::endl;
 			}
 			behaviorIndex++;
 			//std::cout << "Executed behavior index " << behaviorIndex << std::endl;
