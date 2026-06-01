@@ -264,6 +264,44 @@ namespace Aeolus
         }
     }
 
+    void BaseState::doAdeptHarassMicro(AeolusBot& aeolusbot)
+    {
+        auto& mediator = ManagerMediator::getInstance();
+        ::sc2::Units adepts = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::HARASS_ADEPT);
+
+        std::vector<std::vector<::sc2::Point2D>> positionsBehindEnemyMainNaturalThirdBase = 
+            mediator.getPositionsBehindEnemyMainNaturalThird(aeolusbot);
+
+        auto harassmentTracker = mediator.getHarassmentTracker(aeolusbot);
+
+        for (const auto& adept : adepts)
+        {
+            if (harassmentTracker.find(adept->tag) == harassmentTracker.end())
+            {
+                mediator.registerHarassmentStatus(aeolusbot, adept->tag, HarassmentStatus::HEADING_TO_BASE);
+                continue;
+            }
+            HarassmentStatus currentStatus = harassmentTracker[adept->tag];
+
+            if (currentStatus == HarassmentStatus::HEADING_TO_BASE)
+            {
+
+            }
+            else if (currentStatus == HarassmentStatus::HARASSING_AT_MAIN)
+            {
+
+            }
+            else if (currentStatus == HarassmentStatus::HARASSING_AT_NATURAL)
+            {
+
+            }
+            else if (currentStatus == HarassmentStatus::SURVIVING)
+            {
+
+            }
+        }
+    }
+
     void BaseState::doHighEconomyMacroTasks(AeolusBot& aeolusbot, bool forceDetection)
     {
         aeolusbot.RegisterBehavior(std::make_unique<BuildGeysers>());

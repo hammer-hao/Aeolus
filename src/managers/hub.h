@@ -20,6 +20,7 @@
 #include "army_composition_manager.h"
 #include "scouting_manager.h"
 #include "config_manager.h"
+#include "harassment_manager.h"
 
 namespace Aeolus
 {
@@ -52,6 +53,7 @@ namespace Aeolus
 			managers.push_back(std::make_unique<ArmyCompositionManager>(aeolusbot));
 			managers.push_back(std::make_unique<ScoutingManager>(aeolusbot));
 			managers.push_back(std::make_unique<ConfigManager>(aeolusbot));
+			managers.push_back(std::make_unique<HarassmentManager>(aeolusbot));
 
 			// Store raw pointers before transferring ownership
 			m_unit_filter_manager_ref = static_cast<UnitFilterManager*>(managers[0].get());
@@ -69,6 +71,7 @@ namespace Aeolus
 			m_army_composition_manager_ref = static_cast<ArmyCompositionManager*>(managers[12].get());
 			m_scouting_manager_ref = static_cast<ScoutingManager*>(managers[13].get());
 			m_config_manager_ref = static_cast<ConfigManager*>(managers[14].get());
+			m_harassment_manager_ref = static_cast<HarassmentManager*>(managers[15].get());
 
 			m_managers.push_back(m_unit_filter_manager_ref);
 			m_managers.push_back(m_unit_role_manager_ref);
@@ -85,6 +88,7 @@ namespace Aeolus
 			m_managers.push_back(m_army_composition_manager_ref);
 			m_managers.push_back(m_scouting_manager_ref);
 			m_managers.push_back(m_config_manager_ref);
+			m_managers.push_back(m_harassment_manager_ref);
 
 			ManagerMediator::getInstance().AddManagers(managers);
 
@@ -144,6 +148,7 @@ namespace Aeolus
 			m_target_manager_ref->Initialize();
 			m_combat_sim_manager_ref->Initialize();
 			m_scouting_manager_ref->Initialize();
+			m_harassment_manager_ref->Initialize();
 		}
 
 	private:
@@ -165,5 +170,6 @@ namespace Aeolus
 		ArmyCompositionManager* m_army_composition_manager_ref;
 		ScoutingManager* m_scouting_manager_ref;
 		ConfigManager* m_config_manager_ref;
+		HarassmentManager* m_harassment_manager_ref;
 	};
 }

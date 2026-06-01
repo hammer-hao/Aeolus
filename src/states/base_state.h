@@ -57,6 +57,11 @@ namespace Aeolus
 		void doOracleHarassMicro(AeolusBot& aeolusbot);
 
 		/**
+		* @brief Perform harassment with the adept
+		*/
+		void doAdeptHarassMicro(AeolusBot& aeolusbot);
+
+		/**
 		* @brief perform high economy macro tasks
 		*/
 		void doHighEconomyMacroTasks(AeolusBot& aeolusbot, bool forceDetection);

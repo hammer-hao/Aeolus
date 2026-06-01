@@ -92,7 +92,8 @@ namespace Aeolus {
 			|| unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL
 			|| unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS
 			|| unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_VOIDRAY
-			|| unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ZEALOT)
+			|| unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ZEALOT
+			|| unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ADEPT)
 		{
 			AssignRole(unit, constants::UnitRole::ATTACKING);
 		}
@@ -107,6 +108,10 @@ namespace Aeolus {
 		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_OBSERVER)
 		{
 			AssignRole(unit, constants::UnitRole::MOBILE_DETECTION);
+		}
+		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ADEPTPHASESHIFT)
+		{
+			AssignRole(unit, constants::UnitRole::ADEPT_SHADE);
 		}
 	}
 
