@@ -78,7 +78,7 @@ namespace Aeolus
 		::sc2::Point2D _getAdeptShadeTargetFromHarassmentStatus(HarassmentStatus status,
 			const std::vector<std::vector<::sc2::Point2D>>& behindMineralPositions, ::sc2::Point2D fallbackLocation);
 
-		HarassmentStatus BaseState::_getClosestHarassStatus(
+		HarassmentStatus _getClosestHarassStatus(
 			AeolusBot& aeolusbot,
 			const ::sc2::Unit* adept,
 			const std::vector<std::vector<::sc2::Point2D>>& positionsBehindEnemyMainNaturalThirdBase);

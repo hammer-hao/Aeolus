@@ -23,7 +23,7 @@ namespace Aeolus
 
 		std::any ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args) override;
 
-		void HarassmentManager::Initialize();
+		void Initialize();
 
 		void update(int iteration) override;
 

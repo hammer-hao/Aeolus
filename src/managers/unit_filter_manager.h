@@ -26,7 +26,7 @@ namespace Aeolus
 		// Implement the update method.
 		void update(int iteration) override;
 
-		void UnitFilterManager::OnUnitCreated(const ::sc2::Unit* unit);
+		void OnUnitCreated(const ::sc2::Unit* unit);
 
 		void OnUnitDestroyed(const ::sc2::Unit* unit);
 
