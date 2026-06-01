@@ -105,8 +105,7 @@ namespace Aeolus
         {
             return std::map < ::sc2::UNIT_TYPEID, float>
             {
-                {::sc2::UNIT_TYPEID::PROTOSS_STALKER, 0.7f},
-                { ::sc2::UNIT_TYPEID::PROTOSS_ORACLE, 0.3f }
+                {::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.0f}
             };
         }
         case (BuildOrderEnum::STALKER_IMMORTAL):
