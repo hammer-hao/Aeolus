@@ -43,7 +43,8 @@ namespace Aeolus
         doBookKeepingMacroTasks(aeolusbot);
 
 		// auto supply only when we are somehow supply blocked during executing the build order
-		if (aeolusbot.Observation()->GetFoodCap() <= aeolusbot.Observation()->GetFoodUsed())
+		if (aeolusbot.Observation()->GetFoodCap() <= aeolusbot.Observation()->GetFoodUsed()
+			&& aeolusbot.Observation()->GetGameLoop() > 3400)
 			aeolusbot.RegisterBehavior(std::make_unique<AutoSupply>());
 
 		if (aeolusbot.Observation()->GetGameLoop() % 22 == 0)
@@ -63,8 +64,13 @@ namespace Aeolus
 		// during the build order, we generally want to defend. However, we would still like to move out
 		// if we have enought supply
 		::sc2::Units forces = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
-        
-        if (forces.empty()) return;
+
+		// during the build order state, all adepts will be assigned the harassment role
+		for (const auto& unit : forces)
+		{
+			if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ADEPT)
+				mediator.AssignRole(aeolusbot, unit, constants::UnitRole::HARASS_ADEPT);
+		}
 
 		::sc2::Point2D target = (forces.size() >= aeolusbot.getMoveOutSupply()) ?
 			mediator.GetAtttackTarget(aeolusbot) : mediator.GetDefenseTarget(aeolusbot, 1);
@@ -76,6 +82,9 @@ namespace Aeolus
 
 		// We are open to doing Oracle harass during the build order stage
 		doOracleHarassMicro(aeolusbot);
+
+		// Perform Adept Harassment Micro
+		doAdeptHarassMicro(aeolusbot);
 	}
 
 	void BuildOrderState::_ensureContingencyResponse(AeolusBot& aeolusbot)

@@ -64,6 +64,9 @@ namespace Aeolus
         doOracleHarassMicro(aeolusbot);
 
         doObserverMicro(aeolusbot);
+
+        // Perform Adept Harassment Micro
+        doAdeptHarassMicro(aeolusbot);
 	}
 
     void ForwardPressureState::_transitionIntoConsolidateIfNeeded(AeolusBot& aeolusbot)

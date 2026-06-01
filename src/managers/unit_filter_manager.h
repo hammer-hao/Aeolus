@@ -26,6 +26,8 @@ namespace Aeolus
 		// Implement the update method.
 		void update(int iteration) override;
 
+		void OnUnitCreated(const ::sc2::Unit* unit);
+
 		void OnUnitDestroyed(const ::sc2::Unit* unit);
 
 	private:
@@ -60,5 +62,8 @@ namespace Aeolus
 
 		// Map to keep track of the known enemy units that are still alive
 		std::unordered_map<::sc2::Tag, ::sc2::UNIT_TYPEID> m_knownEnemyUnits;
+
+		// Map to keep track of the known adept shades
+		std::unordered_map<::sc2::Tag, std::pair<::sc2::Tag, int>> m_adeptShadeTracker;
 	};
 }

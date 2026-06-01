@@ -4,10 +4,13 @@
 #include "../../Aeolus.h"
 #include <sc2api/sc2_unit.h>
 #include <sc2api/sc2_common.h>
+#include <sc2api/sc2_data.h>
 #include <string>
 #include <iostream>
 
 #include "../managers/manager_mediator.h"
+#include "../Aeolus.h"
+#include "../enums.h"
 
 #include "../behaviors/macro_behaviors/mining.h"
 #include "../behaviors/macro_behaviors/scout.h"
@@ -31,6 +34,7 @@
 #include "../behaviors/micro_behaviors/pick_unit_up.h"
 #include "../behaviors/micro_behaviors/unload.h"
 #include "../behaviors/micro_behaviors/use_ability.h"
+#include "../behaviors/micro_behaviors/move.h"
 
 #include "../utils/unit_utils.h"
 #include "../utils/position_utils.h"
@@ -264,6 +268,142 @@ namespace Aeolus
         }
     }
 
+    void BaseState::doAdeptHarassMicro(AeolusBot& aeolusbot)
+    {
+        auto& mediator = ManagerMediator::getInstance();
+        ::sc2::Units adepts = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::HARASS_ADEPT);
+        std::map<::sc2::Tag, ::sc2::Units> unitsInRangeMap = _getEnemiesInRangeMap(aeolusbot, adepts);
+
+        std::vector<std::vector<::sc2::Point2D>> positionsBehindEnemyMainNaturalThirdBase =
+            mediator.getPositionsBehindEnemyMainNaturalThird(aeolusbot);
+
+        auto harassmentTracker = mediator.getHarassmentTracker(aeolusbot);
+        auto adeptShadeTracker = mediator.GetAdeptShadeTracker(aeolusbot);
+
+        for (const auto& adept : adepts)
+        {
+            if (harassmentTracker.find(adept->tag) == harassmentTracker.end())
+            {
+                mediator.registerHarassmentStatus(aeolusbot, adept->tag, HarassmentStatus::HEADING_TO_BASE);
+                continue;
+            }
+
+            auto adept_behavior = std::make_unique<MicroBehavior>(adept);
+            auto available_abilities = aeolusbot.Query()->GetAbilitiesForUnit(adept).abilities;
+            if (std::any_of(available_abilities.begin(), available_abilities.end(), [](::sc2::AvailableAbility ability) {
+                return ability.ability_id == ::sc2::ABILITY_ID::EFFECT_ADEPTPHASESHIFT;
+                })) {
+                adept_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::EFFECT_ADEPTPHASESHIFT, adept->pos));
+            }
+
+            HarassmentStatus currentStatus = harassmentTracker[adept->tag];
+
+            if (currentStatus == HarassmentStatus::HEADING_TO_BASE)
+            {
+                std::vector<::sc2::Point2D> pointsBehindMain =
+                    positionsBehindEnemyMainNaturalThirdBase.front();
+
+                ::sc2::Point2D closest = *std::min_element(
+                    pointsBehindMain.begin(), pointsBehindMain.end(),
+                    [adept, &aeolusbot](::sc2::Point2D a, ::sc2::Point2D b) {
+                        return aeolusbot.Query()->PathingDistance(adept->pos, a) < aeolusbot.Query()->PathingDistance(adept->pos, b);
+                    }
+                );
+
+                adept_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                adept_behavior->AddBehavior(std::make_unique<PathToTarget>(closest));
+
+                if (std::count_if(unitsInRangeMap[adept->tag].begin(), unitsInRangeMap[adept->tag].end(), [](const ::sc2::Unit* unit) {
+                    return (constants::WORKER_TYPES.find(unit->unit_type) != constants::WORKER_TYPES.end());
+                    }) >= 3)
+                {
+                    HarassmentStatus newStatus = _getClosestHarassStatus(aeolusbot, adept, positionsBehindEnemyMainNaturalThirdBase);
+                    mediator.registerHarassmentStatus(aeolusbot, adept->tag, newStatus);
+                }
+            }
+            else if (currentStatus == HarassmentStatus::HARASSING_AT_MAIN || currentStatus == HarassmentStatus::HARASSING_AT_NATURAL)
+            {
+                const ::sc2::Units& allClose = unitsInRangeMap[adept->tag];
+
+                if (!std::any_of(allClose.begin(), allClose.end(), [](const ::sc2::Unit* unit) {
+                    return (constants::WORKER_TYPES.find(unit->unit_type) != constants::WORKER_TYPES.end());
+                    })) {
+                    adept_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                }
+                else 
+                {
+                    ::sc2::Units closeWorkers;
+                    std::copy_if(allClose.begin(), allClose.end(), std::back_inserter(closeWorkers), [](const ::sc2::Unit* unit) {
+                        return (constants::WORKER_TYPES.find(unit->unit_type) != constants::WORKER_TYPES.end());
+                        });
+                    auto workserInAttackRange = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, adept, closeWorkers);
+                    if (!workserInAttackRange.empty())
+                    {
+                        adept_behavior->AddBehavior(
+                            std::make_unique<ShootTargetInRange>(
+                                workserInAttackRange
+                            )
+                        );
+                    }
+                    else
+                    {
+                        auto enemy_target = utils::PickAttackTarget(allClose);
+                        adept_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
+                    }
+                }
+
+                if ((adept->shield / adept->shield_max) <= 0.05f)
+                {
+                    mediator.registerHarassmentStatus(aeolusbot, adept->tag, HarassmentStatus::SURVIVING);
+                }
+            }
+            else if (currentStatus == HarassmentStatus::SURVIVING)
+            {
+                adept_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                if ((adept->shield / adept->shield_max) >= 0.95f)
+                {
+                    mediator.registerHarassmentStatus(aeolusbot, adept->tag, HarassmentStatus::HEADING_TO_BASE);
+                }
+            }
+
+            aeolusbot.RegisterBehavior(std::move(adept_behavior));
+
+            if (adeptShadeTracker.find(adept->tag) != adeptShadeTracker.end())
+            {
+                const ::sc2::Unit* adeptShade = aeolusbot.Observation()->GetUnit(adeptShadeTracker[adept->tag].first);
+                auto adept_shade_behavior = std::make_unique<MicroBehavior>(adeptShade);
+
+                if (adeptShadeTracker[adept->tag].second <= 44)
+                {
+                    adept_shade_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                }
+
+                auto target = _getAdeptShadeTargetFromHarassmentStatus(currentStatus,
+                    positionsBehindEnemyMainNaturalThirdBase,
+                    aeolusbot.Observation()->GetStartLocation());
+                adept_shade_behavior->AddBehavior(std::make_unique<Move>(target));
+
+                if (adeptShadeTracker[adept->tag].second == 1)
+                {
+                    if (currentStatus == HarassmentStatus::SURVIVING)
+                    {
+
+                    }
+                    else 
+                    {
+                        // mediator.IsGroundPositionSafe()
+                        // need to decide if cancel or not
+                        // adept_shade_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::CANCEL));
+                        HarassmentStatus newStatus = _getClosestHarassStatus(aeolusbot, adeptShade, positionsBehindEnemyMainNaturalThirdBase);
+                        mediator.registerHarassmentStatus(aeolusbot, adept->tag, newStatus);
+                    }
+                }
+
+                aeolusbot.RegisterBehavior(std::move(adept_shade_behavior));
+            }
+        }
+    }
+
     void BaseState::doHighEconomyMacroTasks(AeolusBot& aeolusbot, bool forceDetection)
     {
         aeolusbot.RegisterBehavior(std::make_unique<BuildGeysers>());
@@ -302,4 +442,100 @@ namespace Aeolus
         }
     }
 
+    std::map<::sc2::Tag, ::sc2::Units> BaseState::_getEnemiesInRangeMap(AeolusBot& aeolusbot, const ::sc2::Units& units)
+    {
+        std::map<::sc2::Tag, ::sc2::Units> out;
+        auto& mediator = ManagerMediator::getInstance();
+
+        std::vector<::sc2::Point2D> startingPoints(units.size());
+
+        std::transform(units.begin(), units.end(), startingPoints.begin(), [](const ::sc2::Unit* unit) {
+            return unit->pos;
+            });
+
+        const auto queryResult = mediator.GetEnemyUnitsInRangeMap(aeolusbot, startingPoints, 5.0);
+
+        for (int i = 0; i < units.size(); ++i)
+        {
+            out.insert({units[i]->tag, queryResult[i]});
+        }
+        return out;
+    }
+
+    ::sc2::Point2D BaseState::_getAdeptShadeTargetFromHarassmentStatus(
+        HarassmentStatus status, 
+        const std::vector<std::vector<::sc2::Point2D>>& behindMineralPositions, ::sc2::Point2D fallbackLocation)
+    {
+        if (status == HarassmentStatus::HEADING_TO_BASE)
+        {
+            return behindMineralPositions.front()[1];
+        }
+        else if (status == HarassmentStatus::HARASSING_AT_MAIN)
+        {
+            return behindMineralPositions[1][1];
+        }
+        else if (status == HarassmentStatus::HARASSING_AT_NATURAL)
+        {
+            return behindMineralPositions.front()[1];
+        }
+        else if (status == HarassmentStatus::HARASSING_AT_THIRD)
+        {
+            return behindMineralPositions[1][1];
+        }
+        else if (status == HarassmentStatus::SURVIVING)
+        {
+            return fallbackLocation;
+        }
+        return behindMineralPositions.front().front();
+    }
+
+    HarassmentStatus BaseState::_getClosestHarassStatus(
+        AeolusBot& aeolusbot,
+        const ::sc2::Unit* adept,
+        const std::vector<std::vector<::sc2::Point2D>>& positionsBehindEnemyMainNaturalThirdBase)
+    {
+        auto* query = aeolusbot.Query();
+
+        auto distanceToGroup = [&](const std::vector<::sc2::Point2D>& points) {
+            if (points.empty()) {
+                return std::numeric_limits<float>::max();
+            }
+
+            auto closestPointIt = std::min_element(
+                points.begin(),
+                points.end(),
+                [&](const ::sc2::Point2D& a, const ::sc2::Point2D& b) {
+                    return query->PathingDistance(adept->pos, a)
+                        < query->PathingDistance(adept->pos, b);
+                });
+
+            return query->PathingDistance(adept->pos, *closestPointIt);
+            };
+
+        size_t bestIndex = 0;
+        float bestDistance = std::numeric_limits<float>::max();
+
+        for (size_t i = 0; i < positionsBehindEnemyMainNaturalThirdBase.size(); ++i)
+        {
+            float dist = distanceToGroup(positionsBehindEnemyMainNaturalThirdBase[i]);
+
+            if (dist < bestDistance)
+            {
+                bestDistance = dist;
+                bestIndex = i;
+            }
+        }
+
+        switch (bestIndex)
+        {
+        case 0:
+            return HarassmentStatus::HARASSING_AT_MAIN;
+        case 1:
+            return HarassmentStatus::HARASSING_AT_NATURAL;
+        case 2:
+            return HarassmentStatus::HARASSING_AT_THIRD;
+        default:
+            return HarassmentStatus::HARASSING_AT_MAIN;
+        }
+    }
 } // namespace Aeolus

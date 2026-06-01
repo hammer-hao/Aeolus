@@ -462,6 +462,20 @@ namespace Aeolus
 			);
 		}
 
+		/**
+		* @brief returns a map that tracks each adept with their shade info. Adepts with active shades
+		* will appear in the map. The value represents the shade tag and the frames the shade has remaining.
+		*/
+		std::unordered_map<::sc2::Tag, std::pair<::sc2::Tag, int>> GetAdeptShadeTracker(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<std::unordered_map<::sc2::Tag, std::pair<::sc2::Tag, int>>, int>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_ADEPT_SHADE_TRACKER,
+				0
+			);
+		}
+
 		// PathManager
 
 		::sc2::ImageData GetDefaultGridData(AeolusBot& aeolusbot)
@@ -1065,6 +1079,20 @@ namespace Aeolus
 		}
 
 		/**
+		* @brief given a base location, return a vector of length 3 representing the three pathing locations
+		* behind the base's mineral line
+		*/
+		std::vector<::sc2::Point2D> getBehindMineralPositions(AeolusBot& aeolusbot, ::sc2::Point2D baseLocation)
+		{
+			return ManagerRequest<::std::vector<::sc2::Point2D>, ::sc2::Point2D>(
+				aeolusbot,
+				constants::ManagerName::SCOUTING_MANAGER,
+				constants::ManagerRequestType::GET_BEHIND_MINERAL_LOCATIONS,
+				baseLocation
+			);
+		}
+
+		/**
 		* Returns the opponent's race. Note: if the opponent has randomed a race, this will return sc2::Race::RANDOM
 		* instead of the race they randomed into.
 		*/
@@ -1094,6 +1122,50 @@ namespace Aeolus
 				constants::ManagerName::CONFIG_MANAGER,
 				constants::ManagerRequestType::GET_CONTINGENCY_PLANS,
 				0
+			);
+		}
+
+		// Harassment Manager
+
+		/**
+		* @brief returns a vector of length 3 with each element being a vector of 3 ::sc2::Point2d object
+		* representing the three possible locations for the harassment unit to go to behind the enemy's main,
+		* natural, and third base.
+		*/
+		std::vector<std::vector<::sc2::Point2D>> getPositionsBehindEnemyMainNaturalThird(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<std::vector<std::vector<::sc2::Point2D>>, int>(
+				aeolusbot,
+				constants::ManagerName::HARASSMENT_MANAGER,
+				constants::ManagerRequestType::GET_POSITIONS_BEHIND_ENEMY_MAIN_NATURAL_THIRD,
+				0
+			);
+		}
+
+		/**
+		* @brief returns a map of current harrassment units and the current state they are in
+		*/
+		std::map<::sc2::Tag, HarassmentStatus> getHarassmentTracker(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<std::map<::sc2::Tag, HarassmentStatus>, int>(
+				aeolusbot,
+				constants::ManagerName::HARASSMENT_MANAGER,
+				constants::ManagerRequestType::GET_HARASSMENT_TRACKER,
+				0
+			);
+		}
+
+		/**
+		* @brief register/re-register a harassment status to a harassment unit
+		*/
+		int registerHarassmentStatus(AeolusBot& aeolusbot, ::sc2::Tag unit, HarassmentStatus status)
+		{
+			return ManagerRequest<int, ::sc2::Tag, HarassmentStatus>(
+				aeolusbot,
+				constants::ManagerName::HARASSMENT_MANAGER,
+				constants::ManagerRequestType::REGISTER_HARASSMENT_STATUS,
+				unit,
+				status
 			);
 		}
 	};

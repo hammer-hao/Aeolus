@@ -25,7 +25,8 @@ namespace Aeolus {
 			COMBAT_SIM_MANAGER,
 			ARMY_COMPOSITION_MANAGER,
 			SCOUTING_MANAGER,
-			CONFIG_MANAGER
+			CONFIG_MANAGER,
+			HARASSMENT_MANAGER,
 		};
 
 		enum class ManagerRequestType
@@ -103,6 +104,7 @@ namespace Aeolus {
 			GET_REQUIRED_TECH,
 			GET_UNIT_SUPPLY_COST,
 			GET_UNIT_MOVEMENT_SPEED,
+			GET_ADEPT_SHADE_TRACKER,
 
 			// DefenseManager
 			GET_UNITS_IN_RANGE,
@@ -134,9 +136,15 @@ namespace Aeolus {
 			REGISTER_SCOUT,
 			CHECK_SCOUT_TO_NEXT_WAYPOINT,
 			GET_OPPONENT_RACE,
+			GET_BEHIND_MINERAL_LOCATIONS,
 
 			// ConfigManager
 			GET_CONTINGENCY_PLANS,
+
+			// HarassmentManager
+			GET_POSITIONS_BEHIND_ENEMY_MAIN_NATURAL_THIRD,
+			GET_HARASSMENT_TRACKER,
+			REGISTER_HARASSMENT_STATUS
 		};
 
 		enum class UnitRole
@@ -149,6 +157,8 @@ namespace Aeolus {
 			ORACLE,
 			MOBILE_DETECTION,
 			SCOUTING,
+			HARASS_ADEPT,
+			ADEPT_SHADE,
 		};
 		std::string ManagerNameToString(ManagerName name);
 		std::string ManagerRequestTypeToString(ManagerRequestType requestType);

@@ -49,6 +49,9 @@ namespace Aeolus
 
 		// We are open to doing Oracle harass during the contingency stage
 		// doOracleDefensiveMicro(aeolusbot);
+
+		// Perform Adept Harassment Micro
+		doAdeptHarassMicro(aeolusbot);
 	}
 
 	void ContingencyState::macro(AeolusBot& aeolusbot)
