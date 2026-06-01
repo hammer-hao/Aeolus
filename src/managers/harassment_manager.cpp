@@ -61,6 +61,7 @@ namespace Aeolus
 
 	void HarassmentManager::update(int iteration)
 	{
+#ifndef BUILD_FOR_LADDER
 		::sc2::HeightMap heightmap(m_bot.Observation()->GetGameInfo());
 		auto* debug = m_bot.Debug();
 
@@ -73,6 +74,7 @@ namespace Aeolus
 			}
 		}
 		debug->SendDebug();
+#endif
 	}
 
 	void HarassmentManager::onUnitDestroyed(const ::sc2::Unit* unit)
