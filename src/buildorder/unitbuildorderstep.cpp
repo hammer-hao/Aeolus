@@ -45,7 +45,7 @@ namespace Aeolus
 		::sc2::UNIT_TYPEID required_tech = mediator.GetRequiredTech(aeolusbot, m_to_train);
 		if (required_tech != ::sc2::UNIT_TYPEID::INVALID &&
 			!std::any_of(all_structures.begin(), all_structures.end(),
-			[required_tech](const ::sc2::Unit* structure) {return structure->unit_type == required_tech; }))
+			[required_tech](const ::sc2::Unit* structure) {return structure->unit_type == required_tech && structure->build_progress >= 1.0f; }))
 		{
 			// std::cout << "we do not have the required tech to train " << ::sc2::UnitTypeToName(m_to_train) << std::endl;
 			// std::cout << "required tech: " << ::sc2::UnitTypeToName(required_tech) << std::endl;
