@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bot_state.h"
+#include "../enums.h"
 #include <sc2api/sc2_unit.h>
 #include <sc2api/sc2_common.h>
 #include <string>
@@ -70,6 +71,17 @@ namespace Aeolus
 		* @brief perform micro on observers
 		*/
 		void doObserverMicro(AeolusBot& aeolusbot);
+
+	private:
+		std::map<::sc2::Tag, ::sc2::Units> _getEnemiesInRangeMap(AeolusBot& aeolusbot, const ::sc2::Units& units);
+
+		::sc2::Point2D _getAdeptShadeTargetFromHarassmentStatus(HarassmentStatus status,
+			const std::vector<std::vector<::sc2::Point2D>>& behindMineralPositions, ::sc2::Point2D fallbackLocation);
+
+		HarassmentStatus BaseState::_getClosestHarassStatus(
+			AeolusBot& aeolusbot,
+			const ::sc2::Unit* adept,
+			const std::vector<std::vector<::sc2::Point2D>>& positionsBehindEnemyMainNaturalThirdBase);
 	};
 } // namespace Aeolus
 

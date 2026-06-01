@@ -462,6 +462,20 @@ namespace Aeolus
 			);
 		}
 
+		/**
+		* @brief returns a map that tracks each adept with their shade info. Adepts with active shades
+		* will appear in the map. The value represents the shade tag and the frames the shade has remaining.
+		*/
+		std::unordered_map<::sc2::Tag, std::pair<::sc2::Tag, int>> GetAdeptShadeTracker(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<std::unordered_map<::sc2::Tag, std::pair<::sc2::Tag, int>>, int>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_ADEPT_SHADE_TRACKER,
+				0
+			);
+		}
+
 		// PathManager
 
 		::sc2::ImageData GetDefaultGridData(AeolusBot& aeolusbot)

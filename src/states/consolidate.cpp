@@ -81,5 +81,8 @@ namespace Aeolus
         doOracleHarassMicro(aeolusbot);
 
         doObserverMicro(aeolusbot);
+
+        // Perform Adept Harassment Micro
+        doAdeptHarassMicro(aeolusbot);
 	}
 }

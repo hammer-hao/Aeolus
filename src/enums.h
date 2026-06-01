@@ -87,6 +87,15 @@ namespace Aeolus
 		{
 		}
 	};
+
+	enum class HarassmentStatus
+	{
+		HEADING_TO_BASE,
+		HARASSING_AT_MAIN,
+		HARASSING_AT_NATURAL,
+		HARASSING_AT_THIRD,
+		SURVIVING,
+	};
 }
 
 namespace std 

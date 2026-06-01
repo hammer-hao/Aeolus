@@ -71,8 +71,6 @@ namespace Aeolus
 			if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ADEPT)
 				mediator.AssignRole(aeolusbot, unit, constants::UnitRole::HARASS_ADEPT);
 		}
-        
-        if (forces.empty()) return;
 
 		::sc2::Point2D target = (forces.size() >= aeolusbot.getMoveOutSupply()) ?
 			mediator.GetAtttackTarget(aeolusbot) : mediator.GetDefenseTarget(aeolusbot, 1);

@@ -97,7 +97,8 @@ source_group("Source Files\\Managers" FILES
     managers/combat_sim_manager.cpp
     managers/army_composition_manager.cpp
     managers/scouting_manager.cpp
-    managers/config_manager.cpp)
+    managers/config_manager.cpp
+    managers/harassment_manager.cpp)
 
 source_group("Header Files\\Managers" FILES 
     managers/hub.h
@@ -117,7 +118,8 @@ source_group("Header Files\\Managers" FILES
     managers/combat_sim_manager.h
     managers/army_composition_manager.h
     managers/scouting_manager.h
-    managers/config_manager.h)
+    managers/config_manager.h
+    managers/harassment_manager.h)
 
 source_group("Source Files\\states" FILES
     states/forward_pressure.cpp
@@ -227,6 +229,7 @@ set(bot_sources
     managers/army_composition_manager.cpp
     managers/scouting_manager.cpp
     managers/config_manager.cpp
+    managers/harassment_manager.cpp
     states/consolidate.cpp
     states/forward_pressure.cpp
     states/build_order_state.cpp
@@ -299,6 +302,7 @@ set(bot_headers
     managers/army_composition_manager.h
     managers/scouting_manager.h
     managers/config_manager.h
+    managers/harassment_manager.h
     states/bot_state.h
     states/consolidate.h
     states/forward_pressure.h

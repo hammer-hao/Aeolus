@@ -1,21 +1,13 @@
 #pragma once
 
 #include "manager.h"
+#include "../enums.h"
 #include <map>
 #include <sc2api/sc2_unit.h>
 
 namespace Aeolus
 {
 	class AeolusBot;
-
-	enum class HarassmentStatus
-	{
-		HEADING_TO_BASE,
-		HARASSING_AT_MAIN,
-		HARASSING_AT_NATURAL,
-		HARASSING_AT_THIRD,
-		SURVIVING,
-	};
 
 	class HarassmentManager : public Manager
 	{

@@ -124,6 +124,7 @@ namespace Aeolus
 		{
 			m_placement_manager_ref->OnUnitCreated(unit);
 			m_unit_role_manager_ref->OnUnitCreated(unit);
+			m_unit_filter_manager_ref->OnUnitCreated(unit);
 		}
 
 		void OnUnitDestroyed(const ::sc2::Unit* unit)
