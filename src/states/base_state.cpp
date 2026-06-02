@@ -303,15 +303,17 @@ namespace Aeolus
                 std::vector<::sc2::Point2D> pointsBehindMain =
                     positionsBehindEnemyMainNaturalThirdBase.front();
 
-                ::sc2::Point2D closest = *std::min_element(
+                /*::sc2::Point2D closest = *std::min_element(
                     pointsBehindMain.begin(), pointsBehindMain.end(),
                     [adept, &aeolusbot](::sc2::Point2D a, ::sc2::Point2D b) {
                         return aeolusbot.Query()->PathingDistance(adept->pos, a) < aeolusbot.Query()->PathingDistance(adept->pos, b);
                     }
-                );
+                );*/
+
+                ::sc2::Point2D closest = pointsBehindMain[1];
 
                 adept_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-                adept_behavior->AddBehavior(std::make_unique<PathToTarget>(closest));
+                adept_behavior->AddBehavior(std::make_unique<AMove>(closest));
 
                 if (std::count_if(unitsInRangeMap[adept->tag].begin(), unitsInRangeMap[adept->tag].end(), [](const ::sc2::Unit* unit) {
                     return (constants::WORKER_TYPES.find(unit->unit_type) != constants::WORKER_TYPES.end());
@@ -344,6 +346,9 @@ namespace Aeolus
                                 workserInAttackRange
                             )
                         );
+                        adept_behavior->AddBehavior(
+                            std::make_unique<KeepUnitSafe>()
+                        );
                     }
                     else
                     {
@@ -359,7 +364,24 @@ namespace Aeolus
             }
             else if (currentStatus == HarassmentStatus::SURVIVING)
             {
-                adept_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                const ::sc2::Units& allClose = unitsInRangeMap[adept->tag];
+                ::sc2::Units closeWorkers;
+                std::copy_if(allClose.begin(), allClose.end(), std::back_inserter(closeWorkers), [](const ::sc2::Unit* unit) {
+                    return (constants::WORKER_TYPES.find(unit->unit_type) != constants::WORKER_TYPES.end());
+                    });
+                auto workserInAttackRange = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, adept, closeWorkers);
+                if (!workserInAttackRange.empty())
+                {
+                    adept_behavior->AddBehavior(
+                        std::make_unique<ShootTargetInRange>(
+                            workserInAttackRange
+                        )
+                    );
+                }
+                else 
+                {
+                    adept_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                }
                 if ((adept->shield / adept->shield_max) >= 0.95f)
                 {
                     mediator.registerHarassmentStatus(aeolusbot, adept->tag, HarassmentStatus::HEADING_TO_BASE);
@@ -385,11 +407,11 @@ namespace Aeolus
 
                 if (adeptShadeTracker[adept->tag].second == 1)
                 {
-                    if (currentStatus == HarassmentStatus::SURVIVING)
+                    if (currentStatus == HarassmentStatus::SURVIVING || currentStatus == HarassmentStatus::HEADING_TO_BASE)
                     {
 
                     }
-                    else 
+                    else
                     {
                         // mediator.IsGroundPositionSafe()
                         // need to decide if cancel or not
@@ -519,7 +541,7 @@ namespace Aeolus
         {
             float dist = distanceToGroup(positionsBehindEnemyMainNaturalThirdBase[i]);
 
-            if (dist < bestDistance)
+            if (dist < bestDistance && dist!=0)
             {
                 bestDistance = dist;
                 bestIndex = i;
