@@ -43,6 +43,11 @@ namespace Aeolus
         // Bookkeeping tasks first
         doBookKeepingMacroTasks(aeolusbot);
 
+        // research nice-to-have upgrades
+        if (aeolusbot.Observation()->GetFoodArmy() > 40) {
+            aeolusbot.RegisterBehavior(std::make_unique<TechUp>(::sc2::UPGRADE_ID::BLINKTECH));
+        }
+
         // high economy macro tasks
         doHighEconomyMacroTasks(aeolusbot, false); // forceDetection = false, don't force detection when we don't need it
 
