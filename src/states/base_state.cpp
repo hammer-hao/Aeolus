@@ -193,78 +193,202 @@ namespace Aeolus
     void BaseState::doOracleHarassMicro(AeolusBot& aeolusbot)
     {
         auto& mediator = ManagerMediator::getInstance();
-        std::vector<::sc2::Point2D> harassLocations = aeolusbot.Observation()->GetGameInfo().enemy_start_locations;
-        ::sc2::Units oracles = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::ORACLE);
 
-        // use single harass location for now
-        ::sc2::Point2D harassLocation = harassLocations.front();
+        ::sc2::Units oracles =
+            mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::ORACLE);
 
-        std::vector<::sc2::Point2D> starting_points;
-        float search_radius = 12.0f;
-        for (const auto& unit : oracles) starting_points.push_back(unit->pos);
-        auto enemies_in_range = ManagerMediator::getInstance().GetEnemyUnitsInRangeMap(aeolusbot,
-            starting_points, search_radius);
+        auto unitsInRangeMap = _getEnemiesInRangeMap(aeolusbot, oracles);
 
-        for (int i = 0; i < oracles.size(); ++i)
+        auto harassmentTracker =
+            mediator.getHarassmentTracker(aeolusbot);
+
+        std::vector<std::vector<::sc2::Point2D>>
+            positionsBehindEnemyMainNaturalThirdBase =
+            mediator.getPositionsBehindEnemyMainNaturalThird(aeolusbot);
+
+        for (const auto* oracle : oracles)
         {
-            const ::sc2::Unit* oracle = oracles[i];
-            auto oracle_behavior = std::make_unique<MicroBehavior>(oracle);
-            auto availableAbilities = aeolusbot.Query()->GetAbilitiesForUnit(oracle);
+            if (harassmentTracker.find(oracle->tag) ==
+                harassmentTracker.end())
+            {
+                mediator.registerHarassmentStatus(
+                    aeolusbot,
+                    oracle->tag,
+                    HarassmentStatus::HEADING_TO_BASE);
 
-            // 1st priority: keep oracle safe
-            if (oracle->shield / oracle->shield_max < 0.3) oracle_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                continue;
+            }
 
-            ::sc2::Units workersInRange;
-            std::copy_if(enemies_in_range[i].begin(), enemies_in_range[i].end(), std::back_inserter(workersInRange), [](const ::sc2::Unit* unit)
-                {
-                    return (constants::WORKER_TYPES.find(unit->unit_type) != constants::WORKER_TYPES.end());
-                }
-            );
+            auto oracle_behavior =
+                std::make_unique<MicroBehavior>(oracle);
 
-            if (!workersInRange.empty() && oracle->energy > 55.0) {
-                for (const auto& availableAbility : availableAbilities.abilities)
-                {
-                    if (availableAbility.ability_id == ::sc2::ABILITY_ID::BEHAVIOR_PULSARBEAMON)
+            auto availableAbilities =
+                aeolusbot.Query()->GetAbilitiesForUnit(oracle).abilities;
+
+            auto beamAvailable =
+                std::any_of(
+                    availableAbilities.begin(),
+                    availableAbilities.end(),
+                    [](const ::sc2::AvailableAbility& ability)
                     {
-                        // add activate pulsar beam to behavior
-                        oracle_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::BEHAVIOR_PULSARBEAMON));
-                        break;
+                        return ability.ability_id ==
+                            ::sc2::ABILITY_ID::BEHAVIOR_PULSARBEAMON;
+                    });
+
+            bool beamCurrentlyOff = beamAvailable;
+            HarassmentStatus currentStatus =
+                harassmentTracker[oracle->tag];
+
+            const auto& allClose =
+                unitsInRangeMap[oracle->tag];
+
+            ::sc2::Units closeWorkers;
+
+            std::copy_if(
+                allClose.begin(),
+                allClose.end(),
+                std::back_inserter(closeWorkers),
+                [](const ::sc2::Unit* unit)
+                {
+                    return constants::WORKER_TYPES.find(
+                        unit->unit_type)
+                        != constants::WORKER_TYPES.end();
+                });
+
+            // ----------------------------
+            // HEADING TO BASE
+            // ----------------------------
+
+            if (currentStatus ==
+                HarassmentStatus::HEADING_TO_BASE)
+            {
+                ::sc2::Point2D target =
+                    positionsBehindEnemyMainNaturalThirdBase
+                    .front()[1];
+
+                oracle_behavior->AddBehavior(
+                    std::make_unique<AMove>(target));
+
+                if (closeWorkers.size() >= 3)
+                {
+                    HarassmentStatus newStatus =
+                        _getClosestHarassStatus(
+                            aeolusbot,
+                            oracle,
+                            positionsBehindEnemyMainNaturalThirdBase);
+
+                    mediator.registerHarassmentStatus(
+                        aeolusbot,
+                        oracle->tag,
+                        newStatus);
+                }
+            }
+
+            // ----------------------------
+            // HARASSING
+            // ----------------------------
+
+            else if (
+                currentStatus ==
+                HarassmentStatus::HARASSING_AT_MAIN ||
+                currentStatus ==
+                HarassmentStatus::HARASSING_AT_NATURAL ||
+                currentStatus ==
+                HarassmentStatus::HARASSING_AT_THIRD)
+            {
+                if ((oracle->shield / oracle->shield_max)
+                    <= 0.15f)
+                {
+                    mediator.registerHarassmentStatus(
+                        aeolusbot,
+                        oracle->tag,
+                        HarassmentStatus::SURVIVING);
+                }
+
+                if (!closeWorkers.empty())
+                {
+                    if (beamCurrentlyOff &&
+                        oracle->energy > 40.0f)
+                    {
+                        oracle_behavior->AddBehavior(
+                            std::make_unique<UseAbility>(
+                                ::sc2::ABILITY_ID::
+                                BEHAVIOR_PULSARBEAMON));
+                    }
+
+                    auto workersInAttackRange =
+                        mediator.GetUnitsInAtttackRange(
+                            aeolusbot,
+                            oracle,
+                            closeWorkers);
+
+                    if (!workersInAttackRange.empty())
+                    {
+                        oracle_behavior->AddBehavior(
+                            std::make_unique<
+                            ShootTargetInRange>(
+                                workersInAttackRange));
+
+                        oracle_behavior->AddBehavior(
+                            std::make_unique<
+                            KeepUnitSafe>());
+                    }
+                    else
+                    {
+                        auto enemyTarget =
+                            utils::PickAttackTarget(
+                                closeWorkers);
+
+                        oracle_behavior->AddBehavior(
+                            std::make_unique<
+                            StutterUnitBack>(
+                                enemyTarget));
                     }
                 }
+                else
+                {
+                    // no workers nearby
+                    oracle_behavior->AddBehavior(
+                        std::make_unique<KeepUnitSafe>());
+                }
+            }
 
-                // no activate pulsar beam available means we have already done it.
-                auto in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, oracle, workersInRange);
-                if (!in_attack_range.empty())
+            // ----------------------------
+            // SURVIVING
+            // ----------------------------
+
+            else if (currentStatus ==
+                HarassmentStatus::SURVIVING)
+            {
+                if (!beamCurrentlyOff)
                 {
                     oracle_behavior->AddBehavior(
-                        std::make_unique<ShootTargetInRange>(
-                            in_attack_range
-                        )
-                    );
+                        std::make_unique<UseAbility>(
+                            ::sc2::ABILITY_ID::
+                            BEHAVIOR_PULSARBEAMOFF));
                 }
-            }
 
-            // 2nd priority: go to harass target / home for recharge
-            ::sc2::Point2D pathTarget = harassLocation;
+                oracle_behavior->AddBehavior(
+                    std::make_unique<KeepUnitSafe>());
 
-            for (const auto& availableAbility : availableAbilities.abilities)
-            {
-                if (availableAbility.ability_id == ::sc2::ABILITY_ID::BEHAVIOR_PULSARBEAMON)
+                oracle_behavior->AddBehavior(
+                    std::make_unique<PathToTarget>(
+                        aeolusbot.Observation()
+                        ->GetStartLocation()));
+
+                if ((oracle->shield /
+                    oracle->shield_max) >= 0.95f
+                    && oracle->energy >= 80.0f)
                 {
-                    // currently no beam activated
-                    if (oracle->energy < 50.0f)
-                    {
-                        pathTarget = utils::GetClosestUnitTo(
-                            oracle->pos,
-                            ManagerMediator::getInstance().GetOwnReadyTownHalls(aeolusbot)
-                        )->pos;
-                    }
-                    break;
+                    mediator.registerHarassmentStatus(
+                        aeolusbot,
+                        oracle->tag,
+                        HarassmentStatus::HEADING_TO_BASE);
                 }
             }
-            oracle_behavior->AddBehavior(std::make_unique<PathToTarget>(pathTarget));
 
-            aeolusbot.RegisterBehavior(std::move(oracle_behavior));
+            aeolusbot.RegisterBehavior(
+                std::move(oracle_behavior));
         }
     }
 
