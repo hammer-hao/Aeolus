@@ -33,6 +33,12 @@ namespace Aeolus
 		}
 		case constants::ManagerRequestType::GET_OPPONENT_RACE:
 			return _getOpponentRace();
+		case constants::ManagerRequestType::GET_BEHIND_MINERAL_LOCATIONS:
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Point2D>>(args);
+			::sc2::Point2D baseLocation = std::get<0>(params);
+			return _getBehindMineralPositions(baseLocation);
+		}
 		default:
 			return 0;
 		}

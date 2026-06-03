@@ -82,6 +82,10 @@ namespace Aeolus
 				[](const auto& pair) {return pair.second; });
 			return result;
 		}
+		case constants::ManagerRequestType::GET_ADEPT_SHADE_TRACKER:
+		{
+			return m_adeptShadeTracker;
+		}
 		default:
 			return 0;
 		}
@@ -202,6 +206,23 @@ namespace Aeolus
 
 			// std::cout << "Size of m_all_structures " << m_all_structures.size() << std::endl;
 		}
+
+		for (auto it = m_adeptShadeTracker.begin();
+			it != m_adeptShadeTracker.end();)
+		{
+			auto& [adeptTag, shade] = *it;
+
+			shade.second--;
+
+			if (shade.second < 0)
+			{
+				it = m_adeptShadeTracker.erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
 	}
 
 	::sc2::Units UnitFilterManager::_getAllStructures(AeolusBot& aeolusbot, ::sc2::Unit::Alliance alliance)
@@ -230,9 +251,51 @@ namespace Aeolus
 		return false;
 	}
 
+	void UnitFilterManager::OnUnitCreated(const ::sc2::Unit* unit)
+	{
+		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ADEPTPHASESHIFT)
+		{
+			::sc2::Units adepts;
+			std::copy_if(m_own_non_workers.begin(), m_own_non_workers.end(), std::back_inserter(adepts),
+				[](const ::sc2::Unit* unit) {
+					return unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ADEPT;
+				});
+			if (adepts.empty()) return;
+
+			const ::sc2::Unit* closestAdept = *std::min_element(adepts.begin(), adepts.end(),
+				[unit](const ::sc2::Unit* a, const ::sc2::Unit* b) {
+					return ::sc2::DistanceSquared2D(a->pos, unit->pos) < ::sc2::DistanceSquared2D(b->pos, unit->pos);
+				});
+
+			m_adeptShadeTracker.emplace(closestAdept->tag, std::pair<::sc2::Tag, int>{ unit->tag, 160 });
+		}
+	}
+
 	void UnitFilterManager::OnUnitDestroyed(const ::sc2::Unit* unit)
 	{
 		if (unit->alliance == ::sc2::Unit::Alliance::Enemy)
 			m_knownEnemyUnits.erase(unit->tag);
+
+		if (unit->alliance == ::sc2::Unit::Alliance::Self)
+		{
+			if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ADEPT)
+			{
+				m_adeptShadeTracker.erase(unit->tag);
+			}
+			else if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ADEPTPHASESHIFT)
+			{
+				auto it = std::find_if(
+					m_adeptShadeTracker.begin(),
+					m_adeptShadeTracker.end(),
+					[unit](const auto& entry) {
+						return entry.second.first == unit->tag;
+					});
+
+				if (it != m_adeptShadeTracker.end())
+				{
+					m_adeptShadeTracker.erase(it);
+				}
+			}
+		}
 	}
 }

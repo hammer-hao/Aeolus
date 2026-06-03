@@ -112,7 +112,7 @@ namespace Aeolus
 		std::copy_if(allUnits.begin(), allUnits.end(), std::back_inserter(groundUnits),
 			[](const ::sc2::Unit* unit)
 			{
-				return (!unit->is_flying);
+				return (!unit->is_flying && !(unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ADEPT));
 			}
 		);
 

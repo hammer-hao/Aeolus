@@ -43,6 +43,13 @@ namespace Aeolus
         // Bookkeeping tasks first
         doBookKeepingMacroTasks(aeolusbot);
 
+        // research nice-to-have upgrades
+        if (aeolusbot.Observation()->GetFoodArmy() > 24) {
+            aeolusbot.RegisterBehavior(std::make_unique<UpgradesController>(
+                std::vector<::sc2::UPGRADE_ID>{::sc2::UPGRADE_ID::BLINKTECH}
+            ));
+        }
+
         // high economy macro tasks
         doHighEconomyMacroTasks(aeolusbot, false); // forceDetection = false, don't force detection when we don't need it
 
@@ -64,6 +71,9 @@ namespace Aeolus
         doOracleHarassMicro(aeolusbot);
 
         doObserverMicro(aeolusbot);
+
+        // Perform Adept Harassment Micro
+        doAdeptHarassMicro(aeolusbot);
 	}
 
     void ForwardPressureState::_transitionIntoConsolidateIfNeeded(AeolusBot& aeolusbot)

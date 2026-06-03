@@ -101,11 +101,11 @@ namespace Aeolus
 				toAdd.push_back(std::make_unique<ScoutingBuildOrderStep>(15, true, true, opponentRace == ::sc2::Race::Zerg || opponentRace == ::sc2::Race::Random ));
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(18, ::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE, true, 1));
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(19, ::sc2::UNIT_TYPEID::PROTOSS_NEXUS, false));
+				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_PYLON, false));
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR, false));
-				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(19, ::sc2::UNIT_TYPEID::PROTOSS_PYLON, false));
+				toAdd.push_back(std::make_unique<UnitBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_ADEPT));
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_STARGATE, true, 1));
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_SHIELDBATTERY, false, 1));
-				toAdd.push_back(std::make_unique<UnitBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_STALKER));
 				toAdd.push_back(std::make_unique<UnitBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_ORACLE));
 				toAdd.push_back(std::make_unique<UpgradeBuildOrderStep>(20, ::sc2::UPGRADE_ID::WARPGATERESEARCH));
 				toAdd.push_back(std::make_unique<StructureBuildOrderStep>(20, ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY, false));

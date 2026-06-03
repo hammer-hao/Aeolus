@@ -5,7 +5,14 @@ namespace Aeolus
 {
 	bool UseAbility::execute(AeolusBot& aeolusbot, const ::sc2::Unit* unit)
 	{
-		aeolusbot.Actions()->UnitCommand(unit, m_ability);
+		if (m_has_target)
+		{
+			aeolusbot.Actions()->UnitCommand(unit, m_ability, m_target);
+		}
+		else 
+		{
+			aeolusbot.Actions()->UnitCommand(unit, m_ability);
+		}
 		return true;
 	}
 }

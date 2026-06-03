@@ -70,7 +70,11 @@ namespace Aeolus
 				size_t existing_production_count = 0;
 
 				for (const auto& structure : all_own_structures)
+				{
 					if (structure->unit_type == trained_from.value()) existing_production_count++;
+					else if (trained_from.value() == ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY &&
+						structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPGATE) existing_production_count++;
+				}
 				existing_production_count += mediator.GetNumberPending(aeolusbot, trained_from.value());
 
 				if (_buildProductionDueToBank(aeolusbot, unit_type, mineral_collection_rate, gas_collection_rate,
