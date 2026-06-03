@@ -15,7 +15,7 @@
           "STALKER": 0.9,
           "ZEALOT": 0.1
         },
-        "move_out_supply": 120,
+        "move_out_supply": 75,
         "cannons_to_add": 2
       },
       {
@@ -54,8 +54,8 @@
           "ADEPT": 0.9,
           "ZEALOT": 0.1
         },
-        "move_out_supply": 120,
-        "cannons_to_add": 2
+        "move_out_supply": 75,
+        "cannons_to_add": 3
       }
     ]
   }
