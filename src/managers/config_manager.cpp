@@ -166,7 +166,9 @@ namespace Aeolus
             {"SPAWNING_POOL", ::sc2::UNIT_TYPEID::ZERG_SPAWNINGPOOL},
             {"STALKER", ::sc2::UNIT_TYPEID::PROTOSS_STALKER},
             {"ZEALOT", ::sc2::UNIT_TYPEID::PROTOSS_ZEALOT},
-            {"ZERGLING", ::sc2::UNIT_TYPEID::ZERG_ZERGLING}
+            {"ZERGLING", ::sc2::UNIT_TYPEID::ZERG_ZERGLING},
+            {"GATEWAY", ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY},
+            {"ADEPT", ::sc2::UNIT_TYPEID::PROTOSS_ADEPT},
         };
 
         auto it = unit_map.find(name);
