@@ -312,7 +312,8 @@ namespace Aeolus
 
                 ::sc2::Point2D closest = pointsBehindMain[1];
 
-                adept_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                if (!unitsInRangeMap[adept->tag].empty())
+                    adept_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
                 adept_behavior->AddBehavior(std::make_unique<AMove>(closest));
 
                 if (std::count_if(unitsInRangeMap[adept->tag].begin(), unitsInRangeMap[adept->tag].end(), [](const ::sc2::Unit* unit) {
@@ -378,10 +379,7 @@ namespace Aeolus
                         )
                     );
                 }
-                else 
-                {
-                    adept_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-                }
+                adept_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
                 if ((adept->shield / adept->shield_max) >= 0.95f)
                 {
                     mediator.registerHarassmentStatus(aeolusbot, adept->tag, HarassmentStatus::HEADING_TO_BASE);
