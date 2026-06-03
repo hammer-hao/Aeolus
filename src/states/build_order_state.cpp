@@ -142,10 +142,18 @@ namespace Aeolus
 		int count = 0;
 		for (const auto& structure : enemyStructures)
 		{
-			if (structure->unit_type == condition.unitType && structure->build_progress > 0.9f &&
-				(!condition.is_proxied || sc2::DistanceSquared2D(structure->pos, aeolusbot.Observation()->GetStartLocation()) < 5000.0f))
 			{
-				count++;
+				if (condition.is_proxied)
+				{
+					if (sc2::DistanceSquared2D(structure->pos, aeolusbot.Observation()->GetStartLocation()) < 5000.0f)
+					{
+						count++;
+					}
+				}
+				else if (structure->unit_type == condition.unitType && structure->build_progress > 0.9f)
+				{
+					count++;
+				}
 			}
 		}
 		return count >= condition.count;

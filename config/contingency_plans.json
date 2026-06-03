@@ -15,7 +15,7 @@
           "STALKER": 0.9,
           "ZEALOT": 0.1
         },
-        "move_out_supply": 120,
+        "move_out_supply": 75,
         "cannons_to_add": 2
       },
       {
@@ -40,7 +40,23 @@
 
     ],
     "protoss": [
-
+      {
+        "name": "proxy_gates",
+        "conditions": [
+          {
+            "name": "GATEWAY",
+            "count": 2,
+            "before_seconds": 150,
+            "is_proxied": true
+          }
+        ],
+        "army_composition": {
+          "ADEPT": 0.9,
+          "ZEALOT": 0.1
+        },
+        "move_out_supply": 75,
+        "cannons_to_add": 3
+      }
     ]
   }
 }
