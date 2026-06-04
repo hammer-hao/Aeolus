@@ -130,6 +130,7 @@ namespace Aeolus
 
 	void DoorManager::onUnitDestroyed(const ::sc2::Unit* unit)
 	{
+		if (!m_enabled) return;
 		// safety check: do nothing if we don’t currently have a door unit
 		if (!m_doorUnit) {
 			return;
