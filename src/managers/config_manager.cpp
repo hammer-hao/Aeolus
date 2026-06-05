@@ -169,6 +169,10 @@ namespace Aeolus
             {"ZERGLING", ::sc2::UNIT_TYPEID::ZERG_ZERGLING},
             {"GATEWAY", ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY},
             {"ADEPT", ::sc2::UNIT_TYPEID::PROTOSS_ADEPT},
+            {"ROACH_WARREN", ::sc2::UNIT_TYPEID::ZERG_ROACHWARREN},
+            {"PROBE", ::sc2::UNIT_TYPEID::PROTOSS_PROBE},
+            {"SCV", ::sc2::UNIT_TYPEID::TERRAN_SCV},
+            {"DRONE", ::sc2::UNIT_TYPEID::ZERG_DRONE}
         };
 
         auto it = unit_map.find(name);

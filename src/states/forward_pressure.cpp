@@ -49,6 +49,9 @@ namespace Aeolus
                 std::vector<::sc2::UPGRADE_ID>{::sc2::UPGRADE_ID::BLINKTECH}
             ));
         }
+        aeolusbot.RegisterBehavior(std::make_unique<UpgradesController>(
+            std::vector<::sc2::UPGRADE_ID>{::sc2::UPGRADE_ID::WARPGATERESEARCH}
+        ));
 
         // high economy macro tasks
         doHighEconomyMacroTasks(aeolusbot, false); // forceDetection = false, don't force detection when we don't need it

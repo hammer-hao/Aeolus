@@ -559,6 +559,9 @@ namespace Aeolus {
 			{::sc2::UPGRADE_ID::BLINKTECH, {
 				::sc2::UNIT_TYPEID::PROTOSS_TWILIGHTCOUNCIL
 			} },
+			{::sc2::UPGRADE_ID::WARPGATERESEARCH, {
+				::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE
+			} },
 		};
 
 		const std::unordered_map<::sc2::UNIT_TYPEID, std::vector<::sc2::UNIT_TYPEID>> UNIT_TECH_REQUIREMENT = {

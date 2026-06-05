@@ -34,10 +34,58 @@
         },
         "move_out_supply": 75,
         "cannons_to_add": 2
+      },
+      {
+        "name": "roach_attack",
+        "conditions": [
+          {
+            "name": "ROACH_WARREN",
+            "count": 1,
+            "before_seconds": 180,
+            "is_proxied": false
+          }
+        ],
+        "army_composition": {
+          "STALKER": 0.8,
+          "IMMORTAL": 0.2
+        },
+        "move_out_supply": 90,
+        "cannons_to_add": 1
+      },
+      {
+        "name": "drone_rush",
+        "conditions": [
+          {
+            "name": "DRONE",
+            "count": 8,
+            "before_seconds": 60,
+            "is_proxied": false
+          }
+        ],
+        "army_composition": {
+          "ZEALOT": 1.0
+        },
+        "move_out_supply": 40,
+        "cannons_to_add": 0
       }
     ],
     "terran": [
-
+      {
+        "name": "scv_rush",
+        "conditions": [
+          {
+            "name": "SCV",
+            "count": 8,
+            "before_seconds": 60,
+            "is_proxied": false
+          }
+        ],
+        "army_composition": {
+          "ZEALOT": 1.0
+        },
+        "move_out_supply": 40,
+        "cannons_to_add": 0
+      }
     ],
     "protoss": [
       {
@@ -56,6 +104,22 @@
         },
         "move_out_supply": 75,
         "cannons_to_add": 3
+      },
+      {
+        "name": "probe_rush",
+        "conditions": [
+          {
+            "name": "PROBE",
+            "count": 8,
+            "before_seconds": 60,
+            "is_proxied": false
+          }
+        ],
+        "army_composition": {
+          "ZEALOT": 1.0
+        },
+        "move_out_supply": 40,
+        "cannons_to_add": 0
       }
     ]
   }
