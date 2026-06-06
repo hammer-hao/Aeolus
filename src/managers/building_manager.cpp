@@ -144,6 +144,7 @@ namespace Aeolus
 						std::optional<::sc2::Point2D> newTarget = mediator.RequestAlternateBuildingPlacement(m_bot, building_order.target, building_order.building_id);
 						if (!newTarget.has_value()) {
 							std::cerr << "[Request alternate building placement]: error encountered!" << std::endl;
+							return;
 						}
 						building_order.target = newTarget.value();
 					}
