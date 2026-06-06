@@ -172,7 +172,8 @@ namespace Aeolus
             {"ROACH_WARREN", ::sc2::UNIT_TYPEID::ZERG_ROACHWARREN},
             {"PROBE", ::sc2::UNIT_TYPEID::PROTOSS_PROBE},
             {"SCV", ::sc2::UNIT_TYPEID::TERRAN_SCV},
-            {"DRONE", ::sc2::UNIT_TYPEID::ZERG_DRONE}
+            {"DRONE", ::sc2::UNIT_TYPEID::ZERG_DRONE},
+            {"IMMORTAL", ::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL},
         };
 
         auto it = unit_map.find(name);
