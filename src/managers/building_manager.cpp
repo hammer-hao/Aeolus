@@ -124,6 +124,29 @@ namespace Aeolus
 			}
 			else
 			{
+				if (worker->shield_max > 0.0f &&
+					worker->shield / worker->shield_max < 0.2f)
+				{
+					auto replacement_worker =
+						mediator.SelectWorkerClosestTo(m_bot, building_order.target);
+
+					if (replacement_worker.has_value())
+					{
+						BuildingOrder order = building_order;
+
+						workers_to_remove.push_back(worker);
+						m_building_tracker[replacement_worker.value()] = order;
+						m_building_counter[order.building_id] += 1;
+
+						mediator.AssignRole(m_bot, worker, constants::UnitRole::GATHERING);
+						mediator.AssignRole(m_bot, replacement_worker.value(), constants::UnitRole::BUILDING);
+
+						std::cout << "BuildingManager: Builder in danger, reassigned construction order."
+							<< std::endl;
+					}
+					continue;
+				}
+
 				float distance_threshold = 1.0f;
 
 				// if the worker is too far, move to target first
