@@ -62,7 +62,7 @@ namespace Aeolus
 	void HarassmentManager::update(int iteration)
 	{
 #ifndef BUILD_FOR_LADDER
-		::sc2::HeightMap heightmap(m_bot.Observation()->GetGameInfo());
+		/*::sc2::HeightMap heightmap(m_bot.Observation()->GetGameInfo());
 		auto* debug = m_bot.Debug();
 
 		for (const auto& locations : m_position_behind_enemy_main_natural_third)
@@ -73,7 +73,7 @@ namespace Aeolus
 				debug->DebugSphereOut(::sc2::Point3D(location.x, location.y, z), 1.0, ::sc2::Colors::Blue);
 			}
 		}
-		debug->SendDebug();
+		debug->SendDebug();*/
 #endif
 	}
 

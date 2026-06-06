@@ -182,5 +182,9 @@ namespace Aeolus
 		void makePlacementAvailable(BuildingTypes buildingSize, int baseIndex, ::sc2::Point2D pos, ::sc2::Tag tag);
 
 		void makePlacementUnavailable(BuildingTypes buildingSize, int baseIndex, ::sc2::Point2D pos, ::sc2::Tag tag);
+
+		bool _isBuildingAreaClear(::sc2::Point2D target, ::sc2::UNIT_TYPEID to_build, ::sc2::Tag build_worker_tag);
+
+		std::optional<::sc2::Point2D> _requestAlternateBuildingPlacement(::sc2::Point2D target, ::sc2::UNIT_TYPEID to_build);
 	};
 }

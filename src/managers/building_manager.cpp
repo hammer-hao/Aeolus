@@ -79,10 +79,10 @@ namespace Aeolus
 
 		::sc2::Units workers_to_remove;
 
-		for (const auto& worker_order : m_building_tracker)
+		for (auto& worker_order : m_building_tracker)
 		{
 			const ::sc2::Unit* worker = worker_order.first;
-			BuildingOrder building_order = worker_order.second;
+			BuildingOrder& building_order = worker_order.second;
 
 			// Check if we are finished with building
 			auto all_structures = mediator.GetAllOwnStructures(m_bot);
@@ -139,8 +139,19 @@ namespace Aeolus
 				// When the worker arrive, issue the build command
 				else if (worker->orders.size() == 0)
 				{
-					::sc2::ABILITY_ID build_command = ManagerMediator::getInstance().GetCreationAbility(m_bot, building_order.building_id);
-					m_bot.Actions()->UnitCommand(worker, build_command, building_order.target);
+					if (!mediator.IsBuildingLocationClear(m_bot, building_order.target, building_order.building_id, worker->tag))
+					{
+						std::optional<::sc2::Point2D> newTarget = mediator.RequestAlternateBuildingPlacement(m_bot, building_order.target, building_order.building_id);
+						if (!newTarget.has_value()) {
+							std::cerr << "[Request alternate building placement]: error encountered!" << std::endl;
+						}
+						building_order.target = newTarget.value();
+					}
+					else 
+					{
+						::sc2::ABILITY_ID build_command = ManagerMediator::getInstance().GetCreationAbility(m_bot, building_order.building_id);
+						m_bot.Actions()->UnitCommand(worker, build_command, building_order.target);
+					}
 				}
 			}
 		}

@@ -57,6 +57,23 @@ namespace Aeolus
 			return _requestBuildingPlacement(base_index, structure_id, is_wall, find_alternative, reserve_placement,
 				within_power_field, pylon_build_progress, build_close_to, close_to);
 		}
+		case (constants::ManagerRequestType::IS_BUILDING_AREA_CLEAR):
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Point2D, ::sc2::UNIT_TYPEID, ::sc2::Tag>>(args);
+			::sc2::Point2D target = std::get<0>(params);
+			::sc2::UNIT_TYPEID toBuild = std::get<1>(params);
+			::sc2::Tag workerTag = std::get<2>(params);
+
+			return _isBuildingAreaClear(target, toBuild, workerTag);
+		}
+		case (constants::ManagerRequestType::REQUEST_ALTERNATE_BUILDING_PLACEMENT):
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Point2D, ::sc2::UNIT_TYPEID>>(args);
+			::sc2::Point2D target = std::get<0>(params);
+			::sc2::UNIT_TYPEID toBuild = std::get<1>(params);
+
+			return _requestAlternateBuildingPlacement(target, toBuild);
+		}
 		default: return 0;
 		}
 	}
@@ -64,8 +81,7 @@ namespace Aeolus
 	void PlacementManager::update(int iteration)
 	{
 		// generate debug outputs for placements
-		/*
-		#ifdef BUILD_WITH_RENDERER
+		#ifndef BUILD_FOR_LADDER
 
 		// const auto height_map = ::sc2::HeightMap(m_bot.Observation()->GetGameInfo());
 		auto* debug = m_bot.Debug();
@@ -74,35 +90,36 @@ namespace Aeolus
 		{
 			for (const auto& building : expansion[BuildingTypes::BUILDING_2X2])
 			{
-				if (building.second.is_wall)
+				if (true)
 				{
+					::sc2::Color color = building.second.available ? ::sc2::Colors::Green : ::sc2::Colors::Red;
 					float terrain_height = m_height_map.TerrainHeight(::sc2::Point2D(building.first.toWorld().x, building.first.toWorld().y));
 					::sc2::Point3D min = ::sc2::Point3D(building.first.toWorld().x - 1, building.first.toWorld().y - 1, terrain_height);
 					::sc2::Point3D max = ::sc2::Point3D(building.first.toWorld().x + 1, building.first.toWorld().y + 1, terrain_height + 0.25);
 					std::stringstream pos;
 					pos << building.first.toWorld().x << " " << building.first.toWorld().y;
 					debug->DebugTextOut(pos.str(), ::sc2::Point3D(building.first.toWorld().x, building.first.toWorld().y, terrain_height), ::sc2::Colors::Blue);
-					debug->DebugBoxOut(min, max, ::sc2::Colors::Green);
+					debug->DebugBoxOut(min, max, color);
 				}
 			}
 			for (const auto& building : expansion[BuildingTypes::BUILDING_3X3])
 			{
-				if (building.second.is_wall)
+				if (true)
 				{
+					::sc2::Color color = building.second.available ? ::sc2::Colors::Blue : ::sc2::Colors::Red;
 					float terrain_height = m_height_map.TerrainHeight(::sc2::Point2D(building.first.toWorld().x, building.first.toWorld().y));
 					::sc2::Point3D min = ::sc2::Point3D(building.first.toWorld().x - 1.5, building.first.toWorld().y - 1.5, terrain_height);
 					::sc2::Point3D max = ::sc2::Point3D(building.first.toWorld().x + 1.5, building.first.toWorld().y + 1.5, terrain_height + 0.25);
 					std::stringstream pos;
 					pos << building.first.toWorld().x << " " << building.first.toWorld().y;
 					debug->DebugTextOut(pos.str(), ::sc2::Point3D(building.first.toWorld().x, building.first.toWorld().y, terrain_height), ::sc2::Colors::Blue);
-					debug->DebugBoxOut(min, max, ::sc2::Colors::Blue);
+					debug->DebugBoxOut(min, max, color);
 				}
 			}
 		}
 
 		debug->SendDebug();
 		#endif
-		*/
 
 		/*
 #ifdef BUILD_WITH_RENDERER
@@ -1832,5 +1849,193 @@ namespace Aeolus
 				}
 			}
 		}
+	}
+
+	bool PlacementManager::_isBuildingAreaClear(
+		::sc2::Point2D target,
+		::sc2::UNIT_TYPEID to_build,
+		::sc2::Tag build_worker_tag)
+	{
+		auto& mediator = ManagerMediator::getInstance();
+
+		BuildingTypes buildingType = _structureToBuildingSize(to_build);
+
+		float halfSize = 0.0f;
+
+		switch (buildingType)
+		{
+		case BuildingTypes::BUILDING_2X2:
+			halfSize = 1.0f;
+			break;
+
+		case BuildingTypes::BUILDING_3X3:
+			halfSize = 1.5f;
+			break;
+
+		case BuildingTypes::BUILDING_5X5:
+			halfSize = 2.5f;
+			break;
+
+		default:
+			return false;
+		}
+
+		const float left = target.x - halfSize;
+		const float right = target.x + halfSize;
+		const float bottom = target.y - halfSize;
+		const float top = target.y + halfSize;
+
+		// slightly larger than footprint for retrieval efficiency
+		const float searchRadius = halfSize + 1.0f;
+
+		auto ownUnits =
+			mediator.GetOwnUnitsInRange(m_bot, { target }, searchRadius);
+
+		auto enemyUnits =
+			mediator.GetUnitsInRange(m_bot, { target }, searchRadius);
+
+		auto blocksPlacement =
+			[&](const ::sc2::Unit* unit)
+			{
+				if (!unit) return false;
+
+				if (unit->display_type ==
+					::sc2::Unit::DisplayType::Snapshot)
+					return false;
+
+				if (unit->is_flying)
+					return false;
+
+				if (unit->tag == build_worker_tag)
+					return false;
+
+				return (
+					unit->pos.x >= left &&
+					unit->pos.x < right &&
+					unit->pos.y >= bottom &&
+					unit->pos.y < top
+					);
+			};
+
+		for (const auto& unit: ownUnits)
+		{
+			if (blocksPlacement(unit))
+				return false;
+		}
+
+		for (const auto& unit: enemyUnits)
+		{
+			if (blocksPlacement(unit))
+				return false;
+		}
+
+		return true;
+	}
+
+	std::optional<::sc2::Point2D> PlacementManager::_requestAlternateBuildingPlacement(
+		::sc2::Point2D target,
+		::sc2::UNIT_TYPEID to_build)
+	{
+		BuildingTypes building_type =
+			_structureToBuildingSize(to_build);
+
+		if (building_type == BuildingTypes::NOT_FOUND)
+			return std::nullopt;
+
+		bool within_power_field = to_build != ::sc2::UNIT_TYPEID::PROTOSS_PYLON;
+
+		TilePos targetTile(target.x, target.y);
+
+		int base_number = 0; // fallback
+		bool found = false;
+
+		for (int i = 0; i < static_cast<int>(m_expansion_map.size()); i++)
+		{
+			auto& placementMap =
+				m_expansion_map[i][building_type];
+
+			if (placementMap.find(targetTile) != placementMap.end())
+			{
+				base_number = i;
+				found = true;
+				break;
+			}
+		}
+
+		if (!found)
+		{
+			std::cout
+				<< "[PlacementManager] Target placement not found, "
+				<< "defaulting to base 0."
+				<< std::endl;
+		}
+
+		auto& placementMap =
+			m_expansion_map[base_number][building_type];
+
+		const BuildingAttributes targetAttrs =
+			(placementMap.find(targetTile) != placementMap.end())
+			? placementMap[targetTile]
+			: BuildingAttributes();
+
+		auto available_positions =
+			_findPotentialPlacementsAtBase(
+				building_type,
+				base_number,
+				within_power_field,
+				1.0f
+			);
+
+		available_positions.erase(
+			std::remove_if(
+				available_positions.begin(),
+				available_positions.end(),
+				[&](const ::sc2::Point2D& pos)
+				{
+					return TilePos(pos.x, pos.y) == targetTile;
+				}
+			),
+			available_positions.end()
+		);
+
+		std::vector<::sc2::Point2D> filtered;
+
+		std::copy_if(
+			available_positions.begin(),
+			available_positions.end(),
+			std::back_inserter(filtered),
+			[&](const ::sc2::Point2D& pos)
+			{
+				auto it = placementMap.find(TilePos(pos.x, pos.y));
+
+				if (it == placementMap.end())
+					return false;
+
+				const auto& attrs = it->second;
+
+				return
+					attrs.is_wall == targetAttrs.is_wall &&
+					attrs.production_pylon == targetAttrs.production_pylon &&
+					attrs.optimal_pylon == targetAttrs.optimal_pylon;
+			}
+		);
+
+		if (filtered.empty())
+			filtered = available_positions;
+
+		if (filtered.empty())
+			return std::nullopt;
+
+		::sc2::Point2D best =
+			utils::GetClosestTo(target, filtered);
+
+		auto& attrs =
+			placementMap[TilePos(best.x, best.y)];
+
+		attrs.worker_on_route = true;
+		attrs.time_requested =
+			m_bot.Observation()->GetGameLoop();
+
+		return best;
 	}
 }
