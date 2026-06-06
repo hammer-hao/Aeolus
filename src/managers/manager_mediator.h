@@ -877,6 +877,37 @@ namespace Aeolus
 		}
 
 		/**
+		* @brief returns whether the given location is clear to build a target structure.
+		* Worker tag needed to prevent identifying the building worker as a blocker
+		*/
+		bool IsBuildingLocationClear(AeolusBot& aeolusbot, ::sc2::Point2D target, ::sc2::UNIT_TYPEID toBuild, ::sc2::Tag workerTag)
+		{
+			return ManagerRequest<bool, ::sc2::Point2D, ::sc2::UNIT_TYPEID, ::sc2::Tag>(
+				aeolusbot,
+				constants::ManagerName::PLACEMENT_MANAGER,
+				constants::ManagerRequestType::IS_BUILDING_AREA_CLEAR,
+				target,
+				toBuild,
+				workerTag
+			);
+		}
+
+		/**
+		* @brief Request a different placement location than the target position for the given structure type
+		* @return The next best placement location rather than the target pos
+		*/
+		std::optional<::sc2::Point2D> RequestAlternateBuildingPlacement(AeolusBot& aeolusbot, ::sc2::Point2D target, ::sc2::UNIT_TYPEID toBuild)
+		{
+			return ManagerRequest<std::optional<::sc2::Point2D>, ::sc2::Point2D, ::sc2::UNIT_TYPEID>(
+				aeolusbot,
+				constants::ManagerName::PLACEMENT_MANAGER,
+				constants::ManagerRequestType::REQUEST_ALTERNATE_BUILDING_PLACEMENT,
+				target,
+				toBuild
+			);
+		}
+
+		/**
 		* @brief Requests a building placement at the target position.
 		* @param base_number: The index of the base to make the request
 		* @param structure_type: The unit id of the requested structure

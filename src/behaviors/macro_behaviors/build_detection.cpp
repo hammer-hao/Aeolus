@@ -37,14 +37,10 @@ namespace Aeolus
 		std::make_unique<TechUp>(::sc2::UNIT_TYPEID::PROTOSS_OBSERVER)->execute(aeolusbot);
 		if (!mediator.IsStructureAvailable(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_ROBOTICSFACILITY))
 		{
-			// already teching up to observer
-			std::cout << "[BuildDetection] Waiting for Teching up to robo tech..." << std::endl;
 			return true;
 		}
 		else
 		{
-			std::cout << "[BuildDetection] Robo ready, queueing observer..." << std::endl;
-
 			// robo ready, no observer yet
 			const auto allOwnStructures = mediator.GetAllOwnStructures(aeolusbot);
 			::sc2::Units robos;
