@@ -61,28 +61,36 @@ namespace Aeolus
 
 		if (!m_build_defense_queued)
 		{
-			bool stillBuildingForge = false;
-			if (mediator.IsStructureAvailable(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_FORGE))
+			if (m_plan.cannons_to_add == 0)
 			{
-				for (const auto& structure : mediator.GetAllOwnStructures(aeolusbot))
+				m_build_defense_queued = true;
+			}
+			else
+			{
+				bool stillBuildingForge = false;
+				if (mediator.IsStructureAvailable(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_FORGE))
 				{
-					if (structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_FORGE &&
-						structure->build_progress > 0.75f)
+					for (const auto& structure : mediator.GetAllOwnStructures(aeolusbot))
 					{
-						for (int i = 0; i < m_plan.cannons_to_add; ++i)
+						if (structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_FORGE &&
+							structure->build_progress > 0.75f)
 						{
-							const ::sc2::UNIT_TYPEID to_build = ::sc2::UNIT_TYPEID::PROTOSS_PHOTONCANNON;
-							const int base_location = 1;
-							const bool is_wall = true;
-							aeolusbot.RegisterBehavior(std::make_unique<BuildStructure>(to_build, base_location, is_wall));
+							for (int i = 0; i < m_plan.cannons_to_add; ++i)
+							{
+								const ::sc2::UNIT_TYPEID to_build = ::sc2::UNIT_TYPEID::PROTOSS_PHOTONCANNON;
+								const int base_location = 1;
+								const bool is_wall = true;
+								aeolusbot.RegisterBehavior(std::make_unique<BuildStructure>(to_build, base_location, is_wall));
+							}
+							m_build_defense_queued = true;
 						}
-						m_build_defense_queued = true;
 					}
 				}
-			} else if (mediator.GetNumberPending(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_FORGE) == 0)
-			{
-				// need to build the forge
-				std::make_unique<BuildStructure>(::sc2::UNIT_TYPEID::PROTOSS_FORGE, 1, true)->execute(aeolusbot);
+				else if (mediator.GetNumberPending(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_FORGE) == 0)
+				{
+					// need to build the forge
+					std::make_unique<BuildStructure>(::sc2::UNIT_TYPEID::PROTOSS_FORGE, 1, true)->execute(aeolusbot);
+				}
 			}
 		}
 
