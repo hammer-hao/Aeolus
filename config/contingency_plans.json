@@ -85,6 +85,40 @@
         },
         "move_out_supply": 40,
         "cannons_to_add": 0
+      },
+      {
+        "name": "marine_rush",
+        "check_no_enemy_expansion": true,
+        "conditions": [
+          {
+            "name": "MARINE",
+            "count": 4,
+            "before_seconds": 180,
+            "is_proxied": false
+          }
+        ],
+        "army_composition": {
+          "STALKER": 1.0
+        },
+        "move_out_supply": 75,
+        "cannons_to_add": 0
+      },
+      {
+        "name": "proxy_barracks",
+        "conditions": [
+          {
+            "name": "BARRACKS",
+            "count": 1,
+            "before_seconds": 120,
+            "is_proxied": true
+          }
+        ],
+        "army_composition": {
+          "STALKER": 0.9,
+          "ZEALOT": 0.1
+        },
+        "move_out_supply": 75,
+        "cannons_to_add": 2
       }
     ],
     "protoss": [

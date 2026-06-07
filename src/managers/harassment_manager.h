@@ -36,6 +36,8 @@ namespace Aeolus
 
 		std::vector<std::vector<::sc2::Point2D>> m_position_behind_enemy_main_natural_third;
 
+		::sc2::Point2D m_enemy_natural_position = ::sc2::Point2D(0, 0);
+
 		std::vector<std::vector<::sc2::Point2D>> _getPositionBehindEnemyMainNaturalThird();
 
 		std::map<::sc2::Tag, HarassmentStatus> _getHarassmentTracker();

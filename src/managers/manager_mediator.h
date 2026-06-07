@@ -449,6 +449,20 @@ namespace Aeolus
 		}
 
 		/**
+		* @brief returns all enemy town hall structures, includes orbitals and planetaries.
+		* Includes lairs and hives. doe NOT include flying command centers and orbitals.
+		*/
+		::sc2::Units GetAllEnemyTownHalls(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_ALL_ENEMY_TOWN_HALLS,
+				0
+			);
+		}
+
+		/**
 		* Returns a list of unit types, one for each enemy unit that we have seen alive
 		* and have not killed. INCLUDES WORKERS!
 		*/
@@ -1197,6 +1211,19 @@ namespace Aeolus
 				constants::ManagerRequestType::REGISTER_HARASSMENT_STATUS,
 				unit,
 				status
+			);
+		}
+
+		/**
+		* @brief returns the enemy natural position
+		*/
+		::sc2::Point2D GetEnemyNaturalPosition(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Point2D, int>(
+				aeolusbot,
+				constants::ManagerName::HARASSMENT_MANAGER,
+				constants::ManagerRequestType::GET_ENEMY_NATURAL_POSITION,
+				0
 			);
 		}
 	};

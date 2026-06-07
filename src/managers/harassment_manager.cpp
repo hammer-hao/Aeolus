@@ -26,6 +26,10 @@ namespace Aeolus
 			_registerHarassmentStatus(unitTag, status);
 			return 0;
 		}
+		case (constants::ManagerRequestType::GET_ENEMY_NATURAL_POSITION):
+		{
+			return m_enemy_natural_position;
+		}
 		default:
 			return 0;
 		}
@@ -50,6 +54,8 @@ namespace Aeolus
 		while (expansions.size() < 3) {
 			expansions.push_back(expansions.back());
 		}
+
+		m_enemy_natural_position = expansions[1];
 
 		for (int i = 0; i < 3; ++i)
 		{

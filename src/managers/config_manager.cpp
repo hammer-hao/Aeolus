@@ -104,6 +104,9 @@ namespace Aeolus
                 plan.cannons_to_add =
                     plan_json["cannons_to_add"].get<int>();
 
+                plan.check_no_enemy_expansion =
+                    plan_json.value("check_no_enemy_expansion", false);
+
                 //
                 // Parse scouting conditions
                 //
@@ -174,6 +177,8 @@ namespace Aeolus
             {"SCV", ::sc2::UNIT_TYPEID::TERRAN_SCV},
             {"DRONE", ::sc2::UNIT_TYPEID::ZERG_DRONE},
             {"IMMORTAL", ::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL},
+            {"MARINE", ::sc2::UNIT_TYPEID::TERRAN_MARINE},
+            {"BARRACKS", ::sc2::UNIT_TYPEID::TERRAN_BARRACKS}
         };
 
         auto it = unit_map.find(name);

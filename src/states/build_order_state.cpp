@@ -106,6 +106,19 @@ namespace Aeolus
 					break;
 				}
 			}
+			if (contingencyPlan.check_no_enemy_expansion)
+			{
+				::sc2::Units enemyth = mediator.GetAllEnemyTownHalls(aeolusbot);
+				::sc2::Point2D enemyNaturalPos = mediator.GetEnemyNaturalPosition(aeolusbot);
+				for (const auto& th : enemyStructures)
+				{
+					if (sc2::DistanceSquared2D(th->pos, enemyNaturalPos) < 9)
+					{
+						meets_criteria = false;
+						break;
+					}
+				}
+			}
 			if (meets_criteria) {
 				std::stringstream scoutedTag;
 				scoutedTag << "Tag:";

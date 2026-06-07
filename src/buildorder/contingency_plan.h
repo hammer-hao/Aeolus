@@ -24,5 +24,6 @@ namespace Aeolus
 		std::unordered_map<::sc2::UNIT_TYPEID, float> army_composition;
 		int move_out_supply;
 		int cannons_to_add;
+		bool check_no_enemy_expansion;
 	};
 }

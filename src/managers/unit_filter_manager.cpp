@@ -75,6 +75,10 @@ namespace Aeolus
 		{
 			return m_destructables;
 		}
+		case (constants::ManagerRequestType::GET_ALL_ENEMY_TOWN_HALLS):
+		{
+			return m_enemy_town_halls;
+		}
 		case (constants::ManagerRequestType::GET_KNOWN_ENEMY_UNIT_TYPES):
 		{
 			std::vector<::sc2::UNIT_TYPEID> result;
@@ -114,6 +118,7 @@ namespace Aeolus
 		m_enemy_units.clear();
 		m_enemy_structures.clear();
 		m_all_enemy_units.clear();
+		m_enemy_town_halls.clear();
 
 		// std::cout << "Size of m_all_structures " << m_all_structures.size() << std::endl;
 
@@ -192,6 +197,16 @@ namespace Aeolus
 				{
 					m_all_structures.push_back(unit);
 					m_enemy_structures.push_back(unit);
+					if (unit_type == static_cast<int>(::sc2::UNIT_TYPEID::PROTOSS_NEXUS) ||
+						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::TERRAN_COMMANDCENTER) ||
+						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::TERRAN_ORBITALCOMMAND) || 
+						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::TERRAN_PLANETARYFORTRESS) || 
+						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::ZERG_HATCHERY) || 
+						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::ZERG_LAIR) || 
+						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::ZERG_HIVE))
+					{
+						m_enemy_town_halls.push_back(unit);
+					}
 				}
 				else
 				{
