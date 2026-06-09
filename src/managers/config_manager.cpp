@@ -20,6 +20,14 @@ namespace Aeolus
 
         json config = json::parse(f);
         _loadContingencyPlans(config);
+        
+        std::ifstream f_natural_wall_placements("data/config/natural_Wall_positions.json");
+        if (!f_natural_wall_placements.is_open())
+        {
+            throw std::runtime_error("Failed to open data/config/natural_Wall_positions.json");
+        }
+        json natural_wall_data = json::parse(f_natural_wall_placements);
+        _loadNaturalWallPlacements(natural_wall_data);
 	}
 
     std::any ConfigManager::ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args)
@@ -29,6 +37,34 @@ namespace Aeolus
         case constants::ManagerRequestType::GET_CONTINGENCY_PLANS:
         {
             return _getContingencyPlans();
+        }
+        case constants::ManagerRequestType::GET_NATURAL_BUILDING_PLACEMENTS:
+        {
+            if (m_natual_pylon_position.has_value() &&
+                m_natural_door_position.has_value() &&
+                m_natural_three_by_three_positions)
+            {
+                std::vector<::sc2::Point2D> positions;
+                positions.reserve(
+                    2 + m_natural_three_by_three_positions->size());
+
+                positions.push_back(*m_natual_pylon_position);
+
+                positions.insert(
+                    positions.end(),
+                    m_natural_three_by_three_positions->begin(),
+                    m_natural_three_by_three_positions->end());
+
+                positions.push_back(*m_natural_door_position);
+
+                return std::optional<std::vector<::sc2::Point2D>>{
+                    std::move(positions)
+                };
+            }
+            else 
+            {
+                return std::optional<std::vector<::sc2::Point2D>>{};
+            }
         }
         default:
             return 0;
@@ -42,7 +78,6 @@ namespace Aeolus
     std::vector<ContingencyPlan> ConfigManager::_getContingencyPlans() {
         auto& mediator = ManagerMediator::getInstance();
         ::sc2::Race opponentRace = mediator.getOpponentRace(m_bot);
-
         switch (opponentRace)
         {
         case ::sc2::Race::Terran:
@@ -208,5 +243,81 @@ namespace Aeolus
         }
 
         return result;
+    }
+
+    void ConfigManager::_loadNaturalWallPlacements(const json& placement_data)
+    {
+        auto* observation = m_bot.Observation();
+
+        std::string map_name =
+            observation->GetGameInfo().map_name;
+
+        const auto& all_wall_positions =
+            placement_data.at("natural_wall_positions");
+
+        if (!all_wall_positions.contains(map_name))
+        {
+            std::cerr << "No natural wall placement data found for map: "
+                << map_name << std::endl;
+            return;
+        }
+
+        const auto& map_wall_positions =
+            all_wall_positions.at(map_name);
+
+        ::sc2::Point2D own_start =
+            observation->GetStartLocation();
+
+        auto parsePoint = [](const json& point_json)
+            {
+                return ::sc2::Point2D(
+                    point_json.at(0).get<float>(),
+                    point_json.at(1).get<float>());
+            };
+
+        const json* best_wall_json = nullptr;
+        float best_distance = std::numeric_limits<float>::max();
+
+        for (const auto& wall_json : map_wall_positions)
+        {
+            ::sc2::Point2D starting_point =
+                parsePoint(wall_json.at("starting_point"));
+
+            float distance =
+                ::sc2::DistanceSquared2D(own_start, starting_point);
+
+            if (distance < best_distance)
+            {
+                best_distance = distance;
+                best_wall_json = &wall_json;
+            }
+        }
+
+        if (best_wall_json == nullptr)
+        {
+            std::cerr << "Natural wall placement data exists for map "
+                << map_name
+                << " but contains no placements."
+                << std::endl;
+            return;
+        }
+
+        m_natual_pylon_position =
+            parsePoint(best_wall_json->at("natural_pylon"));
+
+        std::vector<::sc2::Point2D> three_by_three_positions;
+
+        for (const auto& point_json :
+            best_wall_json->at("natural_three_by_threes"))
+        {
+            three_by_three_positions.push_back(
+                parsePoint(point_json));
+        }
+
+        m_natural_three_by_three_positions =
+            three_by_three_positions;
+
+        m_natural_door_position =
+            parsePoint(best_wall_json->at("natural_door_unit"));
     }
 }

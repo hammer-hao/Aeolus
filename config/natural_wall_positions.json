@@ -1,0 +1,158 @@
+{
+  "natural_wall_positions": {
+    "Torches AIE": [
+      {
+        "starting_point": [ 124, 48 ],
+        "natural_pylon": [ 90, 54 ],
+        "natural_three_by_threes": [
+          [ 86, 55 ],
+          [ 90, 59 ],
+          [ 90, 56 ]
+        ],
+        "natural_door_unit": [ 88, 55 ]
+      },
+      {
+        "starting_point": [ 124, 159 ],
+        "natural_pylon": [ 92, 153 ],
+        "natural_three_by_threes": [
+          [ 90, 148 ],
+          [ 86, 152 ],
+          [ 89, 152 ]
+        ],
+        "natural_door_unit": [ 90, 150 ]
+      }
+    ],
+    "Incorporeal AIE": [
+      {
+        "starting_point": [123, 24],
+        "natural_pylon": [94, 29],
+        "natural_three_by_threes": [
+          [ 89, 31 ],
+          [ 96, 34 ],
+          [ 93, 32 ]
+        ],
+        "natural_door_unit": [91,31]
+      },
+      {
+        "starting_point": [32, 139],
+        "natural_pylon": [62, 134],
+        "natural_three_by_threes": [
+          [ 66, 130 ],
+          [ 62, 129 ],
+          [ 59, 129 ]
+        ],
+        "natural_door_unit": [64, 130]
+      }
+    ],
+    "Ley Lines AIE": [
+      {
+        "starting_point": [42, 40],
+        "natural_pylon": [46, 69],
+        "natural_three_by_threes": [
+          [ 50, 71 ],
+          [ 50, 67 ],
+          [ 49, 64 ]
+        ],
+        "natural_door_unit": [50, 69]
+      },
+      {
+        "starting_point": [155, 133],
+        "natural_pylon": [152, 105],
+        "natural_three_by_threes": [
+          [ 147, 102 ],
+          [ 147, 106 ],
+          [ 148, 109 ]
+        ],
+        "natural_door_unit": [147,104]
+      }
+    ],
+    "Magannatha AIE": [
+      {
+        "starting_point": [38, 141],
+        "natural_pylon": [35, 113],
+        "natural_three_by_threes": [
+          [ 37, 113 ],
+          [ 35, 109 ],
+          [ 32, 108 ]
+        ],
+        "natural_door_unit": [36,111]
+      },
+      {
+        "starting_point": [141, 38],
+        "natural_pylon": [111, 34],
+        "natural_three_by_threes": [
+          [ 107, 34 ],
+          [ 111, 36 ],
+          [ 114, 37 ]
+        ],
+        "natural_door_unit": [109,35]
+      }
+    ],
+    "Persephone AIE": [
+      {
+        "starting_point": [37, 34],
+        "natural_pylon": [69, 36],
+        "natural_three_by_threes": [
+          [ 74, 35 ],
+          [ 70, 41 ],
+          [ 71, 37 ]
+        ],
+        "natural_door_unit": [70,39]
+      },
+      {
+        "starting_point": [37,145],
+        "natural_pylon": [71, 144],
+        "natural_three_by_threes": [
+          [ 75, 142 ],
+          [ 71, 141 ],
+          [ 70, 138 ]
+        ],
+        "natural_door_unit": [73, 142]
+      }
+    ],
+    "Pylon AIE": [
+      {
+        "starting_point": [175, 76],
+        "natural_pylon": [145, 78],
+        "natural_three_by_threes": [
+          [ 138, 79 ],
+          [ 142, 81 ],
+          [ 145, 83 ]
+        ],
+        "natural_door_unit": [140, 80]
+      },
+      {
+        "starting_point": [72,171],
+        "natural_pylon": [104, 170],
+        "natural_three_by_threes": [
+          [ 109, 169 ],
+          [ 105, 167 ],
+          [ 103, 164 ]
+        ],
+        "natural_door_unit": [107,168]
+      }
+    ],
+    "Ultralove AIE": [
+      {
+        "starting_point": [42, 46],
+        "natural_pylon": [71, 47],
+        "natural_three_by_threes": [
+          [ 72, 51 ],
+          [ 74, 47 ],
+          [ 77, 46 ]
+        ],
+        "natural_door_unit": [73, 49]
+      },
+      {
+        "starting_point": [141, 137],
+        "natural_pylon": [113, 137],
+        "natural_three_by_threes": [
+          [ 111, 132 ],
+          [ 106, 137 ],
+          [ 109, 136 ]
+        ],
+        "natural_door_unit": [110,134]
+      }
+    ]
+  }
+}

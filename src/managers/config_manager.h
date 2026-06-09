@@ -29,8 +29,13 @@ namespace Aeolus
 		AeolusBot& m_bot;
 		std::unordered_map<::sc2::Race, std::vector<ContingencyPlan>> m_contingency_plans;
 
+		std::optional<::sc2::Point2D> m_natual_pylon_position;
+		std::optional<std::vector<::sc2::Point2D>> m_natural_three_by_three_positions;
+		std::optional<::sc2::Point2D> m_natural_door_position;
+
 		std::vector<ContingencyPlan> _getContingencyPlans();
 		void _loadContingencyPlans(const json& j);
+		void _loadNaturalWallPlacements(const json& wall_data);
 		::sc2::UNIT_TYPEID _unitNameToType(const std::string& name);
 
 		std::vector<ContingencyPlan> _flattenContingencyPlans(

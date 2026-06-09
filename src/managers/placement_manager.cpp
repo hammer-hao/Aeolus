@@ -1115,6 +1115,58 @@ namespace Aeolus
 	{
 		if (expansion_locations.size() < 2) return; // not a valid map for this calculation
 
+		auto natural_wall_positions =
+			ManagerMediator::getInstance().GetNaturalWallPlacements(m_bot);
+
+		if (natural_wall_positions)
+		{
+			for (size_t i = 0; i < natural_wall_positions->size(); ++i)
+			{
+				const auto& pos = (*natural_wall_positions)[i];
+
+				if (i == 0)
+				{
+					_addPlacementPosition(
+						BuildingTypes::BUILDING_2X2,
+						1,
+						pos,
+						true,
+						true);
+
+					int x_begin = static_cast<int>(pos.x - 1);
+					int y_begin = static_cast<int>(pos.y - 1);
+					m_occupied_points.block<2, 2>(x_begin, y_begin).setConstant(1);
+				}
+				else if (i + 1 == natural_wall_positions->size())
+				{
+					ManagerMediator::getInstance().SetDoorPosition(
+						m_bot,
+						{ pos.x, pos.y });
+				}
+				else
+				{
+					::sc2::Point2D building_center{
+						pos.x + 0.5f,
+						pos.y + 0.5f
+					};
+					_addPlacementPosition(
+						BuildingTypes::BUILDING_3X3,
+						1,
+						building_center,
+						true,
+						true);
+
+					int x_begin = static_cast<int>(pos.x - 1);
+					int y_begin = static_cast<int>(pos.y - 1);
+					m_occupied_points.block<3, 3>(x_begin, y_begin).setConstant(1);
+				}
+			}
+
+			std::cout << "Loaded natural wall placements from config."
+				<< std::endl;
+			return;
+		}
+
 		::sc2::Point2D naturalPos = expansion_locations[1];
 		::sc2::Point2D enemyBase = expansion_locations.back();
 
@@ -1596,14 +1648,19 @@ namespace Aeolus
 			}
 			else
 			{
-				for (int i = base_number + 1; i <= 8; ++i)
+				for (int i = 0; i <= 8; ++i)
 				{
 					at_base = i;
 					available_positions = _findPotentialPlacementsAtBase(building_type, at_base, within_power_field, pylon_build_progress);
 					if (!available_positions.empty()) break;
 				}
-				std::cout << "Not available position for building size anywhere on the map for " << ::sc2::UnitTypeToName(structure_type) << std::endl;
-				return std::nullopt;
+				if (available_positions.empty())
+				{
+					std::cout << "No available position for building size anywhere on the map for "
+						<< ::sc2::UnitTypeToName(structure_type)
+						<< std::endl;
+					return std::nullopt;
+				}
 			}
 		}
 

@@ -143,6 +143,7 @@ namespace Aeolus {
 
 			// ConfigManager
 			GET_CONTINGENCY_PLANS,
+			GET_NATURAL_BUILDING_PLACEMENTS,
 
 			// HarassmentManager
 			GET_POSITIONS_BEHIND_ENEMY_MAIN_NATURAL_THIRD,

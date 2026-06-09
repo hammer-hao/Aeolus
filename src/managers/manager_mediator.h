@@ -1170,6 +1170,20 @@ namespace Aeolus
 			);
 		}
 
+		/**
+		* @returns placements of the natural wall buildings, if specified in natural_wall_positions.json
+		* @return a vector of [<pylon position>, <3x3>, <3x3>, <3x3>, <position for the door unit>]
+		*/
+		std::optional<std::vector<::sc2::Point2D>> GetNaturalWallPlacements(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<std::optional<std::vector<sc2::Point2D>>, int>(
+				aeolusbot,
+				constants::ManagerName::CONFIG_MANAGER,
+				constants::ManagerRequestType::GET_NATURAL_BUILDING_PLACEMENTS,
+				0
+			);
+		}
+
 		// Harassment Manager
 
 		/**
