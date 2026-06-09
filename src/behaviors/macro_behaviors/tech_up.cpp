@@ -86,6 +86,9 @@ namespace Aeolus
 		if (mediator.GetMinerals(aeolusbot) < cost.first || mediator.GetVespene(aeolusbot) < cost.second)
 			// waiting for minerals & gas
 			return true;
-		return std::make_unique<BuildStructure>(toBuild.value(), 0, false)->execute(aeolusbot);
+		auto opponentRace = mediator.getOpponentRace(aeolusbot);
+		bool is_wall = opponentRace == ::sc2::Race::Zerg;
+		int base_index = opponentRace == ::sc2::Race::Zerg ? 1 : 0;
+		return std::make_unique<BuildStructure>(toBuild.value(), base_index, is_wall)->execute(aeolusbot);
 	}
 }
