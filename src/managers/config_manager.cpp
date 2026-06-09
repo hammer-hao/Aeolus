@@ -21,10 +21,10 @@ namespace Aeolus
         json config = json::parse(f);
         _loadContingencyPlans(config);
         
-        std::ifstream f_natural_wall_placements("data/config/natural_Wall_positions.json");
+        std::ifstream f_natural_wall_placements("data/config/natural_wall_positions.json");
         if (!f_natural_wall_placements.is_open())
         {
-            throw std::runtime_error("Failed to open data/config/natural_Wall_positions.json");
+            throw std::runtime_error("Failed to open data/config/natural_wall_positions.json");
         }
         json natural_wall_data = json::parse(f_natural_wall_placements);
         _loadNaturalWallPlacements(natural_wall_data);
