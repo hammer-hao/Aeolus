@@ -61,6 +61,7 @@ namespace Aeolus
 
 		if (!m_build_defense_queued)
 		{
+			const int base_location = mediator.getOpponentRace(aeolusbot) == ::sc2::Race::Zerg ? 1 : 0;
 			if (m_plan.cannons_to_add == 0)
 			{
 				m_build_defense_queued = true;
@@ -78,7 +79,6 @@ namespace Aeolus
 							for (int i = 0; i < m_plan.cannons_to_add; ++i)
 							{
 								const ::sc2::UNIT_TYPEID to_build = ::sc2::UNIT_TYPEID::PROTOSS_PHOTONCANNON;
-								const int base_location = 1;
 								const bool is_wall = true;
 								aeolusbot.RegisterBehavior(std::make_unique<BuildStructure>(to_build, base_location, is_wall));
 							}
@@ -89,7 +89,7 @@ namespace Aeolus
 				else if (mediator.GetNumberPending(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_FORGE) == 0)
 				{
 					// need to build the forge
-					std::make_unique<BuildStructure>(::sc2::UNIT_TYPEID::PROTOSS_FORGE, 1, true)->execute(aeolusbot);
+					std::make_unique<BuildStructure>(::sc2::UNIT_TYPEID::PROTOSS_FORGE, base_location, true)->execute(aeolusbot);
 				}
 			}
 		}

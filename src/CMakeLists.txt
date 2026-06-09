@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(bot_data
     ../config/contingency_plans.json
+    ../config/natural_wall_positions.json
 )
 
 source_group("Data Files\\config" FILES ${bot_data})
