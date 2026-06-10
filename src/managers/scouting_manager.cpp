@@ -170,6 +170,8 @@ namespace Aeolus
 
 	::sc2::Race ScoutingManager::_getOpponentRace()
 	{
+		if (m_opponent_race.has_value()) return m_opponent_race.value();
+
 		const auto own_id = m_bot.Observation()->GetPlayerID();
 
 		::sc2::Race opponentRace = ::sc2::Race::Random;
@@ -179,6 +181,7 @@ namespace Aeolus
 			}
 		}
 
+		m_opponent_race = opponentRace;
 		return opponentRace;
 	}
 

@@ -49,5 +49,7 @@ namespace Aeolus
 		void _clearScout(const ::sc2::Unit* unit);
 
 		::sc2::Race _getOpponentRace();
+
+		std::optional<::sc2::Race> m_opponent_race;
 	};
 }

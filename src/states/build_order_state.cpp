@@ -119,7 +119,7 @@ namespace Aeolus
 					}
 				}
 			}
-			if (meets_criteria) {
+			if (meets_criteria || (aeolusbot.Observation()->GetGameLoop() > 1700 && contingencyPlan.name == "early_pool_rush")) {
 				std::stringstream scoutedTag;
 				scoutedTag << "Tag:";
 				scoutedTag << contingencyPlan.name;
