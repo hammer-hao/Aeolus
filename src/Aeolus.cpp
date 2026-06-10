@@ -182,12 +182,6 @@ namespace Aeolus
         manager_hub_ = Hub(*this);
         manager_hub_.Initialize();
 
-        // tag the replay with chosen build:
-        std::stringstream buildOrderTag;
-        buildOrderTag << "Tag:";
-        buildOrderTag << buildOrderToString(m_build_order_enum);
-        Actions()->SendChat(buildOrderTag.str());
-
         const auto own_id = Observation()->GetPlayerID();
 
         ::sc2::Race opponentRace = ::sc2::Race::Random;
@@ -197,18 +191,9 @@ namespace Aeolus
             }
         }
         m_build_order = BuildOrderFactory::makeBuildOrder(*this, m_build_order_enum, opponentRace);
-        std::stringstream opponentRaceTag;
-        opponentRaceTag << "Tag:";
-        if (opponentRace == ::sc2::Race::Protoss) {
-            opponentRaceTag << "opponent: Protoss";
-        } else if (opponentRace == ::sc2::Race::Terran) {
-            opponentRaceTag << "opponent: Terran";
-        } else if (opponentRace == ::sc2::Race::Zerg) {
-            opponentRaceTag << "opponent: Zerg";
-        } else if (opponentRace == ::sc2::Race::Random) {
-            opponentRaceTag << "opponent: Random";
-        }
-        Actions()->SendChat(opponentRaceTag.str());
+        std::stringstream helloChat;
+        helloChat << "good luck, have fun!";
+        Actions()->SendChat(helloChat.str());
 
         // set state initially to consolidate
         ChangeState(MakeState<BuildOrderState>());
@@ -247,7 +232,7 @@ namespace Aeolus
         Macro();
         Micro();
 
-        #ifndef BUILD_FOR_LADDER
+        /*#ifndef BUILD_FOR_LADDER
         if (Observation()->GetGameLoop() % 100 == 0)
         {
             std::stringstream debugMessage;
@@ -255,7 +240,7 @@ namespace Aeolus
                 << " Total Minerals Mined: " << Observation()->GetMinerals();
             Actions()->SendChat(debugMessage.str());
         }
-        #endif
+        #endif*/
         // std::cout << "Aeolus: Taken a step!" << std::endl;
         // 
         // Call AfterStep at the end of each step

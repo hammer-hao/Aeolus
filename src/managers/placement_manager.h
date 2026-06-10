@@ -186,5 +186,11 @@ namespace Aeolus
 		bool _isBuildingAreaClear(::sc2::Point2D target, ::sc2::UNIT_TYPEID to_build, ::sc2::Tag build_worker_tag);
 
 		std::optional<::sc2::Point2D> _requestAlternateBuildingPlacement(::sc2::Point2D target, ::sc2::UNIT_TYPEID to_build);
+
+		void _clearWorkerOnRoute(BuildingAttributes& attrs);
+
+		void _clearWorkerOnRoute(::sc2::Point2D pos);
+
+		bool _isAllThreeByThreeAtNaturalWallBuilt();
 	};
 }

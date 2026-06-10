@@ -960,6 +960,35 @@ namespace Aeolus
 			);
 		}
 
+		/**
+		* @brief Clear the given position, i.e. set it in the placement tracker to "no worker on route", which allow
+		* new placement queries to return the given position.
+		* IMPORTANT: only use this if sure that the placement will be clear!
+		*/
+		int ClearWorkerOnRoute(AeolusBot& aeolusbot, ::sc2::Point2D pos)
+		{
+			return ManagerRequest<int, ::sc2::Point2D>(
+				aeolusbot,
+				constants::ManagerName::PLACEMENT_MANAGER,
+				constants::ManagerRequestType::CLEAR_WORKER_ON_ROUTE,
+				pos
+			);
+		}
+
+		/**
+		* @brief returns true if all 3x3s in our natural wall exists.
+		* Useful for checking if our wall has been breached / if the wall has been completed
+		*/
+		bool IsNaturalWallComplete(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<bool, int>(
+				aeolusbot,
+				constants::ManagerName::PLACEMENT_MANAGER,
+				constants::ManagerRequestType::IS_NATURAL_WALL_COMPLETE,
+				0
+			);
+		}
+
 		// BuildingManager
 		const std::unordered_map<const ::sc2::Unit*, BuildingOrder>& GetBuildingTracker(AeolusBot& aeolusbot)
 		{

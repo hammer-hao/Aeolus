@@ -74,6 +74,17 @@ namespace Aeolus
 
 			return _requestAlternateBuildingPlacement(target, toBuild);
 		}
+		case (constants::ManagerRequestType::CLEAR_WORKER_ON_ROUTE):
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Point2D>>(args);
+			::sc2::Point2D target = std::get<0>(params);
+			_clearWorkerOnRoute(target);
+			return 0;
+		}
+		case (constants::ManagerRequestType::IS_NATURAL_WALL_COMPLETE):
+		{
+			return _isAllThreeByThreeAtNaturalWallBuilt();
+		}
 		default: return 0;
 		}
 	}
@@ -2030,9 +2041,10 @@ namespace Aeolus
 		auto& placementMap =
 			m_expansion_map[base_number][building_type];
 
-		const BuildingAttributes targetAttrs =
-			(placementMap.find(targetTile) != placementMap.end())
-			? placementMap[targetTile]
+		auto targetIt = placementMap.find(targetTile);
+		BuildingAttributes targetAttrs =
+			targetIt != placementMap.end()
+			? targetIt->second
 			: BuildingAttributes();
 
 		auto available_positions =
@@ -2086,6 +2098,11 @@ namespace Aeolus
 		::sc2::Point2D best =
 			utils::GetClosestTo(target, filtered);
 
+		if (targetIt != placementMap.end())
+		{
+			_clearWorkerOnRoute(targetIt->second);
+		}
+
 		auto& attrs =
 			placementMap[TilePos(best.x, best.y)];
 
@@ -2094,5 +2111,45 @@ namespace Aeolus
 			m_bot.Observation()->GetGameLoop();
 
 		return best;
+	}
+
+	void PlacementManager::_clearWorkerOnRoute(BuildingAttributes& attrs)
+	{
+		attrs.worker_on_route = false;
+		attrs.time_requested = 0;
+	}
+
+	void PlacementManager::_clearWorkerOnRoute(::sc2::Point2D pos)
+	{
+		TilePos tile(pos.x, pos.y);
+
+		for (auto& expansion : m_expansion_map)
+		{
+			for (auto& [buildingType, placementMap] : expansion)
+			{
+				auto it = placementMap.find(tile);
+				if (it != placementMap.end())
+				{
+					_clearWorkerOnRoute(it->second);
+					return;
+				}
+			}
+		}
+
+		std::cout << "Warning: attempted to clear worker_on_route for unknown placement at "
+			<< pos.x << ", " << pos.y << std::endl;
+	}
+
+	bool PlacementManager::_isAllThreeByThreeAtNaturalWallBuilt()
+	{
+		const auto& natural_three_by_threes = m_expansion_map[1][BuildingTypes::BUILDING_3X3];
+		for (const auto& [tilePos, attrs] : natural_three_by_threes)
+		{
+			if (attrs.is_wall && attrs.available)
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 }

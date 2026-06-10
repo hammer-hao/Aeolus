@@ -224,6 +224,7 @@ namespace Aeolus
 				auto cost = mediator.GetUnitCost(m_bot, it->second.building_id);
 				mediator.FreeMinerals(m_bot, cost.first);
 				mediator.FreeVespene(m_bot, cost.second);
+				mediator.ClearWorkerOnRoute(m_bot, it->second.target);
 				m_building_counter[m_building_tracker[unit].building_id] -= 1;
 				m_building_tracker.erase(unit);
 			}
@@ -248,6 +249,7 @@ namespace Aeolus
 			auto cost = mediator.GetUnitCost(m_bot, order.building_id);
 			mediator.FreeMinerals(m_bot, cost.first);
 			mediator.FreeVespene(m_bot, cost.second);
+			mediator.ClearWorkerOnRoute(m_bot, order.target);
 
 			auto counter_it = m_building_counter.find(order.building_id);
 
