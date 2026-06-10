@@ -16,6 +16,10 @@ namespace Aeolus
 {
 	bool ProductionController::execute(AeolusBot& aeolusbot)
 	{
+		// fix for https://github.com/hammer-hao/Aeolus/issues/29 -- just execute every other step to
+		// avoid game client not properly updating the action result
+		if (aeolusbot.Observation()->GetGameLoop() % 2 == 0) return false;
+
 		auto& mediator = ManagerMediator::getInstance();
 		auto* observation = aeolusbot.Observation();
 		float mineral_collection_rate = observation->GetScore().score_details.collection_rate_minerals;
