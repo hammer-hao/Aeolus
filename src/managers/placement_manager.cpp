@@ -81,6 +81,10 @@ namespace Aeolus
 			_clearWorkerOnRoute(target);
 			return 0;
 		}
+		case (constants::ManagerRequestType::IS_NATURAL_WALL_COMPLETE):
+		{
+			return _isAllThreeByThreeAtNaturalWallBuilt();
+		}
 		default: return 0;
 		}
 	}
@@ -2134,5 +2138,18 @@ namespace Aeolus
 
 		std::cout << "Warning: attempted to clear worker_on_route for unknown placement at "
 			<< pos.x << ", " << pos.y << std::endl;
+	}
+
+	bool PlacementManager::_isAllThreeByThreeAtNaturalWallBuilt()
+	{
+		const auto& natural_three_by_threes = m_expansion_map[1][BuildingTypes::BUILDING_3X3];
+		for (const auto& [tilePos, attrs] : natural_three_by_threes)
+		{
+			if (attrs.is_wall && attrs.available)
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 }

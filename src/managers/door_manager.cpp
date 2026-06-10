@@ -30,6 +30,29 @@ namespace Aeolus
 
 	void DoorManager::update(int iteration)
 	{
+		if (iteration % 44 == 1)
+		{
+			auto& mediator = ManagerMediator::getInstance();
+			auto opponentRace = mediator.getOpponentRace(m_bot);
+
+			if (opponentRace == ::sc2::Race::Zerg || opponentRace == ::sc2::Race::Random)
+			{
+				bool should_enable = mediator.IsNaturalWallComplete(m_bot);
+
+				if (m_enabled && !should_enable)
+				{
+					::sc2::Units doorUnits = mediator.GetUnitsFromRole(m_bot, constants::UnitRole::DOOR);
+					for (const auto& unit : doorUnits)
+					{
+						mediator.AssignRole(m_bot, unit, constants::UnitRole::ATTACKING);
+					}
+					m_doorUnit = nullptr;
+				}
+
+				m_enabled = should_enable;
+			}
+		}
+
 		// not enabled, return
 		if (!m_enabled) return;
 

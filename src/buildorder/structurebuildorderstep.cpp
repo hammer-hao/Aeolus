@@ -21,12 +21,6 @@ namespace Aeolus
 
 	bool StructureBuildOrderStep::execute(AeolusBot& aeolusbot)
 	{
-		// enable door manager if a natural wall is being built
-		if (m_is_wall && (m_base_location == 1))
-		{
-			ManagerMediator::getInstance().EnableDoorManager(aeolusbot);
-		}
-
 		if (aeolusbot.Observation()->GetFoodUsed() >= m_supply_threshold)
 		{
 			m_num_before = 0;

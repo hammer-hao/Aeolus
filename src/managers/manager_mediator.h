@@ -975,6 +975,20 @@ namespace Aeolus
 			);
 		}
 
+		/**
+		* @brief returns true if all 3x3s in our natural wall exists.
+		* Useful for checking if our wall has been breached / if the wall has been completed
+		*/
+		bool IsNaturalWallComplete(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<bool, int>(
+				aeolusbot,
+				constants::ManagerName::PLACEMENT_MANAGER,
+				constants::ManagerRequestType::IS_NATURAL_WALL_COMPLETE,
+				0
+			);
+		}
+
 		// BuildingManager
 		const std::unordered_map<const ::sc2::Unit*, BuildingOrder>& GetBuildingTracker(AeolusBot& aeolusbot)
 		{

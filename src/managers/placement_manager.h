@@ -190,5 +190,7 @@ namespace Aeolus
 		void _clearWorkerOnRoute(BuildingAttributes& attrs);
 
 		void _clearWorkerOnRoute(::sc2::Point2D pos);
+
+		bool _isAllThreeByThreeAtNaturalWallBuilt();
 	};
 }
