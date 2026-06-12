@@ -83,6 +83,49 @@ namespace Aeolus
 		return best_position;
 	}
 
+	::sc2::Point2D Grid::FindFurthestSafeSpotTowards(::sc2::Point2D position, ::sc2::Point2D target, const double& radius)
+	{
+		// get all the points within the radius
+		std::vector<std::pair<int, int>> candidates = _drawCircle(position.x, position.y, radius);
+
+		::sc2::Point2D best_position = position;
+		double max_dot_product = -std::numeric_limits<double>::infinity();
+		double pos_to_target_sq = ::sc2::DistanceSquared2D(position, target);
+
+		double target_vec_x = target.x - position.x;
+		double target_vec_y = target.y - position.y;
+
+		for (const auto& cell : candidates)
+		{
+			int x = cell.first;
+			int y = cell.second;
+
+			::sc2::Point2D candidate(x, y);
+
+			if (!IsPositionSafe(candidate)) continue;
+
+			double distance_to_target_sq =
+				(x - target.x) * (x - target.x) +
+				(y - target.y) * (y - target.y);
+
+			if (distance_to_target_sq > pos_to_target_sq) continue;
+
+			double move_vec_x = x - position.x;
+			double move_vec_y = y - position.y;
+
+			double dot_product =
+				move_vec_x * target_vec_x +
+				move_vec_y * target_vec_y;
+
+			if (dot_product > max_dot_product)
+			{
+				max_dot_product = dot_product;
+				best_position = candidate;
+			}
+		}
+		return best_position;
+	}
+
 	/**
 		 * @brief Check if the given position is considered safe on the grid.
 		 *

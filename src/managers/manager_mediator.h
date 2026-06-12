@@ -535,6 +535,38 @@ namespace Aeolus
 		}
 
 		/**
+		* @brief given a position (most likely of a unit we are interested in targeting down), and a target position,
+		* return a safe spot within the given range in the position that is closest to the target position.
+		*/
+		::sc2::Point2D FindFurthestGroundSafeSpotTowards(AeolusBot& aeolusbot, ::sc2::Point2D position, ::sc2::Point2D target, double radius)
+		{
+			return ManagerRequest<::sc2::Point2D, ::sc2::Point2D, ::sc2::Point2D, double>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::FIND_FURTHEST_GROUND_SAFE_SPOT_TOWARDS,
+				position,
+				target,
+				radius
+			);
+		}
+
+		/**
+		* @brief given a position (most likely of a unit we are interested in targeting down), and a target position,
+		* return a safe spot (air) within the given range in the position that is closest to the target position.
+		*/
+		::sc2::Point2D FindFurthestAirSafeSpotTowards(AeolusBot& aeolusbot, ::sc2::Point2D position, ::sc2::Point2D target, double radius)
+		{
+			return ManagerRequest<::sc2::Point2D, ::sc2::Point2D, ::sc2::Point2D, double>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::FIND_FURTHEST_AIR_SAFE_SPOT_TOWARDS,
+				position,
+				target,
+				radius
+			);
+		}
+
+		/**
 		* @brief given a 2D starting position and a radious. Find the point within that radius that has the lowest
 		* influence cost from enemy ground and air attacks combined.
 		*/

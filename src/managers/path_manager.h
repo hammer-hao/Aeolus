@@ -64,6 +64,10 @@ namespace Aeolus
 
 		::sc2::Point2D _getClosestPrismSafeSpot(::sc2::Point2D position, const double& radius);
 
+		::sc2::Point2D _getFuthestGroundSafeSpotTowards(::sc2::Point2D position, ::sc2::Point2D towards, const double& radius);
+
+		::sc2::Point2D _getFuthestAirSafeSpotTowards(::sc2::Point2D position, ::sc2::Point2D towards, const double& radius);
+
 		std::vector<::sc2::Point2D> _getFloodFillArea(::sc2::Point2D starting_point, int max_distance);
 
 		/*

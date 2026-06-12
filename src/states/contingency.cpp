@@ -38,11 +38,11 @@ namespace Aeolus
 		// if we have enought supply
 		::sc2::Units forces = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
 
-		if (forces.empty()) return;
-
-		::sc2::Point2D target = (mediator.GetDefenseTarget(aeolusbot, 1));
-
-		if (!forces.empty()) doGeneralMicro(aeolusbot, forces, target);
+		if (!forces.empty())
+		{
+			::sc2::Point2D target = mediator.GetDefenseTarget(aeolusbot, 1);
+			doGeneralMicro(aeolusbot, forces, target);
+		}
 
 		// Enable prism pick up during contingency if one has been created (not likely)
 		doPrismPickUpMicro(aeolusbot);

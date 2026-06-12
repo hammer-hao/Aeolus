@@ -35,6 +35,7 @@
 #include "../behaviors/micro_behaviors/unload.h"
 #include "../behaviors/micro_behaviors/use_ability.h"
 #include "../behaviors/micro_behaviors/move.h"
+#include "../behaviors/micro_behaviors/move_toward_target_safely.h"
 
 #include "../utils/unit_utils.h"
 #include "../utils/position_utils.h"
@@ -468,6 +469,11 @@ namespace Aeolus
                     {
                         adept_behavior->AddBehavior(
                             std::make_unique<ShootTargetInRange>(
+                                workserInAttackRange
+                            )
+                        );
+                        adept_behavior->AddBehavior(
+                            std::make_unique<MoveTowardTargetSafely>(
                                 workserInAttackRange
                             )
                         );
