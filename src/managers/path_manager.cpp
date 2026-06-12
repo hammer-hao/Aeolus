@@ -77,6 +77,22 @@ namespace Aeolus
 			double radius = std::get<1>(params);
 			return _getClosestPrismSafeSpot(position, radius);
 		}
+		case (constants::ManagerRequestType::FIND_FURTHEST_GROUND_SAFE_SPOT_TOWARDS):
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Point2D, ::sc2::Point2D, double>>(args);
+			::sc2::Point2D position = std::get<0>(params);
+			::sc2::Point2D target = std::get<1>(params);
+			double radius = std::get<2>(params);
+			return _getFuthestGroundSafeSpotTowards(position, target, radius);
+		}
+		case (constants::ManagerRequestType::FIND_FURTHEST_AIR_SAFE_SPOT_TOWARDS):
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Point2D, ::sc2::Point2D, double>>(args);
+			::sc2::Point2D position = std::get<0>(params);
+			::sc2::Point2D target = std::get<1>(params);
+			double radius = std::get<2>(params);
+			return _getFuthestAirSafeSpotTowards(position, target, radius);
+		}
 		case (constants::ManagerRequestType::IS_GROUND_POSITION_SAFE):
 		{
 			auto params = std::any_cast<std::tuple<::sc2::Point2D>>(args);
@@ -232,6 +248,16 @@ namespace Aeolus
 	::sc2::Point2D PathManager::_getClosestAirSafeSpot(::sc2::Point2D position, const double& radius)
 	{
 		return m_air_grid.FindClosestSafeSpot(position, radius);
+	}
+
+	::sc2::Point2D PathManager::_getFuthestGroundSafeSpotTowards(::sc2::Point2D position, ::sc2::Point2D target, const double& radius)
+	{
+		return m_ground_grid.FindFurthestSafeSpotTowards(position, target, radius);
+	}
+
+	::sc2::Point2D PathManager::_getFuthestAirSafeSpotTowards(::sc2::Point2D position, ::sc2::Point2D target, const double& radius)
+	{
+		return m_air_grid.FindFurthestSafeSpotTowards(position, target, radius);
 	}
 
 	::sc2::Point2D PathManager::_getClosestPrismSafeSpot(::sc2::Point2D position, const double& radius)

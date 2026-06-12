@@ -126,6 +126,8 @@ namespace Aeolus
 
         ::sc2::Point2D FindClosestSafeSpot(::sc2::Point2D position, const double& radius);
 
+        ::sc2::Point2D FindFurthestSafeSpotTowards(::sc2::Point2D position, ::sc2::Point2D target, const double& radius);
+
         bool IsPositionSafe(::sc2::Point2D position, double weight_safety_limit = 1.0) const;
 
 	private:
