@@ -437,8 +437,7 @@ namespace Aeolus
 
                 ::sc2::Point2D closest = pointsBehindMain[1];
 
-                if (!unitsInRangeMap[adept->tag].empty())
-                    adept_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                adept_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
                 adept_behavior->AddBehavior(std::make_unique<AMove>(closest));
 
                 if (std::count_if(unitsInRangeMap[adept->tag].begin(), unitsInRangeMap[adept->tag].end(), [](const ::sc2::Unit* unit) {
