@@ -483,8 +483,11 @@ namespace Aeolus
                     }
                     else
                     {
-                        auto enemy_target = utils::PickAttackTarget(allClose);
-                        adept_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
+                        adept_behavior->AddBehavior(
+                            std::make_unique<KeepUnitSafe>()
+                        );
+                        //auto enemy_target = utils::PickAttackTarget(allClose);
+                        //adept_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
                     }
                 }
 

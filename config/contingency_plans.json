@@ -63,7 +63,7 @@
           }
         ],
         "army_composition": {
-          "ZEALOT": 1.0
+          "STALKER": 1.0
         },
         "move_out_supply": 40,
         "cannons_to_add": 0
@@ -81,7 +81,7 @@
           }
         ],
         "army_composition": {
-          "ZEALOT": 1.0
+          "STALKER": 1.0
         },
         "move_out_supply": 40,
         "cannons_to_add": 0
@@ -150,7 +150,7 @@
           }
         ],
         "army_composition": {
-          "ZEALOT": 1.0
+          "STALKER": 1.0
         },
         "move_out_supply": 40,
         "cannons_to_add": 0
