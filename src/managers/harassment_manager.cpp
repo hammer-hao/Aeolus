@@ -85,7 +85,16 @@ namespace Aeolus
 
 	void HarassmentManager::onUnitDestroyed(const ::sc2::Unit* unit)
 	{
-		m_harassment_tracker.erase(unit->tag);
+		auto it = m_harassment_tracker.find(unit->tag);
+		if (it != m_harassment_tracker.end())
+		{
+			std::string message =
+				std::string("Tag: ") + ::sc2::UnitTypeToName(unit->unit_type) + "_killed_at_status_" +
+				std::to_string(static_cast<int>(it->second));
+
+			m_bot.Actions()->SendChat(message);
+			m_harassment_tracker.erase(unit->tag);
+		}
 	}
 
 	std::vector<std::vector<::sc2::Point2D>> HarassmentManager::_getPositionBehindEnemyMainNaturalThird()
@@ -100,6 +109,12 @@ namespace Aeolus
 
 	void HarassmentManager::_registerHarassmentStatus(::sc2::Tag unitTag, HarassmentStatus status)
 	{
+		std::string message =
+			"Unit " + std::to_string(unitTag) + ':' +
+			::sc2::UnitTypeToName(m_bot.Observation()->GetUnit(unitTag)->unit_type) +
+			" status -> " + std::to_string(static_cast<int>(status));
+
+		m_bot.Actions()->SendChat(message);
 		m_harassment_tracker[unitTag] = status;
 	}
 }
