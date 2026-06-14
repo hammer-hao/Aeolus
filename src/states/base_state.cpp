@@ -40,6 +40,8 @@
 #include "../utils/unit_utils.h"
 #include "../utils/position_utils.h"
 
+#include "../pathing/grid.h"
+
 namespace Aeolus
 {
 	void BaseState::declareEnter() 
@@ -440,7 +442,11 @@ namespace Aeolus
                 adept_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
                 adept_behavior->AddBehavior(std::make_unique<AMove>(closest));
 
-                if (std::count_if(unitsInRangeMap[adept->tag].begin(), unitsInRangeMap[adept->tag].end(), [](const ::sc2::Unit* unit) {
+                if ((adept->shield / adept->shield_max) <= 0.05f)
+                {
+                    mediator.registerHarassmentStatus(aeolusbot, adept->tag, HarassmentStatus::SURVIVING);
+                }
+                else if (std::count_if(unitsInRangeMap[adept->tag].begin(), unitsInRangeMap[adept->tag].end(), [](const ::sc2::Unit* unit) {
                     return (constants::WORKER_TYPES.find(unit->unit_type) != constants::WORKER_TYPES.end());
                     }) >= 3)
                 {
@@ -537,17 +543,25 @@ namespace Aeolus
 
                 if (adeptShadeTracker[adept->tag].second == 1)
                 {
-                    if (currentStatus == HarassmentStatus::SURVIVING || currentStatus == HarassmentStatus::HEADING_TO_BASE)
+                    // only finish our shade if it is safe / safer than current position
+                    if (mediator.IsGroundPositionSafe(aeolusbot, adeptShade->pos) || mediator.IsSpotSaferThan(aeolusbot, adeptShade->pos, adept->pos, GridType::GROUND))
                     {
+                        if (currentStatus == HarassmentStatus::SURVIVING || currentStatus == HarassmentStatus::HEADING_TO_BASE)
+                        {
 
+                        }
+                        else
+                        {
+                            // mediator.IsGroundPositionSafe()
+                            // need to decide if cancel or not
+                            // adept_shade_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::CANCEL));
+                            HarassmentStatus newStatus = _getClosestHarassStatus(aeolusbot, adeptShade, positionsBehindEnemyMainNaturalThirdBase);
+                            mediator.registerHarassmentStatus(aeolusbot, adept->tag, newStatus);
+                        }
                     }
                     else
                     {
-                        // mediator.IsGroundPositionSafe()
-                        // need to decide if cancel or not
-                        // adept_shade_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::CANCEL));
-                        HarassmentStatus newStatus = _getClosestHarassStatus(aeolusbot, adeptShade, positionsBehindEnemyMainNaturalThirdBase);
-                        mediator.registerHarassmentStatus(aeolusbot, adept->tag, newStatus);
+                        adept_shade_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::CANCEL));
                     }
                 }
 

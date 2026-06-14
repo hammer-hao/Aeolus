@@ -615,6 +615,22 @@ namespace Aeolus
 			);
 		}
 
+		/**
+		* @brief give two points on the map and a grid type, returns whether the first point is safer
+		* than the second on the given grid type
+		*/
+		bool IsSpotSaferThan(AeolusBot& aeolusbot, ::sc2::Point2D posA, ::sc2::Point2D posB, GridType gridType)
+		{
+			return ManagerRequest<bool, ::sc2::Point2D, ::sc2::Point2D, GridType>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::IS_SPOT_SAFER_THAN,
+				posA,
+				posB,
+				gridType
+			);
+		}
+
 
 		std::vector<::sc2::Point2D> GetFloodFillArea(AeolusBot& aeolusbot, ::sc2::Point2D starting_point, int max_distance)
 		{

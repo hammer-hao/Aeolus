@@ -126,6 +126,11 @@ namespace Aeolus
 		return best_position;
 	}
 
+	bool Grid::isSpotSaferThan(::sc2::Point2D posA, ::sc2::Point2D posB)
+	{
+		return m_grid(static_cast<int>(posA.y), static_cast<int>(posA.x)) <= m_grid(static_cast<int>(posB.y), static_cast<int>(posB.x));
+	}
+
 	/**
 		 * @brief Check if the given position is considered safe on the grid.
 		 *

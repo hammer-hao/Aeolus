@@ -22,6 +22,10 @@ namespace Aeolus
 		auto* observation = aeolusbot.Observation();
 		auto& mediator = ManagerMediator::getInstance();
 
+		// fix for https://github.com/hammer-hao/Aeolus/issues/29 -- just execute every other step to
+		// avoid game client not properly updating the action result
+		if (observation->GetGameLoop() % 2 == 0) return false;
+
 		// if warp gate ready, wait for gateway to morph
 		for (auto& upgradeId : observation->GetUpgrades())
 		{

@@ -131,6 +131,14 @@ namespace Aeolus
 			int sensitivity = std::get<7>(params);
 			return AStarPathFindNext(start, goal, gridType, sense_danger, danger_distance, danger_threshold, smoothing, sensitivity);
 		}
+		case (constants::ManagerRequestType::IS_SPOT_SAFER_THAN):
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Point2D, ::sc2::Point2D, GridType>>(args);
+			::sc2::Point2D posA = std::get<0>(params);
+			::sc2::Point2D posB = std::get<1>(params);
+			GridType gridType = std::get<2>(params);
+			return _isSpotSaferThan(posA, posB, gridType);
+		}
 		default:
 			return 0;
 		}
@@ -278,6 +286,23 @@ namespace Aeolus
 	bool PathManager::_isPrismPositionSafe(::sc2::Point2D position)
 	{
 		return m_prism_grid.IsPositionSafe(position);
+	}
+
+	bool PathManager::_isSpotSaferThan(::sc2::Point2D posA, ::sc2::Point2D posB, GridType gridType)
+	{
+		if (gridType == GridType::GROUND)
+		{
+			return m_ground_grid.isSpotSaferThan(posA, posB);
+		}
+		else if (gridType == GridType::AIR)
+		{
+			return m_air_grid.isSpotSaferThan(posA, posB);
+		}
+		else if (gridType == GridType::BOTH)
+		{
+			return m_prism_grid.isSpotSaferThan(posA, posB);
+		}
+		return m_ground_grid.isSpotSaferThan(posA, posB);
 	}
 
 	void PathManager::_reset_grids()
