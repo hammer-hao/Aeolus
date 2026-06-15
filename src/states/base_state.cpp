@@ -415,15 +415,18 @@ namespace Aeolus
                 continue;
             }
 
+            HarassmentStatus currentStatus = harassmentTracker[adept->tag];
+
             auto adept_behavior = std::make_unique<MicroBehavior>(adept);
             auto available_abilities = aeolusbot.Query()->GetAbilitiesForUnit(adept).abilities;
             if (std::any_of(available_abilities.begin(), available_abilities.end(), [](::sc2::AvailableAbility ability) {
                 return ability.ability_id == ::sc2::ABILITY_ID::EFFECT_ADEPTPHASESHIFT;
                 })) {
-                adept_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::EFFECT_ADEPTPHASESHIFT, adept->pos));
+                auto target = _getAdeptShadeTargetFromHarassmentStatus(currentStatus,
+                    positionsBehindEnemyMainNaturalThirdBase,
+                    aeolusbot.Observation()->GetStartLocation());
+                adept_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::EFFECT_ADEPTPHASESHIFT, target));
             }
-
-            HarassmentStatus currentStatus = harassmentTracker[adept->tag];
 
             if (currentStatus == HarassmentStatus::HEADING_TO_BASE)
             {
@@ -440,7 +443,7 @@ namespace Aeolus
                 ::sc2::Point2D closest = pointsBehindMain[1];
 
                 adept_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-                adept_behavior->AddBehavior(std::make_unique<AMove>(closest));
+                adept_behavior->AddBehavior(std::make_unique<Move>(closest));
 
                 if ((adept->shield / adept->shield_max) <= 0.05f)
                 {
