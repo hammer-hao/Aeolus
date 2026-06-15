@@ -300,7 +300,8 @@ namespace Aeolus
                 HarassmentStatus::HARASSING_AT_THIRD)
             {
                 if ((oracle->shield / oracle->shield_max)
-                    <= 0.15f)
+                    <= 0.15f ||
+                    beamCurrentlyOff && oracle->energy < 25.0f)
                 {
                     mediator.registerHarassmentStatus(
                         aeolusbot,
@@ -334,6 +335,11 @@ namespace Aeolus
 
                         oracle_behavior->AddBehavior(
                             std::make_unique<
+                            MoveTowardTargetSafely>(
+                                workersInAttackRange));
+
+                        oracle_behavior->AddBehavior(
+                            std::make_unique<
                             KeepUnitSafe>());
                     }
                     else
@@ -344,7 +350,7 @@ namespace Aeolus
 
                         oracle_behavior->AddBehavior(
                             std::make_unique<
-                            StutterUnitBack>(
+                            MoveTowardTargetSafely>(
                                 enemyTarget));
                     }
                 }
@@ -381,7 +387,7 @@ namespace Aeolus
 
                 if ((oracle->shield /
                     oracle->shield_max) >= 0.95f
-                    && oracle->energy >= 80.0f)
+                    && oracle->energy >= 50.0f)
                 {
                     mediator.registerHarassmentStatus(
                         aeolusbot,
@@ -487,6 +493,14 @@ namespace Aeolus
                         );
                         adept_behavior->AddBehavior(
                             std::make_unique<KeepUnitSafe>()
+                        );
+                    }
+                    else if (!closeWorkers.empty())
+                    {
+                        adept_behavior->AddBehavior(
+                            std::make_unique<MoveTowardTargetSafely>(
+                                closeWorkers
+                            )
                         );
                     }
                     else
