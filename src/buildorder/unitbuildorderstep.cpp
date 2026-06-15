@@ -106,7 +106,7 @@ namespace Aeolus
 
 	bool UnitBuildOrderStep::isDone(AeolusBot& aeolusbot)
 	{
-		std::cout << "Checking if current unit build order for " << ::sc2::UnitTypeToName(m_to_train) << " is done" << '\n';
+		/*std::cout << "Checking if current unit build order for " << ::sc2::UnitTypeToName(m_to_train) << " is done" << '\n';
 		auto trainedFrom = utils::_isTrainedFrom(m_to_train);
 		if (!trainedFrom.has_value()) return true;
 
@@ -119,7 +119,8 @@ namespace Aeolus
 			}
 		}
 		std::cout << ::sc2::UnitTypeToName(m_to_train) << " is NOT done" << '\n';
-		return false;
+		return false;*/
+		return m_started;
 	}
 
 	bool UnitBuildOrderStep::started()
