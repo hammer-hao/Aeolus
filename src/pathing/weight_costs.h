@@ -37,7 +37,7 @@ namespace Aeolus {
             {::sc2::UNIT_TYPEID::PROTOSS_PHOENIX, {15, 0, 7, 0}},
             {::sc2::UNIT_TYPEID::ZERG_QUEEN, {12.6, 11.2, 7, 5}},
             {::sc2::UNIT_TYPEID::PROTOSS_SENTRY, {8.4, 8.4, 5, 5}},
-            {::sc2::UNIT_TYPEID::PROTOSS_STALKER, {10, 10, 6, 6}},
+            {::sc2::UNIT_TYPEID::PROTOSS_STALKER, {10, 10, 7, 6}},
             {::sc2::UNIT_TYPEID::PROTOSS_TEMPEST, {17, 17, 14, 10}},
             {::sc2::UNIT_TYPEID::TERRAN_THOR, {28, 28, 11, 7}},
             {::sc2::UNIT_TYPEID::TERRAN_VIKINGASSAULT, {0, 17, 0, 6}},
