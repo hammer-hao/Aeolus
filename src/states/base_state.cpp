@@ -228,17 +228,16 @@ namespace Aeolus
             auto availableAbilities =
                 aeolusbot.Query()->GetAbilitiesForUnit(oracle).abilities;
 
-            auto beamAvailable =
-                std::any_of(
-                    availableAbilities.begin(),
-                    availableAbilities.end(),
-                    [](const ::sc2::AvailableAbility& ability)
+            bool beamCurrentlyOff =
+                !std::any_of(
+                    oracle->buffs.begin(),
+                    oracle->buffs.end(),
+                    [](const ::sc2::BUFF_ID& buff)
                     {
-                        return ability.ability_id ==
-                            ::sc2::ABILITY_ID::BEHAVIOR_PULSARBEAMON;
+                        return buff ==
+                            ::sc2::BUFF_ID::ORACLEWEAPON;
                     });
 
-            bool beamCurrentlyOff = beamAvailable;
             HarassmentStatus currentStatus =
                 harassmentTracker[oracle->tag];
 
@@ -270,7 +269,7 @@ namespace Aeolus
                     .front()[1];
 
                 oracle_behavior->AddBehavior(
-                    std::make_unique<AMove>(target));
+                    std::make_unique<PathToTarget>(target));
 
                 if (closeWorkers.size() >= 3)
                 {
@@ -284,6 +283,14 @@ namespace Aeolus
                         aeolusbot,
                         oracle->tag,
                         newStatus);
+                }
+                else if ((oracle->shield / oracle->shield_max)
+                    <= 0.15f)
+                {
+                    mediator.registerHarassmentStatus(
+                        aeolusbot,
+                        oracle->tag,
+                        HarassmentStatus::SURVIVING);
                 }
             }
 
@@ -359,6 +366,13 @@ namespace Aeolus
                     // no workers nearby
                     oracle_behavior->AddBehavior(
                         std::make_unique<KeepUnitSafe>());
+                    oracle_behavior->AddBehavior(
+                        std::make_unique<Move>(
+                            _getOracleTargetFromHarassmentStatus(
+                                currentStatus, 
+                                positionsBehindEnemyMainNaturalThirdBase, 
+                                aeolusbot.Observation()->GetStartLocation())
+                        ));
                 }
             }
 
@@ -664,6 +678,33 @@ namespace Aeolus
         else if (status == HarassmentStatus::HARASSING_AT_THIRD)
         {
             return behindMineralPositions[1][1];
+        }
+        else if (status == HarassmentStatus::SURVIVING)
+        {
+            return fallbackLocation;
+        }
+        return behindMineralPositions.front().front();
+    }
+
+    ::sc2::Point2D BaseState::_getOracleTargetFromHarassmentStatus(
+        HarassmentStatus status,
+        const std::vector<std::vector<::sc2::Point2D>>& behindMineralPositions, ::sc2::Point2D fallbackLocation)
+    {
+        if (status == HarassmentStatus::HEADING_TO_BASE)
+        {
+            return behindMineralPositions.front()[1];
+        }
+        else if (status == HarassmentStatus::HARASSING_AT_MAIN)
+        {
+            return behindMineralPositions.front()[1];
+        }
+        else if (status == HarassmentStatus::HARASSING_AT_NATURAL)
+        {
+            return behindMineralPositions[1][1];
+        }
+        else if (status == HarassmentStatus::HARASSING_AT_THIRD)
+        {
+            return behindMineralPositions[2][1];
         }
         else if (status == HarassmentStatus::SURVIVING)
         {
