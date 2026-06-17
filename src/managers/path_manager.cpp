@@ -20,7 +20,17 @@ namespace Aeolus
 			m_prism_grid = m_ground_grid;
 			m_air_grid = Grid(m_ground_grid.GetWidth(), m_ground_grid.GetHeight());
 			m_ground_grid.UpdateCache();
-			m_ground_grid.UpdateCache();
+			m_air_grid.UpdateCache();
+			m_prism_grid.UpdateCache();
+
+			auto game_info = m_bot.Observation()->GetGameInfo();
+
+			auto playable_min = game_info.playable_min;
+			auto playable_max = game_info.playable_max;
+
+			m_ground_grid.SetPlayableBounds(playable_min, playable_max);
+			m_air_grid.SetPlayableBounds(playable_min, playable_max);
+			m_prism_grid.SetPlayableBounds(playable_min, playable_max);
 		}
 		else if (iteration > 0)
 		{
@@ -341,6 +351,7 @@ namespace Aeolus
 	{
 		m_ground_grid.Reset();
 		m_air_grid.Reset();
+		m_prism_grid.Reset();
 	}
 
 	void PathManager::_reset_danger_tiles()

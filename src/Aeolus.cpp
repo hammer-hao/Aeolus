@@ -182,6 +182,9 @@ namespace Aeolus
         manager_hub_ = Hub(*this);
         manager_hub_.Initialize();
 
+        auto max = Observation()->GetGameInfo().playable_max;
+        auto min = Observation()->GetGameInfo().playable_min;
+
         const auto own_id = Observation()->GetPlayerID();
 
         ::sc2::Race opponentRace = ::sc2::Race::Random;
