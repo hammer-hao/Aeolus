@@ -581,10 +581,12 @@ namespace Aeolus
                         {
                             aeolusbot.Actions()->SendChat("safe");
                         }
-                        if (mediator.IsSpotSaferThan(aeolusbot, adeptShade->pos, adept->pos, GridType::GROUND))
+                        else if (mediator.IsSpotSaferThan(aeolusbot, adeptShade->pos, adept->pos, GridType::GROUND))
                         {
                             aeolusbot.Actions()->SendChat("safer");
                         }
+                        auto pathQuery = aeolusbot.Query()->PathingDistance(adeptShade->pos, target);
+                        aeolusbot.Actions()->SendChat(std::to_string(pathQuery));
                         if (currentStatus == HarassmentStatus::SURVIVING || currentStatus == HarassmentStatus::HEADING_TO_BASE)
                         {
 
