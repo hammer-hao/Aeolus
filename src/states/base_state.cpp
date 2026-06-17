@@ -585,11 +585,10 @@ namespace Aeolus
                         {
                             aeolusbot.Actions()->SendChat("safer");
                         }
-                        auto pathQuery = aeolusbot.Query()->PathingDistance(adeptShade->pos, target);
+                        auto pathQuery = aeolusbot.Query()->PathingDistance(adeptShade, target);
                         aeolusbot.Actions()->SendChat(std::to_string(pathQuery));
                         if (currentStatus == HarassmentStatus::SURVIVING || currentStatus == HarassmentStatus::HEADING_TO_BASE)
                         {
-
                         }
                         else
                         {
