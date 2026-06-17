@@ -581,6 +581,23 @@ namespace Aeolus
 			);
 		}
 
+		/**
+		* @brief given a 2d starting position and target, find the safe spot for the startign position within a radius
+		* that is closest to the target point.
+		*/
+		::sc2::Point2D FindClosestSafeSpotTowards(AeolusBot& aeolusbot, ::sc2::Point2D position, ::sc2::Point2D target, double radius, GridType gridType)
+		{
+			return ManagerRequest<::sc2::Point2D, ::sc2::Point2D, ::sc2::Point2D, double, GridType>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::FIND_CLOSEST_SAFE_SPOT_TOWARDS,
+				position,
+				target,
+				radius,
+				gridType
+			);
+		}
+
 		bool IsGroundPositionSafe(AeolusBot& aeolusbot, ::sc2::Point2D position)
 		{
 			return ManagerRequest<bool, ::sc2::Point2D>(

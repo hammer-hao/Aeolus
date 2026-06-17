@@ -27,13 +27,23 @@ namespace Aeolus
 
 		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPPRISM)
 		{
-			safe_spot = manager.FindClosestPrismSafeSpot(aeolusbot, unit->pos, 7.0);
+			safe_spot = m_target.has_value() ?
+				manager.FindClosestSafeSpotTowards(aeolusbot, unit->pos, m_target.value(), 7.0, GridType::BOTH) :
+				manager.FindClosestPrismSafeSpot(aeolusbot, unit->pos, 7.0);
 		}
 		else
 		{
-			safe_spot = (!unit->is_flying) ?
-				manager.FindClosestGroundSafeSpot(aeolusbot, unit->pos, 7.0) :
-				manager.FindClosestAirSafeSpot(aeolusbot, unit->pos, 7.0);
+			if (m_target.has_value())
+			{
+				GridType gridType = unit->is_flying ? GridType::AIR : GridType::GROUND;
+				safe_spot = manager.FindClosestSafeSpotTowards(aeolusbot, unit->pos, m_target.value(), 7.0, gridType);
+			}
+			else
+			{
+				safe_spot = (!unit->is_flying) ?
+					manager.FindClosestGroundSafeSpot(aeolusbot, unit->pos, 7.0) :
+					manager.FindClosestAirSafeSpot(aeolusbot, unit->pos, 7.0);
+			}
 		}
 
 		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER &&
@@ -50,6 +60,9 @@ namespace Aeolus
 				}
 			}
 		}
+
+		std::cout << "[KeepUnitSafe] unit: " << ::sc2::UnitTypeToName(unit->unit_type) << ", position: (" <<
+			unit->pos.x << ", " << unit->pos.y << "), target: (" << safe_spot.x << ", " << safe_spot.y << ')' << std::endl;
 
 		// blink not available, just path unit to target
 		auto path = PathToTarget(safe_spot);

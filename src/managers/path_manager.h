@@ -70,6 +70,8 @@ namespace Aeolus
 
 		bool _isSpotSaferThan(::sc2::Point2D posA, ::sc2::Point2D posB, GridType gridType);
 
+		::sc2::Point2D _findClosestSafeSpotTowards(::sc2::Point2D position, ::sc2::Point2D target, double radius, GridType gridType);
+
 		std::vector<::sc2::Point2D> _getFloodFillArea(::sc2::Point2D starting_point, int max_distance);
 
 		/*

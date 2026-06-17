@@ -16,8 +16,15 @@ namespace Aeolus
 	public:
 		KeepUnitSafe() {}
 
+		KeepUnitSafe(::sc2::Point2D target) : m_target(target)
+		{
+		}
+
 		~KeepUnitSafe() override = default;
 
 		bool execute(AeolusBot& aeolusbot, const ::sc2::Unit* unit) override;
+
+	private:
+		std::optional<::sc2::Point2D> m_target;
 	};
 }

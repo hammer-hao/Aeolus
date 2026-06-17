@@ -93,6 +93,15 @@ namespace Aeolus
 			double radius = std::get<2>(params);
 			return _getFuthestAirSafeSpotTowards(position, target, radius);
 		}
+		case (constants::ManagerRequestType::FIND_CLOSEST_SAFE_SPOT_TOWARDS):
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Point2D, ::sc2::Point2D, double, GridType>>(args);
+			::sc2::Point2D position = std::get<0>(params);
+			::sc2::Point2D target = std::get<1>(params);
+			double radius = std::get<2>(params);
+			GridType gridType = std::get<3>(params);
+			return _findClosestSafeSpotTowards(position, target, radius, gridType);
+		}
 		case (constants::ManagerRequestType::IS_GROUND_POSITION_SAFE):
 		{
 			auto params = std::any_cast<std::tuple<::sc2::Point2D>>(args);
@@ -286,6 +295,23 @@ namespace Aeolus
 	bool PathManager::_isPrismPositionSafe(::sc2::Point2D position)
 	{
 		return m_prism_grid.IsPositionSafe(position);
+	}
+
+	::sc2::Point2D PathManager::_findClosestSafeSpotTowards(::sc2::Point2D position, ::sc2::Point2D target, double radius, GridType gridType)
+	{
+		if (gridType == GridType::GROUND)
+		{
+			return m_ground_grid.FindClosestSafeSpotTowards(position, target, radius);
+		}
+		else if (gridType == GridType::AIR)
+		{
+			return m_ground_grid.FindClosestSafeSpotTowards(position, target, radius);
+		}
+		else if (gridType == GridType::BOTH)
+		{
+			return m_ground_grid.FindClosestSafeSpotTowards(position, target, radius);
+		}
+		return m_ground_grid.FindClosestSafeSpotTowards(position, target, radius);
 	}
 
 	bool PathManager::_isSpotSaferThan(::sc2::Point2D posA, ::sc2::Point2D posB, GridType gridType)

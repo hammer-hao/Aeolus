@@ -126,6 +126,63 @@ namespace Aeolus
 		return best_position;
 	}
 
+	::sc2::Point2D Grid::FindClosestSafeSpotTowards(::sc2::Point2D position, ::sc2::Point2D target, const double& radius)
+	{
+		std::vector<std::pair<int, int>> candidates =
+			_drawCircle(position.x, position.y, radius);
+
+		::sc2::Point2D best_safe_position = position;
+		::sc2::Point2D safest_position = position;
+
+		double best_safe_score = std::numeric_limits<double>::infinity();
+		double best_safety_score = std::numeric_limits<double>::infinity();
+
+		bool found_safe = false;
+
+		constexpr double retreat_target_bias = 0.75;
+
+		for (const auto& cell : candidates)
+		{
+			int x = cell.first;
+			int y = cell.second;
+
+			::sc2::Point2D candidate(
+				static_cast<float>(x),
+				static_cast<float>(y));
+
+			double distance_from_unit =
+				::sc2::Distance2D(position, candidate);
+
+			double distance_to_target =
+				::sc2::Distance2D(candidate, target);
+
+			double target_biased_score =
+				distance_from_unit +
+				retreat_target_bias * distance_to_target;
+
+			if (IsPositionSafe(candidate))
+			{
+				found_safe = true;
+
+				if (target_biased_score < best_safe_score)
+				{
+					best_safe_score = target_biased_score;
+					best_safe_position = candidate;
+				}
+			}
+
+			double safety_score = m_grid(y, x);
+
+			if (safety_score < best_safety_score)
+			{
+				best_safety_score = safety_score;
+				safest_position = candidate;
+			}
+		}
+
+		return found_safe ? best_safe_position : safest_position;
+	}
+
 	bool Grid::isSpotSaferThan(::sc2::Point2D posA, ::sc2::Point2D posB)
 	{
 		return m_grid(static_cast<int>(posA.y), static_cast<int>(posA.x)) <= m_grid(static_cast<int>(posB.y), static_cast<int>(posB.x));

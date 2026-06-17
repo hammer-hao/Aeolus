@@ -392,7 +392,7 @@ namespace Aeolus
                 }
 
                 oracle_behavior->AddBehavior(
-                    std::make_unique<KeepUnitSafe>());
+                    std::make_unique<KeepUnitSafe>(aeolusbot.Observation()->GetStartLocation()));
 
                 oracle_behavior->AddBehavior(
                     std::make_unique<PathToTarget>(
