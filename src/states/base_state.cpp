@@ -578,13 +578,8 @@ namespace Aeolus
                     if ((mediator.IsGroundPositionSafe(aeolusbot, adeptShade->pos) || mediator.IsSpotSaferThan(aeolusbot, adeptShade->pos, adept->pos, GridType::GROUND))
                         && !(currentStatus != HarassmentStatus::SURVIVING && aeolusbot.Query()->PathingDistance(adeptShade, target) == 0.0f))
                     {
-                        if (mediator.IsGroundPositionSafe(aeolusbot, adeptShade->pos))
+                        if (currentStatus == HarassmentStatus::SURVIVING || currentStatus == HarassmentStatus::HEADING_TO_BASE)
                         {
-                            aeolusbot.Actions()->SendChat("safe");
-                        }
-                        else if (mediator.IsSpotSaferThan(aeolusbot, adeptShade->pos, adept->pos, GridType::GROUND))
-                        {
-                            aeolusbot.Actions()->SendChat("safer");
                         }
                         else
                         {
