@@ -33,6 +33,12 @@ namespace Aeolus
 			{
 				AddUnitInfluence(unit);
 			}
+
+			::sc2::Units enemey_static_defenses = ManagerMediator::getInstance().GetAllEnemyStaticDefenses(m_bot);
+			for (const auto unit : enemey_static_defenses)
+			{
+				AddUnitInfluence(unit);
+			}
 		}
 	}
 
@@ -185,20 +191,20 @@ namespace Aeolus
 		{
 			// add the range of marines + 1;
 			double ground_cost = 20;
-			double ground_range = 6 + Config::range_buffer;
+			double ground_range = 6;
 			m_ground_grid.AddCost(unit->pos.x, unit->pos.y, ground_range, ground_cost);
-			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + Config::range_buffer + 1.0, ground_cost);
+			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + 1.0, ground_cost);
 
 			double air_cost = 20;
-			double air_Range = 6 + Config::range_buffer;
+			double air_Range = 6;
 			m_air_grid.AddCost(unit->pos.x, unit->pos.y, air_Range, air_cost);
-			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, air_Range + Config::range_buffer + 1.0, air_cost);
+			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, air_Range + 1.0, air_cost);
 		}
 		else if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_DISRUPTORPHASED)
 		{
 			// A disruptor Nova
 			double ground_cost = 1000;
-			double ground_range = 8 + Config::range_buffer;
+			double ground_range = 8;
 			m_ground_grid.AddCost(unit->pos.x, unit->pos.y, ground_range, ground_cost);
 			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + Config::range_buffer + 1.0, ground_cost);
 		}

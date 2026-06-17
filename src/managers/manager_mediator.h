@@ -448,6 +448,16 @@ namespace Aeolus
 			);
 		}
 
+		::sc2::Units GetAllEnemyStaticDefenses(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_ENEMY_STATIC_DEFENSES,
+				0
+			);
+		}
+
 		/**
 		* @brief returns all enemy town hall structures, includes orbitals and planetaries.
 		* Includes lairs and hives. doe NOT include flying command centers and orbitals.
