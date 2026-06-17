@@ -577,6 +577,14 @@ namespace Aeolus
                     // only finish our shade if it is safe / safer than current position
                     if (mediator.IsGroundPositionSafe(aeolusbot, adeptShade->pos) || mediator.IsSpotSaferThan(aeolusbot, adeptShade->pos, adept->pos, GridType::GROUND))
                     {
+                        if (mediator.IsGroundPositionSafe(aeolusbot, adeptShade->pos))
+                        {
+                            aeolusbot.Actions()->SendChat("safe");
+                        }
+                        if (mediator.IsSpotSaferThan(aeolusbot, adeptShade->pos, adept->pos, GridType::GROUND))
+                        {
+                            aeolusbot.Actions()->SendChat("safer");
+                        }
                         if (currentStatus == HarassmentStatus::SURVIVING || currentStatus == HarassmentStatus::HEADING_TO_BASE)
                         {
 
