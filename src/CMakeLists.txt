@@ -47,7 +47,8 @@ behaviors/micro_behaviors/attack_target_unit.cpp
 behaviors/micro_behaviors/pick_unit_up.cpp
 behaviors/micro_behaviors/unload.cpp
 behaviors/micro_behaviors/use_ability.cpp
-behaviors/micro_behaviors/move_toward_target_safely.cpp)
+behaviors/micro_behaviors/move_toward_target_safely.cpp
+behaviors/micro_behaviors/hug_corner_towards.cpp)
 
 
 source_group("Header Files\\behaviors" FILES behaviors/behavior.h)
@@ -81,7 +82,8 @@ behaviors/micro_behaviors/attack_target_unit.h
 behaviors/micro_behaviors/pick_unit_up.h
 behaviors/micro_behaviors/unload.h
 behaviors/micro_behaviors/use_ability.h
-behaviors/micro_behaviors/move_toward_target_safely.h)
+behaviors/micro_behaviors/move_toward_target_safely.h
+behaviors/micro_behaviors/hug_corner_towards.h)
 
 source_group("Source Files\\Managers" FILES 
     managers/hub.cpp
@@ -216,6 +218,7 @@ set(bot_sources
     behaviors/micro_behaviors/unload.cpp
     behaviors/micro_behaviors/use_ability.cpp
     behaviors/micro_behaviors/move_toward_target_safely.cpp
+    behaviors/micro_behaviors/hug_corner_towards.cpp
     managers/hub.cpp
     managers/manager_mediator.cpp
     managers/path_manager.cpp
@@ -288,6 +291,7 @@ set(bot_headers
     behaviors/micro_behaviors/unload.h
     behaviors/micro_behaviors/use_ability.h
     behaviors/micro_behaviors/move_toward_target_safely.h
+    behaviors/micro_behaviors/hug_corner_towards.h
     behaviors/behavior.h
     managers/hub.h
     managers/manager.h

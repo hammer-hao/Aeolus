@@ -66,8 +66,8 @@ namespace Aeolus
 			}
 		}
 
-		std::cout << "[KeepUnitSafe] unit: " << ::sc2::UnitTypeToName(unit->unit_type) << ", position: (" <<
-			unit->pos.x << ", " << unit->pos.y << "), target: (" << safe_spot.x << ", " << safe_spot.y << ')' << std::endl;
+		/*std::cout << "[KeepUnitSafe] unit: " << ::sc2::UnitTypeToName(unit->unit_type) << ", position: (" <<
+			unit->pos.x << ", " << unit->pos.y << "), target: (" << safe_spot.x << ", " << safe_spot.y << ')' << std::endl;*/
 
 		// blink not available, just path unit to target
 		auto path = PathToTarget(safe_spot);

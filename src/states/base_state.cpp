@@ -36,6 +36,7 @@
 #include "../behaviors/micro_behaviors/use_ability.h"
 #include "../behaviors/micro_behaviors/move.h"
 #include "../behaviors/micro_behaviors/move_toward_target_safely.h"
+#include "../behaviors/micro_behaviors/hug_corner_towards.h"
 
 #include "../utils/unit_utils.h"
 #include "../utils/position_utils.h"
@@ -392,12 +393,24 @@ namespace Aeolus
                 }
 
                 oracle_behavior->AddBehavior(
-                    std::make_unique<KeepUnitSafe>(aeolusbot.Observation()->GetStartLocation()));
+                    std::make_unique<HugCornerTowards>(aeolusbot.Observation()->GetStartLocation())
+                );
+
+                oracle_behavior->AddBehavior(
+                    std::make_unique<KeepUnitSafe>());
 
                 oracle_behavior->AddBehavior(
                     std::make_unique<PathToTarget>(
                         aeolusbot.Observation()
                         ->GetStartLocation()));
+
+                /*oracle_behavior->AddBehavior(
+                    std::make_unique<KeepUnitSafe>(aeolusbot.Observation()->GetStartLocation()));
+
+                oracle_behavior->AddBehavior(
+                    std::make_unique<PathToTarget>(
+                        aeolusbot.Observation()
+                        ->GetStartLocation()));*/
 
                 if ((oracle->shield /
                     oracle->shield_max) >= 0.95f
