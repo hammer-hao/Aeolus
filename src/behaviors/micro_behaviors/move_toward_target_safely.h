@@ -17,7 +17,7 @@ namespace Aeolus
 	class MoveTowardTargetSafely : public MicroManeuver
 	{
 	public:
-		MoveTowardTargetSafely(::sc2::Unit* target) : m_target(target) {}
+		MoveTowardTargetSafely(const ::sc2::Unit* target) : m_target(target) {}
 
 		MoveTowardTargetSafely(::sc2::Units potentialTargets) 
 		{

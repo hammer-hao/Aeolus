@@ -40,7 +40,8 @@ namespace Aeolus
 
 		if (!forces.empty())
 		{
-			::sc2::Point2D target = mediator.GetDefenseTarget(aeolusbot, 1);
+			int baseToDefend = mediator.getOpponentRace(aeolusbot) == ::sc2::Race::Zerg ? 1 : 0;
+			::sc2::Point2D target = mediator.GetDefenseTarget(aeolusbot, baseToDefend);
 			doGeneralMicro(aeolusbot, forces, target);
 		}
 

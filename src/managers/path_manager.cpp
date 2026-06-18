@@ -20,7 +20,17 @@ namespace Aeolus
 			m_prism_grid = m_ground_grid;
 			m_air_grid = Grid(m_ground_grid.GetWidth(), m_ground_grid.GetHeight());
 			m_ground_grid.UpdateCache();
-			m_ground_grid.UpdateCache();
+			m_air_grid.UpdateCache();
+			m_prism_grid.UpdateCache();
+
+			auto game_info = m_bot.Observation()->GetGameInfo();
+
+			auto playable_min = game_info.playable_min;
+			auto playable_max = game_info.playable_max;
+
+			m_ground_grid.SetPlayableBounds(playable_min, playable_max);
+			m_air_grid.SetPlayableBounds(playable_min, playable_max);
+			m_prism_grid.SetPlayableBounds(playable_min, playable_max);
 		}
 		else if (iteration > 0)
 		{
@@ -30,6 +40,12 @@ namespace Aeolus
 			::sc2::Units enemy_units = ManagerMediator::getInstance().GetAllEnemyUnits(m_bot);
 
 			for (const auto unit : enemy_units)
+			{
+				AddUnitInfluence(unit);
+			}
+
+			::sc2::Units enemey_static_defenses = ManagerMediator::getInstance().GetAllEnemyStaticDefenses(m_bot);
+			for (const auto unit : enemey_static_defenses)
 			{
 				AddUnitInfluence(unit);
 			}
@@ -93,6 +109,15 @@ namespace Aeolus
 			double radius = std::get<2>(params);
 			return _getFuthestAirSafeSpotTowards(position, target, radius);
 		}
+		case (constants::ManagerRequestType::FIND_CLOSEST_SAFE_SPOT_TOWARDS):
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Point2D, ::sc2::Point2D, double, GridType>>(args);
+			::sc2::Point2D position = std::get<0>(params);
+			::sc2::Point2D target = std::get<1>(params);
+			double radius = std::get<2>(params);
+			GridType gridType = std::get<3>(params);
+			return _findClosestSafeSpotTowards(position, target, radius, gridType);
+		}
 		case (constants::ManagerRequestType::IS_GROUND_POSITION_SAFE):
 		{
 			auto params = std::any_cast<std::tuple<::sc2::Point2D>>(args);
@@ -131,6 +156,14 @@ namespace Aeolus
 			int sensitivity = std::get<7>(params);
 			return AStarPathFindNext(start, goal, gridType, sense_danger, danger_distance, danger_threshold, smoothing, sensitivity);
 		}
+		case (constants::ManagerRequestType::IS_SPOT_SAFER_THAN):
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Point2D, ::sc2::Point2D, GridType>>(args);
+			::sc2::Point2D posA = std::get<0>(params);
+			::sc2::Point2D posB = std::get<1>(params);
+			GridType gridType = std::get<2>(params);
+			return _isSpotSaferThan(posA, posB, gridType);
+		}
 		default:
 			return 0;
 		}
@@ -168,20 +201,20 @@ namespace Aeolus
 		{
 			// add the range of marines + 1;
 			double ground_cost = 20;
-			double ground_range = 6 + Config::range_buffer;
+			double ground_range = 6;
 			m_ground_grid.AddCost(unit->pos.x, unit->pos.y, ground_range, ground_cost);
-			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + Config::range_buffer + 1.0, ground_cost);
+			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + 1.0, ground_cost);
 
 			double air_cost = 20;
-			double air_Range = 6 + Config::range_buffer;
+			double air_Range = 6;
 			m_air_grid.AddCost(unit->pos.x, unit->pos.y, air_Range, air_cost);
-			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, air_Range + Config::range_buffer + 1.0, air_cost);
+			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, air_Range + 1.0, air_cost);
 		}
 		else if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_DISRUPTORPHASED)
 		{
 			// A disruptor Nova
 			double ground_cost = 1000;
-			double ground_range = 8 + Config::range_buffer;
+			double ground_range = 8;
 			m_ground_grid.AddCost(unit->pos.x, unit->pos.y, ground_range, ground_cost);
 			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + Config::range_buffer + 1.0, ground_cost);
 		}
@@ -280,10 +313,45 @@ namespace Aeolus
 		return m_prism_grid.IsPositionSafe(position);
 	}
 
+	::sc2::Point2D PathManager::_findClosestSafeSpotTowards(::sc2::Point2D position, ::sc2::Point2D target, double radius, GridType gridType)
+	{
+		if (gridType == GridType::GROUND)
+		{
+			return m_ground_grid.FindClosestSafeSpotTowards(position, target, radius);
+		}
+		else if (gridType == GridType::AIR)
+		{
+			return m_ground_grid.FindClosestSafeSpotTowards(position, target, radius);
+		}
+		else if (gridType == GridType::BOTH)
+		{
+			return m_ground_grid.FindClosestSafeSpotTowards(position, target, radius);
+		}
+		return m_ground_grid.FindClosestSafeSpotTowards(position, target, radius);
+	}
+
+	bool PathManager::_isSpotSaferThan(::sc2::Point2D posA, ::sc2::Point2D posB, GridType gridType)
+	{
+		if (gridType == GridType::GROUND)
+		{
+			return m_ground_grid.isSpotSaferThan(posA, posB);
+		}
+		else if (gridType == GridType::AIR)
+		{
+			return m_air_grid.isSpotSaferThan(posA, posB);
+		}
+		else if (gridType == GridType::BOTH)
+		{
+			return m_prism_grid.isSpotSaferThan(posA, posB);
+		}
+		return m_ground_grid.isSpotSaferThan(posA, posB);
+	}
+
 	void PathManager::_reset_grids()
 	{
 		m_ground_grid.Reset();
 		m_air_grid.Reset();
+		m_prism_grid.Reset();
 	}
 
 	void PathManager::_reset_danger_tiles()

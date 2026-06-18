@@ -128,11 +128,26 @@ namespace Aeolus
 
         ::sc2::Point2D FindFurthestSafeSpotTowards(::sc2::Point2D position, ::sc2::Point2D target, const double& radius);
 
+        ::sc2::Point2D FindClosestSafeSpotTowards(::sc2::Point2D position, ::sc2::Point2D target, const double& radius);
+
+        bool isSpotSaferThan(::sc2::Point2D posA, ::sc2::Point2D posB);
+
         bool IsPositionSafe(::sc2::Point2D position, double weight_safety_limit = 1.0) const;
+
+        void SetPlayableBounds(::sc2::Point2D playable_min, ::sc2::Point2D playable_max);
+
+        bool IsPositionValid(::sc2::Point2D position) const;
+
+        bool IsCellValid(int x, int y) const;
 
 	private:
 		int m_width;
 		int m_height;
+        int m_playable_min_x = 0;
+        int m_playable_min_y = 0;
+        int m_playable_max_x = 0;
+        int m_playable_max_y = 0;
+        bool m_has_playable_bounds = false;
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> m_grid;
         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> m_cached_grid;
 

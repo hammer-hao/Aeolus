@@ -136,6 +136,7 @@ namespace Aeolus
 			m_door_manager_ref->onUnitDestroyed(unit);
 			m_placement_manager_ref->OnUnitDestroyed(unit);
 			m_unit_filter_manager_ref->OnUnitDestroyed(unit);
+			m_harassment_manager_ref->onUnitDestroyed(unit);
 		}
 
 		void _initializeManagers()

@@ -63,7 +63,7 @@
           }
         ],
         "army_composition": {
-          "ZEALOT": 1.0
+          "STALKER": 1.0
         },
         "move_out_supply": 40,
         "cannons_to_add": 0
@@ -81,7 +81,7 @@
           }
         ],
         "army_composition": {
-          "ZEALOT": 1.0
+          "STALKER": 1.0
         },
         "move_out_supply": 40,
         "cannons_to_add": 0
@@ -133,11 +133,10 @@
           }
         ],
         "army_composition": {
-          "ADEPT": 0.9,
-          "ZEALOT": 0.1
+          "STALKER": 1.0
         },
         "move_out_supply": 75,
-        "cannons_to_add": 3
+        "cannons_to_add": 0
       },
       {
         "name": "probe_rush",
@@ -150,7 +149,7 @@
           }
         ],
         "army_composition": {
-          "ZEALOT": 1.0
+          "STALKER": 1.0
         },
         "move_out_supply": 40,
         "cannons_to_add": 0

@@ -11,16 +11,24 @@ namespace Aeolus
 		return m_grid;
 	}
 
-	void Grid::SetValue(int x, int y, double value)
-	{
-		// Set the value of the grid at position (x, y)
-		m_grid(y, x) = value;
-	}
-
 	double Grid::GetValue(int x, int y)
 	{
-		// get the value of the grid at positio (x, y)
+		if (!IsCellValid(x, y))
+		{
+			return std::numeric_limits<double>::infinity();
+		}
+
 		return m_grid(y, x);
+	}
+
+	void Grid::SetValue(int x, int y, double value)
+	{
+		if (!IsCellValid(x, y))
+		{
+			return;
+		}
+
+		m_grid(y, x) = value;
 	}
 
 	/**
@@ -126,6 +134,72 @@ namespace Aeolus
 		return best_position;
 	}
 
+	::sc2::Point2D Grid::FindClosestSafeSpotTowards(::sc2::Point2D position, ::sc2::Point2D target, const double& radius)
+	{
+		std::vector<std::pair<int, int>> candidates =
+			_drawCircle(position.x, position.y, radius);
+
+		::sc2::Point2D best_safe_position = position;
+		::sc2::Point2D safest_position = position;
+
+		double best_safe_score = std::numeric_limits<double>::infinity();
+		double best_safety_score = std::numeric_limits<double>::infinity();
+
+		bool found_safe = false;
+
+		constexpr double retreat_target_bias = 0.75;
+
+		for (const auto& cell : candidates)
+		{
+			int x = cell.first;
+			int y = cell.second;
+
+			::sc2::Point2D candidate(
+				static_cast<float>(x),
+				static_cast<float>(y));
+
+			double distance_from_unit =
+				::sc2::Distance2D(position, candidate);
+
+			double distance_to_target =
+				::sc2::Distance2D(candidate, target);
+
+			double target_biased_score =
+				distance_from_unit +
+				retreat_target_bias * distance_to_target;
+
+			if (IsPositionSafe(candidate))
+			{
+				found_safe = true;
+
+				if (target_biased_score < best_safe_score)
+				{
+					best_safe_score = target_biased_score;
+					best_safe_position = candidate;
+				}
+			}
+
+			double safety_score = m_grid(y, x);
+
+			if (safety_score < best_safety_score)
+			{
+				best_safety_score = safety_score;
+				safest_position = candidate;
+			}
+		}
+
+		return found_safe ? best_safe_position : safest_position;
+	}
+
+	bool Grid::isSpotSaferThan(::sc2::Point2D posA, ::sc2::Point2D posB)
+	{
+		if (!IsPositionValid(posA)) return false;
+		if (!IsPositionValid(posB)) return true;
+
+		return m_grid(static_cast<int>(posA.y), static_cast<int>(posA.x)) <=
+			m_grid(static_cast<int>(posB.y), static_cast<int>(posB.x));
+	}
+
 	/**
 		 * @brief Check if the given position is considered safe on the grid.
 		 *
@@ -144,8 +218,15 @@ namespace Aeolus
 		}
 		*/
 
-		// Check if the value at the grid position is below the safety limit
-		return m_grid(static_cast<int>(position.y), static_cast<int>(position.x)) <= weight_safety_limit;
+		if (!IsPositionValid(position))
+		{
+			return false;
+		}
+
+		int x = static_cast<int>(position.x);
+		int y = static_cast<int>(position.y);
+
+		return m_grid(y, x) <= weight_safety_limit;
 	}
 
 	std::vector<std::pair<int, int>> Grid::_drawCircle(const double& pos_x, const double& pos_y, const double& radius) const
@@ -165,7 +246,7 @@ namespace Aeolus
 					int gridX = centerX + x;
 					int gridY = centerY + y;
 					
-					if (gridX >= 0 && gridX <= m_width && gridY >= 0 && gridY <= m_height)
+					if (IsCellValid(gridX, gridY))
 					{
 						disk.emplace_back(gridX, gridY);
 					}
@@ -185,19 +266,60 @@ namespace Aeolus
 			int x = cell.first;
 			int y = cell.second;
 
-			if (x >= 0 && x < m_width && y >= 0 && y < m_height)
+			if (!IsCellValid(x, y))
 			{
-				if (initial_default_Weight > 0 && m_grid(y, x) == 1) {
-					m_grid(y, x) = 1 + initial_default_Weight;
-				}
+				continue;
+			}
 
-				m_grid(y, x) += weight;
-				if (safe && m_grid(y, x) < 1)
-				{
-					std::cerr << "Warning: Value below 1. Setting to minimum (1).\n";
-					m_grid(y, x) = 1;
-				}
+			if (initial_default_Weight > 0 && m_grid(y, x) == 1) {
+				m_grid(y, x) = 1 + initial_default_Weight;
+			}
+
+			m_grid(y, x) += weight;
+			if (safe && m_grid(y, x) < 1)
+			{
+				std::cerr << "Warning: Value below 1. Setting to minimum (1).\n";
+				m_grid(y, x) = 1;
 			}
 		}
+	}
+
+	void Grid::SetPlayableBounds(::sc2::Point2D playable_min, ::sc2::Point2D playable_max)
+	{
+		m_playable_min_x = static_cast<int>(std::floor(playable_min.x));
+		m_playable_min_y = static_cast<int>(std::floor(playable_min.y));
+
+		m_playable_max_x = static_cast<int>(std::ceil(playable_max.x));
+		m_playable_max_y = static_cast<int>(std::ceil(playable_max.y));
+
+		m_has_playable_bounds = true;
+	}
+
+	bool Grid::IsPositionValid(::sc2::Point2D position) const
+	{
+		int x = static_cast<int>(position.x);
+		int y = static_cast<int>(position.y);
+
+		if (x < 0 || x >= m_width || y < 0 || y >= m_height)
+		{
+			return false;
+		}
+
+		if (!m_has_playable_bounds)
+		{
+			return true;
+		}
+
+		return x >= m_playable_min_x &&
+			x < m_playable_max_x &&
+			y >= m_playable_min_y &&
+			y < m_playable_max_y;
+	}
+
+	bool Grid::IsCellValid(int x, int y) const
+	{
+		return IsPositionValid(::sc2::Point2D(
+			static_cast<float>(x),
+			static_cast<float>(y)));
 	}
 }

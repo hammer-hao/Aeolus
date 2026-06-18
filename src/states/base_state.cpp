@@ -36,9 +36,12 @@
 #include "../behaviors/micro_behaviors/use_ability.h"
 #include "../behaviors/micro_behaviors/move.h"
 #include "../behaviors/micro_behaviors/move_toward_target_safely.h"
+#include "../behaviors/micro_behaviors/hug_corner_towards.h"
 
 #include "../utils/unit_utils.h"
 #include "../utils/position_utils.h"
+
+#include "../pathing/grid.h"
 
 namespace Aeolus
 {
@@ -226,17 +229,16 @@ namespace Aeolus
             auto availableAbilities =
                 aeolusbot.Query()->GetAbilitiesForUnit(oracle).abilities;
 
-            auto beamAvailable =
-                std::any_of(
-                    availableAbilities.begin(),
-                    availableAbilities.end(),
-                    [](const ::sc2::AvailableAbility& ability)
+            bool beamCurrentlyOff =
+                !std::any_of(
+                    oracle->buffs.begin(),
+                    oracle->buffs.end(),
+                    [](const ::sc2::BUFF_ID& buff)
                     {
-                        return ability.ability_id ==
-                            ::sc2::ABILITY_ID::BEHAVIOR_PULSARBEAMON;
+                        return buff ==
+                            ::sc2::BUFF_ID::ORACLEWEAPON;
                     });
 
-            bool beamCurrentlyOff = beamAvailable;
             HarassmentStatus currentStatus =
                 harassmentTracker[oracle->tag];
 
@@ -268,7 +270,7 @@ namespace Aeolus
                     .front()[1];
 
                 oracle_behavior->AddBehavior(
-                    std::make_unique<AMove>(target));
+                    std::make_unique<PathToTarget>(target));
 
                 if (closeWorkers.size() >= 3)
                 {
@@ -282,6 +284,14 @@ namespace Aeolus
                         aeolusbot,
                         oracle->tag,
                         newStatus);
+                }
+                else if ((oracle->shield / oracle->shield_max)
+                    <= 0.15f)
+                {
+                    mediator.registerHarassmentStatus(
+                        aeolusbot,
+                        oracle->tag,
+                        HarassmentStatus::SURVIVING);
                 }
             }
 
@@ -298,7 +308,8 @@ namespace Aeolus
                 HarassmentStatus::HARASSING_AT_THIRD)
             {
                 if ((oracle->shield / oracle->shield_max)
-                    <= 0.15f)
+                    <= 0.15f ||
+                    beamCurrentlyOff && oracle->energy < 25.0f)
                 {
                     mediator.registerHarassmentStatus(
                         aeolusbot,
@@ -332,6 +343,11 @@ namespace Aeolus
 
                         oracle_behavior->AddBehavior(
                             std::make_unique<
+                            MoveTowardTargetSafely>(
+                                workersInAttackRange));
+
+                        oracle_behavior->AddBehavior(
+                            std::make_unique<
                             KeepUnitSafe>());
                     }
                     else
@@ -342,7 +358,7 @@ namespace Aeolus
 
                         oracle_behavior->AddBehavior(
                             std::make_unique<
-                            StutterUnitBack>(
+                            MoveTowardTargetSafely>(
                                 enemyTarget));
                     }
                 }
@@ -351,6 +367,13 @@ namespace Aeolus
                     // no workers nearby
                     oracle_behavior->AddBehavior(
                         std::make_unique<KeepUnitSafe>());
+                    oracle_behavior->AddBehavior(
+                        std::make_unique<Move>(
+                            _getOracleTargetFromHarassmentStatus(
+                                currentStatus, 
+                                positionsBehindEnemyMainNaturalThirdBase, 
+                                aeolusbot.Observation()->GetStartLocation())
+                        ));
                 }
             }
 
@@ -370,6 +393,10 @@ namespace Aeolus
                 }
 
                 oracle_behavior->AddBehavior(
+                    std::make_unique<HugCornerTowards>(aeolusbot.Observation()->GetStartLocation())
+                );
+
+                oracle_behavior->AddBehavior(
                     std::make_unique<KeepUnitSafe>());
 
                 oracle_behavior->AddBehavior(
@@ -377,9 +404,17 @@ namespace Aeolus
                         aeolusbot.Observation()
                         ->GetStartLocation()));
 
+                /*oracle_behavior->AddBehavior(
+                    std::make_unique<KeepUnitSafe>(aeolusbot.Observation()->GetStartLocation()));
+
+                oracle_behavior->AddBehavior(
+                    std::make_unique<PathToTarget>(
+                        aeolusbot.Observation()
+                        ->GetStartLocation()));*/
+
                 if ((oracle->shield /
                     oracle->shield_max) >= 0.95f
-                    && oracle->energy >= 80.0f)
+                    && oracle->energy >= 50.0f)
                 {
                     mediator.registerHarassmentStatus(
                         aeolusbot,
@@ -413,15 +448,18 @@ namespace Aeolus
                 continue;
             }
 
+            HarassmentStatus currentStatus = harassmentTracker[adept->tag];
+
             auto adept_behavior = std::make_unique<MicroBehavior>(adept);
             auto available_abilities = aeolusbot.Query()->GetAbilitiesForUnit(adept).abilities;
             if (std::any_of(available_abilities.begin(), available_abilities.end(), [](::sc2::AvailableAbility ability) {
                 return ability.ability_id == ::sc2::ABILITY_ID::EFFECT_ADEPTPHASESHIFT;
                 })) {
-                adept_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::EFFECT_ADEPTPHASESHIFT, adept->pos));
+                auto target = _getAdeptShadeTargetFromHarassmentStatus(currentStatus,
+                    positionsBehindEnemyMainNaturalThirdBase,
+                    aeolusbot.Observation()->GetStartLocation());
+                adept_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::EFFECT_ADEPTPHASESHIFT, target));
             }
-
-            HarassmentStatus currentStatus = harassmentTracker[adept->tag];
 
             if (currentStatus == HarassmentStatus::HEADING_TO_BASE)
             {
@@ -437,11 +475,14 @@ namespace Aeolus
 
                 ::sc2::Point2D closest = pointsBehindMain[1];
 
-                if (!unitsInRangeMap[adept->tag].empty())
-                    adept_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-                adept_behavior->AddBehavior(std::make_unique<AMove>(closest));
+                adept_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                adept_behavior->AddBehavior(std::make_unique<Move>(closest));
 
-                if (std::count_if(unitsInRangeMap[adept->tag].begin(), unitsInRangeMap[adept->tag].end(), [](const ::sc2::Unit* unit) {
+                if ((adept->shield / adept->shield_max) <= 0.05f)
+                {
+                    mediator.registerHarassmentStatus(aeolusbot, adept->tag, HarassmentStatus::SURVIVING);
+                }
+                else if (std::count_if(unitsInRangeMap[adept->tag].begin(), unitsInRangeMap[adept->tag].end(), [](const ::sc2::Unit* unit) {
                     return (constants::WORKER_TYPES.find(unit->unit_type) != constants::WORKER_TYPES.end());
                     }) >= 3)
                 {
@@ -481,10 +522,21 @@ namespace Aeolus
                             std::make_unique<KeepUnitSafe>()
                         );
                     }
+                    else if (!closeWorkers.empty())
+                    {
+                        adept_behavior->AddBehavior(
+                            std::make_unique<MoveTowardTargetSafely>(
+                                closeWorkers
+                            )
+                        );
+                    }
                     else
                     {
-                        auto enemy_target = utils::PickAttackTarget(allClose);
-                        adept_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
+                        adept_behavior->AddBehavior(
+                            std::make_unique<KeepUnitSafe>()
+                        );
+                        //auto enemy_target = utils::PickAttackTarget(allClose);
+                        //adept_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
                     }
                 }
 
@@ -535,17 +587,25 @@ namespace Aeolus
 
                 if (adeptShadeTracker[adept->tag].second == 1)
                 {
-                    if (currentStatus == HarassmentStatus::SURVIVING || currentStatus == HarassmentStatus::HEADING_TO_BASE)
+                    // only finish our shade if it is safe / safer than current position
+                    if ((mediator.IsGroundPositionSafe(aeolusbot, adeptShade->pos) || mediator.IsSpotSaferThan(aeolusbot, adeptShade->pos, adept->pos, GridType::GROUND))
+                        && !(currentStatus != HarassmentStatus::SURVIVING && aeolusbot.Query()->PathingDistance(adeptShade, target) == 0.0f))
                     {
-
+                        if (currentStatus == HarassmentStatus::SURVIVING || currentStatus == HarassmentStatus::HEADING_TO_BASE)
+                        {
+                        }
+                        else
+                        {
+                            // mediator.IsGroundPositionSafe()
+                            // need to decide if cancel or not
+                            // adept_shade_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::CANCEL));
+                            HarassmentStatus newStatus = _getClosestHarassStatus(aeolusbot, adeptShade, positionsBehindEnemyMainNaturalThirdBase);
+                            mediator.registerHarassmentStatus(aeolusbot, adept->tag, newStatus);
+                        }
                     }
                     else
                     {
-                        // mediator.IsGroundPositionSafe()
-                        // need to decide if cancel or not
-                        // adept_shade_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::CANCEL));
-                        HarassmentStatus newStatus = _getClosestHarassStatus(aeolusbot, adeptShade, positionsBehindEnemyMainNaturalThirdBase);
-                        mediator.registerHarassmentStatus(aeolusbot, adept->tag, newStatus);
+                        adept_shade_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::CANCEL));
                     }
                 }
 
@@ -631,6 +691,33 @@ namespace Aeolus
         else if (status == HarassmentStatus::HARASSING_AT_THIRD)
         {
             return behindMineralPositions[1][1];
+        }
+        else if (status == HarassmentStatus::SURVIVING)
+        {
+            return fallbackLocation;
+        }
+        return behindMineralPositions.front().front();
+    }
+
+    ::sc2::Point2D BaseState::_getOracleTargetFromHarassmentStatus(
+        HarassmentStatus status,
+        const std::vector<std::vector<::sc2::Point2D>>& behindMineralPositions, ::sc2::Point2D fallbackLocation)
+    {
+        if (status == HarassmentStatus::HEADING_TO_BASE)
+        {
+            return behindMineralPositions.front()[1];
+        }
+        else if (status == HarassmentStatus::HARASSING_AT_MAIN)
+        {
+            return behindMineralPositions.front()[1];
+        }
+        else if (status == HarassmentStatus::HARASSING_AT_NATURAL)
+        {
+            return behindMineralPositions[1][1];
+        }
+        else if (status == HarassmentStatus::HARASSING_AT_THIRD)
+        {
+            return behindMineralPositions[2][1];
         }
         else if (status == HarassmentStatus::SURVIVING)
         {

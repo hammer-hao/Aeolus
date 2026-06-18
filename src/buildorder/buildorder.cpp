@@ -40,6 +40,8 @@ namespace Aeolus
 
 	bool BuildOrder::execute()
 	{
+		if (m_aeolusbot.Observation()->GetGameLoop() % 2 == 0) return false; // step size for build order = 2
+
 		// no build instructions left, return false
 		if (m_build_order_queue.empty()) return false;
 

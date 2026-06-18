@@ -448,6 +448,16 @@ namespace Aeolus
 			);
 		}
 
+		::sc2::Units GetAllEnemyStaticDefenses(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_ENEMY_STATIC_DEFENSES,
+				0
+			);
+		}
+
 		/**
 		* @brief returns all enemy town hall structures, includes orbitals and planetaries.
 		* Includes lairs and hives. doe NOT include flying command centers and orbitals.
@@ -581,6 +591,23 @@ namespace Aeolus
 			);
 		}
 
+		/**
+		* @brief given a 2d starting position and target, find the safe spot for the startign position within a radius
+		* that is closest to the target point.
+		*/
+		::sc2::Point2D FindClosestSafeSpotTowards(AeolusBot& aeolusbot, ::sc2::Point2D position, ::sc2::Point2D target, double radius, GridType gridType)
+		{
+			return ManagerRequest<::sc2::Point2D, ::sc2::Point2D, ::sc2::Point2D, double, GridType>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::FIND_CLOSEST_SAFE_SPOT_TOWARDS,
+				position,
+				target,
+				radius,
+				gridType
+			);
+		}
+
 		bool IsGroundPositionSafe(AeolusBot& aeolusbot, ::sc2::Point2D position)
 		{
 			return ManagerRequest<bool, ::sc2::Point2D>(
@@ -612,6 +639,22 @@ namespace Aeolus
 				constants::ManagerName::PATH_MANAGER,
 				constants::ManagerRequestType::IS_PRISM_POSITION_SAFE,
 				position
+			);
+		}
+
+		/**
+		* @brief give two points on the map and a grid type, returns whether the first point is safer
+		* than the second on the given grid type
+		*/
+		bool IsSpotSaferThan(AeolusBot& aeolusbot, ::sc2::Point2D posA, ::sc2::Point2D posB, GridType gridType)
+		{
+			return ManagerRequest<bool, ::sc2::Point2D, ::sc2::Point2D, GridType>(
+				aeolusbot,
+				constants::ManagerName::PATH_MANAGER,
+				constants::ManagerRequestType::IS_SPOT_SAFER_THAN,
+				posA,
+				posB,
+				gridType
 			);
 		}
 
