@@ -152,13 +152,16 @@ namespace Aeolus
 		int before_gameloop = static_cast<int>(condition.before_seconds * 22.4f);
 		if (aeolusbot.Observation()->GetGameLoop() > before_gameloop) return false;
 
+		const ::sc2::Point2D enemyStartLocation = ManagerMediator::getInstance().GetExpansionLocations(aeolusbot).back();
+
 		int count = 0;
 		for (const auto& structure : enemyStructures)
 		{
 			{
 				if (condition.is_proxied)
 				{
-					if (sc2::DistanceSquared2D(structure->pos, aeolusbot.Observation()->GetStartLocation()) < 5000.0f)
+					if (sc2::DistanceSquared2D(structure->pos, aeolusbot.Observation()->GetStartLocation()) < 5000.0f ||
+						(sc2::DistanceSquared2D(structure->pos, enemyStartLocation) > 5000.0f))
 					{
 						count++;
 					}
