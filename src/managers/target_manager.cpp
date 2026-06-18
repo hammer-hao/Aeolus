@@ -61,7 +61,7 @@ namespace Aeolus
 			{
 				std::cout << "something went wrong when calculating defensive position for base "
 					<< i << std::endl;
-				m_defenseTarget.push_back({ 0.0f, 0.0f });
+				m_defenseTarget.push_back(utils::GetPositionTowards(expansionLocations[i], expansionLocations.back(), 6.0f));
 			}
 		}
 	}
