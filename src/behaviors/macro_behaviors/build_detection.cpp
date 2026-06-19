@@ -9,6 +9,7 @@ namespace Aeolus
 {
 	bool BuildDetection::execute(AeolusBot& aeolusbot)
 	{
+		if (aeolusbot.Observation()->GetGameLoop() % 2 == 0) return false;
 		auto& mediator = ManagerMediator::getInstance();
 
 		const auto allUnits = mediator.GetAllOwnUnits(aeolusbot);
