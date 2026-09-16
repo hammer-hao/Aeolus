@@ -85,6 +85,12 @@ namespace Aeolus
 		{
 			return _isAllThreeByThreeAtNaturalWallBuilt();
 		}
+		case (constants::ManagerRequestType::IS_POINT_OCCUPIED):
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Point2D>>(args);
+			::sc2::Point2D target = std::get<0>(params);
+			return _isPointOccupied(target);
+		}
 		default: return 0;
 		}
 	}
@@ -2151,5 +2157,12 @@ namespace Aeolus
 			}
 		}
 		return true;
+	}
+
+	bool PlacementManager::_isPointOccupied(::sc2::Point2D target)
+	{
+		int posX = static_cast<int>(target.x);
+		int posY = static_cast<int>(target.y);
+		return m_occupied_points(posX, posY) == 1;
 	}
 }

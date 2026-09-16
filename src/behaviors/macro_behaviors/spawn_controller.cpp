@@ -180,6 +180,7 @@ namespace Aeolus
 
 	::sc2::Point2D SpawnController::_calculateWarpInSpot(AeolusBot& aeolusbot, ::sc2::Point2D target)
 	{
+		auto& mediator = ManagerMediator::getInstance();
 		auto allStructures = ManagerMediator::getInstance().GetAllOwnStructures(aeolusbot);
 		auto allGasSprings = ManagerMediator::getInstance().GetAllVespeneGeysers(aeolusbot);
 		::sc2::Units allPylons;
@@ -236,8 +237,8 @@ namespace Aeolus
 
 				if (position == m_lastWarpInSpot) continue;
 
-				if (utils::canPlaceStructure(static_cast<int>(std::round(position.x - 1)), static_cast<int>(std::round(position.y - 1)), 2,
-					placementGrid))
+				if ((utils::canPlaceStructure(static_cast<int>(std::round(position.x - 1)), static_cast<int>(std::round(position.y - 1)), 2,
+					placementGrid)) && !mediator.IsPointOccupied(aeolusbot, position))
 				{
 					std::cout << "found a good warp in spot at position: " << position.x << " " << position.y << std::endl;
 

@@ -192,5 +192,7 @@ namespace Aeolus
 		void _clearWorkerOnRoute(::sc2::Point2D pos);
 
 		bool _isAllThreeByThreeAtNaturalWallBuilt();
+
+		bool _isPointOccupied(::sc2::Point2D target);
 	};
 }

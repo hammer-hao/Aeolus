@@ -1063,6 +1063,19 @@ namespace Aeolus
 				0
 			);
 		}
+		/**
+		* @brief returns true if the given point is reserved for potentially placing a building
+		* Useful for on-the-spot building construction
+		*/
+		bool IsPointOccupied(AeolusBot& aeolusbot, ::sc2::Point2D target)
+		{
+			return ManagerRequest<bool, ::sc2::Point2D>(
+				aeolusbot,
+				constants::ManagerName::PLACEMENT_MANAGER,
+				constants::ManagerRequestType::IS_POINT_OCCUPIED,
+				target
+			);
+		}
 
 		// BuildingManager
 		const std::unordered_map<const ::sc2::Unit*, BuildingOrder>& GetBuildingTracker(AeolusBot& aeolusbot)
