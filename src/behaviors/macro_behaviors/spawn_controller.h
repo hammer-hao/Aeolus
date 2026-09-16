@@ -38,10 +38,6 @@ namespace Aeolus
 		::sc2::Units _getBuildStructures(AeolusBot& aeolusbot,
 			::sc2::UNIT_TYPEID structure_type, ::sc2::UNIT_TYPEID spawn_type);
 
-		static int _calculateBuildAmount(AeolusBot& aeolusbot, ::sc2::UNIT_TYPEID spawn_type,
-			const ::sc2::Units& production_structures, int supply_left, int limit,
-			int& supply_cost, int& mineral_cost, int& vespene_cost);
-
 		::sc2::Point2D _calculateWarpInSpot(AeolusBot& aeolusbot, ::sc2::Point2D target);
 
 		bool _spawnUnits(AeolusBot& aeolusbot);
