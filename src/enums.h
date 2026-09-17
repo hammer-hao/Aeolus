@@ -96,6 +96,15 @@ namespace Aeolus
 		HARASSING_AT_THIRD,
 		SURVIVING,
 	};
+
+	struct CompositionWeights
+	{
+		float stalker;
+		float immortal;
+		float tempest;
+		float colossus;
+		float archon;
+	};
 }
 
 namespace std 
