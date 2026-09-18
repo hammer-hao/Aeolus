@@ -1197,14 +1197,13 @@ namespace Aeolus
 		/**
 		* Get the optimal army composition
 		*/
-		std::pair<std::pair<::sc2::UNIT_TYPEID, int>, std::vector<::sc2::UPGRADE_ID>> 
-			getOptimalArmyComp(AeolusBot& aeolusbot, std::vector<::sc2::UNIT_TYPEID> opponent_army)
+		std::map<::sc2::UNIT_TYPEID, float> getOptimalArmyComp(AeolusBot& aeolusbot)
 		{
-			return ManagerRequest<std::pair<std::pair<::sc2::UNIT_TYPEID, int>, std::vector<::sc2::UPGRADE_ID>>, std::vector<::sc2::UNIT_TYPEID>>(
+			return ManagerRequest<std::map<::sc2::UNIT_TYPEID, float>, int>(
 				aeolusbot,
-				constants::ManagerName::COMBAT_SIM_MANAGER,
+				constants::ManagerName::ARMY_COMPOSITION_MANAGER,
 				constants::ManagerRequestType::GET_OPTIMAL_ARMY_COMPOSITION,
-				opponent_army
+				0
 			);
 		}
 

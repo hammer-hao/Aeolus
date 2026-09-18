@@ -12,7 +12,14 @@ namespace Aeolus
 {
 	std::any ArmyCompositionManager::ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args)
 	{
-		return 1;
+		switch (request)
+		{
+		case (constants::ManagerRequestType::GET_OPTIMAL_ARMY_COMPOSITION):
+		{
+			return m_best_army_composition;
+		}
+		default: return 0;
+		}
 	}
 
 	void ArmyCompositionManager::update(int iteration) 

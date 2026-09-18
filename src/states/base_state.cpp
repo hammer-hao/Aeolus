@@ -616,13 +616,14 @@ namespace Aeolus
 
     void BaseState::doHighEconomyMacroTasks(AeolusBot& aeolusbot, bool forceDetection)
     {
+        auto& mediator = ManagerMediator::getInstance();
         aeolusbot.RegisterBehavior(std::make_unique<BuildGeysers>());
         aeolusbot.RegisterBehavior(std::make_unique<Expand>());
         aeolusbot.RegisterBehavior(std::make_unique<AutoSupply>());
 
         aeolusbot.RegisterBehavior(std::make_unique<BuildDetection>(forceDetection));
-        aeolusbot.RegisterBehavior(std::make_unique<ProductionController>(aeolusbot.getArmyComp()));
-        aeolusbot.RegisterBehavior(std::make_unique<SpawnController>(aeolusbot.getArmyComp()));
+        aeolusbot.RegisterBehavior(std::make_unique<ProductionController>(mediator.getOptimalArmyComp(aeolusbot)));
+        aeolusbot.RegisterBehavior(std::make_unique<SpawnController>(mediator.getOptimalArmyComp(aeolusbot)));
         aeolusbot.RegisterBehavior(std::make_unique<UpgradesController>(
             std::vector<::sc2::UPGRADE_ID>{
             ::sc2::UPGRADE_ID::PROTOSSGROUNDWEAPONSLEVEL1,
