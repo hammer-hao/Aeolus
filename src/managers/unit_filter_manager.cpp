@@ -83,6 +83,10 @@ namespace Aeolus
 		{
 			return m_enemy_static_defenses;
 		}
+		case (constants::ManagerRequestType::GET_ENEMY_CLOAKED_AND_BURROWED_UNITS):
+		{
+			return m_enemy_cloaked_or_burrowed_units;
+		}
 		case (constants::ManagerRequestType::GET_KNOWN_ENEMY_UNIT_TYPES):
 		{
 			std::vector<::sc2::UNIT_TYPEID> result;
@@ -124,6 +128,7 @@ namespace Aeolus
 		m_all_enemy_units.clear();
 		m_enemy_town_halls.clear();
 		m_enemy_static_defenses.clear();
+		m_enemy_cloaked_or_burrowed_units.clear();
 
 		// std::cout << "Size of m_all_structures " << m_all_structures.size() << std::endl;
 
@@ -224,6 +229,15 @@ namespace Aeolus
 				{
 					m_enemy_units.push_back(unit);
 					m_knownEnemyUnits.insert({ unit->tag, unit->unit_type });
+				}
+				if (unit->is_burrowed || unit->cloak == ::sc2::Unit::CloakState::Cloaked ||
+					unit->cloak == ::sc2::Unit::CloakState::CloakedDetected)
+				{
+					if (std::find(unit->buffs.begin(), unit->buffs.end(), ::sc2::BUFF_ID::ORACLEREVELATION)
+						== unit->buffs.end())
+					{
+						m_enemy_cloaked_or_burrowed_units.push_back(unit);
+					}
 				}
 				break;
 			}

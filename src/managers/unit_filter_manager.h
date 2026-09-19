@@ -61,6 +61,7 @@ namespace Aeolus
 		::sc2::Units m_all_enemy_units;
 		::sc2::Units m_enemy_town_halls;
 		::sc2::Units m_enemy_static_defenses;
+		::sc2::Units m_enemy_cloaked_or_burrowed_units;
 
 		// Map to keep track of the known enemy units that are still alive
 		std::unordered_map<::sc2::Tag, ::sc2::UNIT_TYPEID> m_knownEnemyUnits;

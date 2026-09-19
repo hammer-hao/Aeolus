@@ -392,28 +392,44 @@ namespace Aeolus
                             BEHAVIOR_PULSARBEAMOFF));
                 }
 
-                oracle_behavior->AddBehavior(
-                    std::make_unique<HugCornerTowards>(aeolusbot.Observation()->GetStartLocation())
-                );
+                // if there is a cloaked or burrowed enemy on the field, we want to utilize
+                // the revelation ability as a mobile detector
+                ::sc2::Units enemyCloakedBurrowedUnits = mediator.GetAllEnemyCloakedAndBurrowedUnits(aeolusbot);
+                if (enemyCloakedBurrowedUnits.empty() ||
+                    oracle->energy < 25 ||
+                    std::find_if(availableAbilities.begin(), availableAbilities.end(), [](const ::sc2::AvailableAbility& availableAbility) {
+                        return availableAbility.ability_id == ::sc2::ABILITY_ID::EFFECT_ORACLEREVELATION;
+                            }) == availableAbilities.end())
+                {
+                    oracle_behavior->AddBehavior(
+                        std::make_unique<HugCornerTowards>(aeolusbot.Observation()->GetStartLocation())
+                    );
+                    oracle_behavior->AddBehavior(
+                        std::make_unique<KeepUnitSafe>());
+                    oracle_behavior->AddBehavior(
+                        std::make_unique<PathToTarget>(
+                            aeolusbot.Observation()
+                            ->GetStartLocation()));
+                }
+                else
+                {
+                    const ::sc2::Point2D toReveal =
+                        utils::GetClosestUnitTo(aeolusbot.Observation()->GetStartLocation(),
+                            enemyCloakedBurrowedUnits)->pos;
+                    if (::sc2::Distance2D(oracle->pos, toReveal) > 11.5f)
+                    {
+                        oracle_behavior->AddBehavior(std::make_unique<HugCornerTowards>(toReveal));
+                        oracle_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                        oracle_behavior->AddBehavior(std::make_unique<PathToTarget>(toReveal));
+                    }
+                    else
+                    {
+                        oracle_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::EFFECT_ORACLEREVELATION, toReveal));
+                    }
+                }
 
-                oracle_behavior->AddBehavior(
-                    std::make_unique<KeepUnitSafe>());
-
-                oracle_behavior->AddBehavior(
-                    std::make_unique<PathToTarget>(
-                        aeolusbot.Observation()
-                        ->GetStartLocation()));
-
-                /*oracle_behavior->AddBehavior(
-                    std::make_unique<KeepUnitSafe>(aeolusbot.Observation()->GetStartLocation()));
-
-                oracle_behavior->AddBehavior(
-                    std::make_unique<PathToTarget>(
-                        aeolusbot.Observation()
-                        ->GetStartLocation()));*/
-
-                if ((oracle->shield /
-                    oracle->shield_max) >= 0.95f
+                if (enemyCloakedBurrowedUnits.empty() &&
+                    (oracle->shield / oracle->shield_max) >= 0.95f
                     && oracle->energy >= 50.0f)
                 {
                     mediator.registerHarassmentStatus(
@@ -643,11 +659,20 @@ namespace Aeolus
     {
         auto& mediator = ManagerMediator::getInstance();
         ::sc2::Units observers = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::MOBILE_DETECTION);
+
+        ::sc2::Point2D observerTarget = mediator.GetAtttackTarget(aeolusbot);
+        ::sc2::Units cloakedOrBurrowedEnemies = mediator.GetAllEnemyCloakedAndBurrowedUnits(aeolusbot);
+        if (!cloakedOrBurrowedEnemies.empty())
+        {
+            observerTarget =
+                utils::GetClosestUnitTo(aeolusbot.Observation()->GetStartLocation(), cloakedOrBurrowedEnemies)->pos;
+        }
+
         for (const auto* observer : observers)
         {
             auto observer_behavior = std::make_unique<MicroBehavior>(observer);
             observer_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-            observer_behavior->AddBehavior(std::make_unique<PathToTarget>(mediator.GetAtttackTarget(aeolusbot)));
+            observer_behavior->AddBehavior(std::make_unique<PathToTarget>(observerTarget));
 
             aeolusbot.RegisterBehavior(std::move(observer_behavior));
         }

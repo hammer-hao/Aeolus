@@ -459,6 +459,20 @@ namespace Aeolus
 		}
 
 		/**
+		* @brief returns all enemy units that are burrowed or cloaked. i.e. requires
+		* detection for us to attack. Includes buildings.
+		*/
+		::sc2::Units GetAllEnemyCloakedAndBurrowedUnits(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_ENEMY_CLOAKED_AND_BURROWED_UNITS,
+				0
+			);
+		}
+
+		/**
 		* @brief returns all enemy town hall structures, includes orbitals and planetaries.
 		* Includes lairs and hives. doe NOT include flying command centers and orbitals.
 		*/
