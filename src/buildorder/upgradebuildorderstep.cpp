@@ -88,6 +88,7 @@ namespace Aeolus
 			}
 		}
 		std::cout << ::sc2::UpgradeIDToName(m_to_research) << " is NOT done" << '\n';
+		m_started = false;
 		return false;
 	}
 
