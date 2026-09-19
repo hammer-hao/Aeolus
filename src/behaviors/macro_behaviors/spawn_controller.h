@@ -42,6 +42,8 @@ namespace Aeolus
 
 		bool _spawnUnits(AeolusBot& aeolusbot);
 
+		bool _makeArchons(AeolusBot& aeolusbot);
+
 		::sc2::Point2D m_lastWarpInSpot;
 	};
 }

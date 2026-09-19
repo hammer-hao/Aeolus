@@ -172,6 +172,7 @@ namespace Aeolus {
 			SCOUTING,
 			HARASS_ADEPT,
 			ADEPT_SHADE,
+			ARCHON_MAKER,
 		};
 		std::string ManagerNameToString(ManagerName name);
 		std::string ManagerRequestTypeToString(ManagerRequestType requestType);
@@ -404,7 +405,8 @@ namespace Aeolus {
 			::sc2::UNIT_TYPEID::PROTOSS_ADEPT,
 			::sc2::UNIT_TYPEID::PROTOSS_SENTRY,
 			::sc2::UNIT_TYPEID::PROTOSS_HIGHTEMPLAR,
-			::sc2::UNIT_TYPEID::PROTOSS_DARKTEMPLAR
+			::sc2::UNIT_TYPEID::PROTOSS_DARKTEMPLAR,
+			::sc2::UNIT_TYPEID::PROTOSS_ARCHON
 		};
 
 		const std::set<::sc2::UnitTypeID> ROBO_UNITS

@@ -115,6 +115,10 @@ namespace Aeolus {
 		{
 			AssignRole(unit, constants::UnitRole::ADEPT_SHADE);
 		}
+		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_HIGHTEMPLAR)
+		{
+			AssignRole(unit, constants::UnitRole::ARCHON_MAKER);
+		}
 	}
 
 	void UnitRoleManager::OnUnitDestroyed(const ::sc2::Unit* unit)

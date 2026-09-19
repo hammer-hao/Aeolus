@@ -26,6 +26,8 @@ namespace Aeolus
 		// avoid game client not properly updating the action result
 		if (observation->GetGameLoop() % 2 == 0) return false;
 
+		_makeArchons(aeolusbot);
+
 		// if warp gate ready, wait for gateway to morph
 		for (auto& upgradeId : observation->GetUpgrades())
 		{
@@ -110,16 +112,22 @@ namespace Aeolus
 			// this is the highest-priority type we can physically build. if we can't afford one
 			// yet, wait it out and save up rather than defaulting to a cheaper, lower-priority
 			// unit that would otherwise starve this one forever.
-			auto unit_cost = mediator.GetUnitCost(aeolusbot, unit_type);
+			bool isArchon = unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ARCHON;
+			std::pair<int, int> unit_cost = mediator.GetUnitCost(aeolusbot, unit_type);
 			int supply_cost = mediator.GetUnitSupplyCost(aeolusbot, unit_type);
+			::sc2::UNIT_TYPEID to_build = unit_type;
+			if (isArchon)
+			{
+				unit_cost = std::pair<int, int>{ 50, 150 };
+				supply_cost = 2;
+				to_build = ::sc2::UNIT_TYPEID::PROTOSS_HIGHTEMPLAR;
+			}
 			if (minerals < unit_cost.first || gas < unit_cost.second || supply_left < supply_cost)
 				return false;
 
-			// std::cout << "Spawn controller: building one " << ::sc2::UnitTypeToName(unit_type) << std::endl;
-
 			// queue a single unit and issue the training command.
 			m_production_to_unit_map.clear();
-			m_production_to_unit_map[build_structures.back()] = unit_type;
+			m_production_to_unit_map[build_structures.back()] = to_build;
 
 			if (_spawnUnits(aeolusbot)) return true;
 
@@ -270,9 +278,18 @@ namespace Aeolus
 			if (item.first->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPGATE)
 			{
 				// warp in logic
-				// only for stalkers now
-				// TODO: change this logic to build any gateway unit
 				::sc2::ABILITY_ID spawn_ability = ::sc2::ABILITY_ID::TRAINWARP_STALKER;
+				switch (item.second)
+				{
+				case ::sc2::UNIT_TYPEID::PROTOSS_ZEALOT:
+					spawn_ability = ::sc2::ABILITY_ID::TRAINWARP_ZEALOT;
+				case ::sc2::UNIT_TYPEID::PROTOSS_STALKER:
+					spawn_ability = ::sc2::ABILITY_ID::TRAINWARP_STALKER;
+				case ::sc2::UNIT_TYPEID::PROTOSS_HIGHTEMPLAR:
+					spawn_ability = ::sc2::ABILITY_ID::TRAINWARP_HIGHTEMPLAR;
+				default:
+					break;
+				}
 
 				::sc2::Point2D enemySpawn = ManagerMediator::getInstance().GetExpansionLocations(aeolusbot).back();
 				::sc2::Point2D warpInPosition = _calculateWarpInSpot(aeolusbot, enemySpawn);
@@ -288,5 +305,24 @@ namespace Aeolus
 			}
 		}
 		return executed;
+	}
+
+	bool SpawnController::_makeArchons(AeolusBot& aeolusbot)
+	{
+		auto& mediator = ManagerMediator::getInstance();
+		auto highTemplars = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::ARCHON_MAKER);
+
+		// collect all idle high templars
+		::sc2::Tags idleHighTemplars;
+		for (const auto& highTemplar : highTemplars)
+		{
+			if (highTemplar->orders.empty()) idleHighTemplars.push_back(highTemplar->tag);
+		}
+
+		if (idleHighTemplars.size() < 2) return false;
+		idleHighTemplars.resize(2);
+
+		aeolusbot.Actions()->UnitCommand(idleHighTemplars, ::sc2::ABILITY_ID::MORPH_ARCHON);
+		return true;
 	}
 }
