@@ -11,6 +11,9 @@
 #include <optional>
 #include <sc2api/sc2_unit.h>
 #include <sc2api/sc2_score.h>
+#include <cmath>
+#include <algorithm>
+#include <vector>
 
 namespace Aeolus
 {
@@ -24,8 +27,6 @@ namespace Aeolus
 		auto* observation = aeolusbot.Observation();
 		float mineral_collection_rate = observation->GetScore().score_details.collection_rate_minerals;
 		float gas_collection_rate = observation->GetScore().score_details.collection_rate_vespene;
-		int minerals = mediator.GetMinerals(aeolusbot);
-		int vespene = mediator.GetVespene(aeolusbot);
 		::sc2::Units all_own_units = mediator.GetAllOwnUnits(aeolusbot);
 		::sc2::Units all_own_structures = mediator.GetAllOwnStructures(aeolusbot);
 
@@ -71,6 +72,9 @@ namespace Aeolus
 
 		bool tech_up_attempted = false;
 
+		// keep track of deman for each production type
+		std::map<::sc2::UNIT_TYPEID, float> production_demands;
+
 		for (const auto& candidate : deficits)
 		{
 			::sc2::UNIT_TYPEID unit_type = candidate.first;
@@ -84,18 +88,10 @@ namespace Aeolus
 
 			::sc2::UNIT_TYPEID required_tech = mediator.GetRequiredTech(aeolusbot, unit_type);
 			bool tech_ready = false; // start false
-			for (const auto& structure : mediator.GetAllOwnStructures(aeolusbot))
+			for (const auto& structure : all_own_structures)
 			{
 				if (structure->unit_type == required_tech && structure->build_progress >= 1.0f)
 				{
-					auto prod = utils::_isTrainedFrom(unit_type).value();
-
-					// if warpgate is ready, change prod to warpgate
-					auto upgrades = observation->GetUpgrades();
-					if (prod == ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY &&
-						std::find(upgrades.begin(), upgrades.end(), ::sc2::UPGRADE_ID::WARPGATERESEARCH)
-						!= upgrades.end())
-						prod = ::sc2::UNIT_TYPEID::PROTOSS_WARPGATE;
 					tech_ready = true;
 					break;
 				}
@@ -115,33 +111,14 @@ namespace Aeolus
 				continue;
 			}
 
-			size_t existing_production_count = 0;
-
-			for (const auto& structure : all_own_structures)
-			{
-				if (structure->unit_type == trained_from.value())
-				{
-					existing_production_count++;
-				}
-				else if (
-					trained_from.value() == ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY &&
-					structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPGATE)
-				{
-					existing_production_count++;
-				}
-			}
-
-			existing_production_count +=
-				mediator.GetNumberPending(aeolusbot, trained_from.value());
-
-			auto result = _buildProductionDueToBank(
-				aeolusbot,
-				unit_type,
-				mineral_collection_rate,
-				gas_collection_rate,
-				existing_production_count,
-				trained_from.value(),
+			float extraDemands = _getProductionDemand(aeolusbot, unit_type, mineral_collection_rate, gas_collection_rate,
 				target_proportion);
+			production_demands[trained_from.value()] += extraDemands;
+
+			auto result = _buildProduction(
+				aeolusbot,
+				trained_from.value(),
+				production_demands[trained_from.value()]);
 			switch (result)
 			{
 			case ProductionBuildResult::Built:
@@ -160,41 +137,56 @@ namespace Aeolus
 		return false;
 	}
 
-	ProductionBuildResult ProductionController::_buildProductionDueToBank(AeolusBot& aeolusbot,
-		::sc2::UNIT_TYPEID unit_type,
+	float ProductionController::_getProductionDemand(AeolusBot& aeolusbot, ::sc2::UNIT_TYPEID unit_type,
 		float mineral_collection_rate,
-		float gas_collection_rate,
-		size_t existing_production_count,
-		::sc2::UNIT_TYPEID production_structure_id,
-		float target_proportion)
+		float gas_collection_rate, float target_proportion)
 	{
-		// std::cout << "Our current mineral income is: " << mineral_collection_rate << std::endl;
-		// std::cout << "Our current gas income is:" << gas_collection_rate << std::endl;
-
 		auto& mediator = ManagerMediator::getInstance();
 		auto unit_cost = mediator.GetUnitCost(aeolusbot, unit_type);
 
-		int rate_supported_by_minerals = static_cast<int>(
-			mineral_collection_rate / (unit_cost.first + 1)
-			* m_alpha
-			* target_proportion
-			);
+		float rate_supported_by_minerals = mineral_collection_rate / (unit_cost.first + 1)
+			* m_alpha * target_proportion;
 
-		int rate_supported_by_gas = static_cast<int>(
-			gas_collection_rate / (unit_cost.second + 1)
-			* m_alpha
-			* target_proportion
-			);
+		if (unit_cost.second == 0)
+			return rate_supported_by_minerals;
 
-		/*std::cout << "We can currently support " << std::min(rate_supported_by_gas, rate_supported_by_minerals)
-			<< " simutaneous productions." << std::endl;
-		std::cout << "Existing production count: " << existing_production_count << std::endl;*/
+		float rate_supported_by_gas = gas_collection_rate / (unit_cost.second + 1)
+			* m_alpha * target_proportion;
 
-		bool mineral_ok = existing_production_count < rate_supported_by_minerals;
-		bool gas_ok = unit_cost.second == 0 || existing_production_count < rate_supported_by_gas;
+		float rate_supported = std::min(rate_supported_by_minerals, rate_supported_by_gas);
+
+		return rate_supported;
+	}
+
+	ProductionBuildResult ProductionController::_buildProduction(AeolusBot& aeolusbot,
+		::sc2::UNIT_TYPEID production_structure_id,
+		float production_demand)
+	{
+		auto& mediator = ManagerMediator::getInstance();
+
+		::sc2::Units all_own_structures = mediator.GetAllOwnStructures(aeolusbot);
+		size_t existing_production_count = 0;
+
+		for (const auto& structure : all_own_structures)
+		{
+			if (structure->unit_type == production_structure_id)
+			{
+				existing_production_count++;
+			}
+			else if (
+				production_structure_id == ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY &&
+				structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPGATE)
+			{
+				existing_production_count++;
+			}
+		}
+
+		existing_production_count +=
+			mediator.GetNumberPending(aeolusbot, production_structure_id);
+
 
 		// We don't need more production for this unit.
-		if (!mineral_ok || !gas_ok)
+		if (existing_production_count >= std::ceil(production_demand))
 			return ProductionBuildResult::NotNeeded;
 
 		// We DO need more production.

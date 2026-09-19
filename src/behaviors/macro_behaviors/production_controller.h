@@ -45,12 +45,13 @@ namespace Aeolus
 		float m_ignore_below;
 		bool m_repower_structures;
 
-		ProductionBuildResult _buildProductionDueToBank(AeolusBot& aeolusbot,
-			::sc2::UNIT_TYPEID unit_type,
+		ProductionBuildResult _buildProduction(AeolusBot& aeolusbot,
+			::sc2::UNIT_TYPEID production_structure_id,
+			float production_demand);
+
+		float _getProductionDemand(AeolusBot& aeolusbot, ::sc2::UNIT_TYPEID unit_type,
 			float mineral_collection_rate,
 			float gas_collection_rate,
-			size_t existing_production_count,
-			::sc2::UNIT_TYPEID production_structure_id, 
 			float target_proportion);
 	};
 }
