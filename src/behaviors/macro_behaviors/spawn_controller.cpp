@@ -80,7 +80,7 @@ namespace Aeolus
 			::sc2::UNIT_TYPEID unit_type = candidate.first;
 
 			::sc2::UNIT_TYPEID required_tech = mediator.GetRequiredTech(aeolusbot, unit_type);
-			::sc2::UNIT_TYPEID trained_from{};
+			::sc2::UNIT_TYPEID trained_from = utils::_isTrainedFrom(unit_type).value();
 
 			bool tech_ready = false; // start false
 			for (const auto& structure : mediator.GetAllOwnStructures(aeolusbot))
@@ -282,20 +282,32 @@ namespace Aeolus
 				switch (item.second)
 				{
 				case ::sc2::UNIT_TYPEID::PROTOSS_ZEALOT:
+				{
 					spawn_ability = ::sc2::ABILITY_ID::TRAINWARP_ZEALOT;
-				case ::sc2::UNIT_TYPEID::PROTOSS_STALKER:
-					spawn_ability = ::sc2::ABILITY_ID::TRAINWARP_STALKER;
-				case ::sc2::UNIT_TYPEID::PROTOSS_HIGHTEMPLAR:
-					spawn_ability = ::sc2::ABILITY_ID::TRAINWARP_HIGHTEMPLAR;
-				default:
 					break;
+				}
+				case ::sc2::UNIT_TYPEID::PROTOSS_STALKER:
+				{
+					spawn_ability = ::sc2::ABILITY_ID::TRAINWARP_STALKER;
+					break;
+				}
+				case ::sc2::UNIT_TYPEID::PROTOSS_HIGHTEMPLAR:
+				{
+					spawn_ability = ::sc2::ABILITY_ID::TRAINWARP_HIGHTEMPLAR;
+					break;
+				}
+				default:
+					continue;
 				}
 
 				::sc2::Point2D enemySpawn = ManagerMediator::getInstance().GetExpansionLocations(aeolusbot).back();
 				::sc2::Point2D warpInPosition = _calculateWarpInSpot(aeolusbot, enemySpawn);
 
-				if (warpInPosition == enemySpawn) return false;
-
+				if (warpInPosition == enemySpawn)
+				{
+					executed = false;
+					continue;
+				}
 				aeolusbot.Actions()->UnitCommand(item.first, spawn_ability, warpInPosition);
 			}
 			else
