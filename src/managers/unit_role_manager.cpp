@@ -92,6 +92,8 @@ namespace Aeolus {
 			|| unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL
 			|| unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS
 			|| unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_VOIDRAY
+			|| unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_TEMPEST
+			|| unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ARCHON
 			|| unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ZEALOT
 			|| unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ADEPT)
 		{
@@ -112,6 +114,10 @@ namespace Aeolus {
 		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ADEPTPHASESHIFT)
 		{
 			AssignRole(unit, constants::UnitRole::ADEPT_SHADE);
+		}
+		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_HIGHTEMPLAR)
+		{
+			AssignRole(unit, constants::UnitRole::ARCHON_MAKER);
 		}
 	}
 

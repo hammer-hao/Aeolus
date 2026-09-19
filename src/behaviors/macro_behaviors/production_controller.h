@@ -6,6 +6,12 @@
 namespace Aeolus
 {
 	class AeolusBot;
+	enum class ProductionBuildResult
+	{
+		NotNeeded,
+		Built,
+		Blocked
+	};
 	class ProductionController : public MacroBehavior
 	{
 	public:
@@ -39,7 +45,7 @@ namespace Aeolus
 		float m_ignore_below;
 		bool m_repower_structures;
 
-		bool _buildProductionDueToBank(AeolusBot& aeolusbot,
+		ProductionBuildResult _buildProductionDueToBank(AeolusBot& aeolusbot,
 			::sc2::UNIT_TYPEID unit_type,
 			float mineral_collection_rate,
 			float gas_collection_rate,
