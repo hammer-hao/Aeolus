@@ -59,7 +59,7 @@ namespace Aeolus
 
 			float deficit = target_proportion - current_proportion;
 
-			deficits.push_back({ unit_type, deficit });
+			if (target_proportion > 0.03f) deficits.push_back({ unit_type, deficit });
 		}
 		std::sort(
 			deficits.begin(),
