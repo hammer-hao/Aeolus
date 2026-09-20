@@ -111,6 +111,31 @@ namespace Aeolus
 				continue;
 			}
 
+			// some units have technically "ready" tech, but are
+			// "incomplete" without their signiture upgrade
+			auto existingUpgrades = aeolusbot.Observation()->GetUpgrades();
+			// some units are technically "incomplete" without their signiture upgrade
+			if (!tech_up_attempted && unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS)
+			{
+				if (std::find(existingUpgrades.begin(), existingUpgrades.end(),
+					::sc2::UPGRADE_ID::EXTENDEDTHERMALLANCE) == existingUpgrades.end())
+				{
+					TechUp techup(unit_type);
+					techup.execute(aeolusbot);
+					tech_up_attempted = true;
+				}
+			}
+			if (!tech_up_attempted && unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER)
+			{
+				if (std::find(existingUpgrades.begin(), existingUpgrades.end(),
+					::sc2::UPGRADE_ID::BLINKTECH) == existingUpgrades.end())
+				{
+					TechUp techup(unit_type);
+					techup.execute(aeolusbot);
+					tech_up_attempted = true;
+				}
+			}
+
 			float extraDemands = _getProductionDemand(aeolusbot, unit_type, mineral_collection_rate, gas_collection_rate,
 				target_proportion);
 			production_demands[trained_from.value()] += extraDemands;

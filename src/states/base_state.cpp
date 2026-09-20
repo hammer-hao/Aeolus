@@ -98,60 +98,91 @@ namespace Aeolus
             if (!close_units.empty())
             {
                 auto in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, unit, close_non_structures);
-                if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS ||
-                    unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_TEMPEST)
+                if (!in_attack_range.empty())
                 {
-                    // high range units
-                    // if we are able to shoot a target in range, do so
-                    // if not, retreat to the safest spot nearby.
-                    // this way we prioritize safety of our high value, high range units over the
-                    // optimal target to shoot at.
                     combat_behavior->AddBehavior(
                         std::make_unique<ShootTargetInRange>(
-                            close_non_structures
+                            in_attack_range
                         )
                     );
-                    combat_behavior->AddBehavior(
-                        std::make_unique<ShootTargetInRange>(
-                            close_units
-                        )
-                    );
+                }
+                else
+                {
+                    auto all_in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, unit, close_units);
+                    if (!all_in_attack_range.empty())
+                    {
+                        combat_behavior->AddBehavior(
+                            std::make_unique<ShootTargetInRange>(
+                                all_in_attack_range
+                            )
+                        );
+                    }
+                }
+
+                auto enemy_target = utils::PickAttackTarget(close_units);
+
+                if ((unit->shield / unit->shield_max) < 0.1)
+                {
                     combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
                 }
                 else
                 {
-                    if (!in_attack_range.empty())
-                    {
-                        combat_behavior->AddBehavior(
-                            std::make_unique<ShootTargetInRange>(
-                                in_attack_range
-                            )
-                        );
-                    }
-                    else
-                    {
-                        auto all_in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, unit, close_units);
-                        if (!all_in_attack_range.empty())
-                        {
-                            combat_behavior->AddBehavior(
-                                std::make_unique<ShootTargetInRange>(
-                                    all_in_attack_range
-                                )
-                            );
-                        }
-                    }
-
-                    auto enemy_target = utils::PickAttackTarget(close_units);
-
-                    if ((unit->shield / unit->shield_max) < 0.1)
-                    {
-                        combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-                    }
-                    else
-                    {
-                        combat_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
-                    }
+                    combat_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
                 }
+                //if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS ||
+                //    unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_TEMPEST)
+                //{
+                //    // high range units
+                //    // if we are able to shoot a target in range, do so
+                //    // if not, retreat to the safest spot nearby.
+                //    // this way we prioritize safety of our high value, high range units over the
+                //    // optimal target to shoot at.
+                //    combat_behavior->AddBehavior(
+                //        std::make_unique<ShootTargetInRange>(
+                //            close_non_structures
+                //        )
+                //    );
+                //    combat_behavior->AddBehavior(
+                //        std::make_unique<ShootTargetInRange>(
+                //            close_units
+                //        )
+                //    );
+                //    combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                //}
+                //else
+                //{
+                //    if (!in_attack_range.empty())
+                //    {
+                //        combat_behavior->AddBehavior(
+                //            std::make_unique<ShootTargetInRange>(
+                //                in_attack_range
+                //            )
+                //        );
+                //    }
+                //    else
+                //    {
+                //        auto all_in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, unit, close_units);
+                //        if (!all_in_attack_range.empty())
+                //        {
+                //            combat_behavior->AddBehavior(
+                //                std::make_unique<ShootTargetInRange>(
+                //                    all_in_attack_range
+                //                )
+                //            );
+                //        }
+                //    }
+
+                //    auto enemy_target = utils::PickAttackTarget(close_units);
+
+                //    if ((unit->shield / unit->shield_max) < 0.1)
+                //    {
+                //        combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                //    }
+                //    else
+                //    {
+                //        combat_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
+                //    }
+                //}
             }
             else
             {
@@ -415,28 +446,44 @@ namespace Aeolus
                             BEHAVIOR_PULSARBEAMOFF));
                 }
 
-                oracle_behavior->AddBehavior(
-                    std::make_unique<HugCornerTowards>(aeolusbot.Observation()->GetStartLocation())
-                );
+                // if there is a cloaked or burrowed enemy on the field, we want to utilize
+                // the revelation ability as a mobile detector
+                ::sc2::Units enemyCloakedBurrowedUnits = mediator.GetAllEnemyCloakedAndBurrowedUnits(aeolusbot);
+                if (enemyCloakedBurrowedUnits.empty() ||
+                    oracle->energy < 25 ||
+                    std::find_if(availableAbilities.begin(), availableAbilities.end(), [](const ::sc2::AvailableAbility& availableAbility) {
+                        return availableAbility.ability_id == ::sc2::ABILITY_ID::EFFECT_ORACLEREVELATION;
+                            }) == availableAbilities.end())
+                {
+                    oracle_behavior->AddBehavior(
+                        std::make_unique<HugCornerTowards>(aeolusbot.Observation()->GetStartLocation())
+                    );
+                    oracle_behavior->AddBehavior(
+                        std::make_unique<KeepUnitSafe>());
+                    oracle_behavior->AddBehavior(
+                        std::make_unique<PathToTarget>(
+                            aeolusbot.Observation()
+                            ->GetStartLocation()));
+                }
+                else
+                {
+                    const ::sc2::Point2D toReveal =
+                        utils::GetClosestUnitTo(aeolusbot.Observation()->GetStartLocation(),
+                            enemyCloakedBurrowedUnits)->pos;
+                    if (::sc2::Distance2D(oracle->pos, toReveal) > 11.5f)
+                    {
+                        oracle_behavior->AddBehavior(std::make_unique<HugCornerTowards>(toReveal));
+                        oracle_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                        oracle_behavior->AddBehavior(std::make_unique<PathToTarget>(toReveal));
+                    }
+                    else
+                    {
+                        oracle_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::EFFECT_ORACLEREVELATION, toReveal));
+                    }
+                }
 
-                oracle_behavior->AddBehavior(
-                    std::make_unique<KeepUnitSafe>());
-
-                oracle_behavior->AddBehavior(
-                    std::make_unique<PathToTarget>(
-                        aeolusbot.Observation()
-                        ->GetStartLocation()));
-
-                /*oracle_behavior->AddBehavior(
-                    std::make_unique<KeepUnitSafe>(aeolusbot.Observation()->GetStartLocation()));
-
-                oracle_behavior->AddBehavior(
-                    std::make_unique<PathToTarget>(
-                        aeolusbot.Observation()
-                        ->GetStartLocation()));*/
-
-                if ((oracle->shield /
-                    oracle->shield_max) >= 0.95f
+                if (enemyCloakedBurrowedUnits.empty() &&
+                    (oracle->shield / oracle->shield_max) >= 0.95f
                     && oracle->energy >= 50.0f)
                 {
                     mediator.registerHarassmentStatus(
@@ -666,11 +713,20 @@ namespace Aeolus
     {
         auto& mediator = ManagerMediator::getInstance();
         ::sc2::Units observers = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::MOBILE_DETECTION);
+
+        ::sc2::Point2D observerTarget = mediator.GetAtttackTarget(aeolusbot);
+        ::sc2::Units cloakedOrBurrowedEnemies = mediator.GetAllEnemyCloakedAndBurrowedUnits(aeolusbot);
+        if (!cloakedOrBurrowedEnemies.empty())
+        {
+            observerTarget =
+                utils::GetClosestUnitTo(aeolusbot.Observation()->GetStartLocation(), cloakedOrBurrowedEnemies)->pos;
+        }
+
         for (const auto* observer : observers)
         {
             auto observer_behavior = std::make_unique<MicroBehavior>(observer);
             observer_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-            observer_behavior->AddBehavior(std::make_unique<PathToTarget>(mediator.GetAtttackTarget(aeolusbot)));
+            observer_behavior->AddBehavior(std::make_unique<PathToTarget>(observerTarget));
 
             aeolusbot.RegisterBehavior(std::move(observer_behavior));
         }

@@ -44,11 +44,6 @@ namespace Aeolus
         doBookKeepingMacroTasks(aeolusbot);
 
         // research nice-to-have upgrades
-        if (aeolusbot.Observation()->GetFoodArmy() > 24) {
-            aeolusbot.RegisterBehavior(std::make_unique<UpgradesController>(
-                std::vector<::sc2::UPGRADE_ID>{::sc2::UPGRADE_ID::BLINKTECH}
-            ));
-        }
         aeolusbot.RegisterBehavior(std::make_unique<UpgradesController>(
             std::vector<::sc2::UPGRADE_ID>{::sc2::UPGRADE_ID::WARPGATERESEARCH}
         ));

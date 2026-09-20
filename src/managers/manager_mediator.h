@@ -459,6 +459,20 @@ namespace Aeolus
 		}
 
 		/**
+		* @brief returns all enemy units that are burrowed or cloaked. i.e. requires
+		* detection for us to attack. Includes buildings.
+		*/
+		::sc2::Units GetAllEnemyCloakedAndBurrowedUnits(AeolusBot& aeolusbot)
+		{
+			return ManagerRequest<::sc2::Units, int>(
+				aeolusbot,
+				constants::ManagerName::UNIT_FILTER_MANAGER,
+				constants::ManagerRequestType::GET_ENEMY_CLOAKED_AND_BURROWED_UNITS,
+				0
+			);
+		}
+
+		/**
 		* @brief returns all enemy town hall structures, includes orbitals and planetaries.
 		* Includes lairs and hives. doe NOT include flying command centers and orbitals.
 		*/
@@ -807,6 +821,19 @@ namespace Aeolus
 				constants::ManagerName::UNIT_PROPERTY_MANAGER,
 				constants::ManagerRequestType::GET_UNIT_COST,
 				unit_type
+			);
+		}
+
+		/**
+		* @brief returns the cost needed ({mineral, gas}) to research an upgrade
+		*/
+		std::pair<int, int> GetUpgradeCost(AeolusBot& aeolusbot, ::sc2::UPGRADE_ID upgrade)
+		{
+			return ManagerRequest<std::pair<int, int>, ::sc2::UPGRADE_ID>(
+				aeolusbot,
+				constants::ManagerName::UNIT_PROPERTY_MANAGER,
+				constants::ManagerRequestType::GET_UPGRADE_COST,
+				upgrade
 			);
 		}
 

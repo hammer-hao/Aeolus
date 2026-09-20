@@ -97,6 +97,12 @@ namespace Aeolus
 			::sc2::UNIT_TYPEID unit_type = std::get<0>(params);
 			return GetCost(unit_type);
 		}
+		case constants::ManagerRequestType::GET_UPGRADE_COST:
+		{
+			auto params = std::any_cast<std::tuple<::sc2::UPGRADE_ID>>(args);
+			::sc2::UPGRADE_ID upgrade = std::get<0>(params);
+			return GetUpgradeCost(upgrade);
+		}
 		case constants::ManagerRequestType::GET_REQUIRED_TECH:
 		{
 			auto params = std::any_cast<std::tuple<::sc2::UNIT_TYPEID>>(args);
@@ -327,6 +333,16 @@ namespace Aeolus
 
 		std::pair<int, int> result = { m_unit_data_cache[id].mineral_cost, m_unit_data_cache[id].vespene_cost };
 		m_cost_cache[id] = result;
+		return result;
+	}
+
+	std::pair<int, int> UnitPropertyManager::GetUpgradeCost(::sc2::UPGRADE_ID upgrade)
+	{
+		uint64_t id = static_cast<uint64_t>(upgrade);
+		auto it = m_upgrade_cost_cache.find(id);
+		if (it != m_upgrade_cost_cache.end()) return m_upgrade_cost_cache[id];
+
+		std::pair<int, int> result = { m_upgrade_data_cache[id].mineral_cost, m_upgrade_data_cache[id].vespene_cost };
 		return result;
 	}
 

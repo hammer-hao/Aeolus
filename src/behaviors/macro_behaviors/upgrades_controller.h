@@ -2,12 +2,12 @@
 
 #include "macro_behavior.h"
 #include <vector>
+#include <set>
 #include <sc2api/sc2_typeenums.h>
 
 namespace Aeolus
 {
 	class AeolusBot;
-
 	/**
 	* @brief The upgrade controller class will attempt to research the next
 	* upgrade in the given vector of upgrade ids that is available.
@@ -23,7 +23,11 @@ namespace Aeolus
 
 		bool execute(AeolusBot& aeolusbot) override;
 
+		inline static std::set<::sc2::UPGRADE_ID> reserved_upgrades{};
+
 	private:
 		std::vector<::sc2::UPGRADE_ID> m_upgrades;
+
+		void unreserveResources(AeolusBot& aeolustbo, ::sc2::UPGRADE_ID upgrade);
 	};
 }
