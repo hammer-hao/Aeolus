@@ -63,23 +63,23 @@ namespace Aeolus
 		if (!m_build_defense_queued)
 		{
 			const int base_location = mediator.getOpponentRace(aeolusbot) == ::sc2::Race::Zerg ? 1 : 0;
-			if (m_plan.cannons_to_add == 0)
+			if (m_plan.batteries_to_add == 0)
 			{
 				m_build_defense_queued = true;
 			}
 			else
 			{
-				bool stillBuildingForge = false;
-				if (mediator.IsStructureAvailable(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_FORGE))
+				bool stillBuildingCyberCore = false;
+				if (mediator.IsStructureAvailable(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE))
 				{
 					for (const auto& structure : mediator.GetAllOwnStructures(aeolusbot))
 					{
-						if (structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_FORGE &&
-							structure->build_progress > 0.75f)
+						if (structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE &&
+							structure->build_progress > 0.9f)
 						{
-							for (int i = 0; i < m_plan.cannons_to_add; ++i)
+							for (int i = 0; i < m_plan.batteries_to_add; ++i)
 							{
-								const ::sc2::UNIT_TYPEID to_build = ::sc2::UNIT_TYPEID::PROTOSS_PHOTONCANNON;
+								const ::sc2::UNIT_TYPEID to_build = ::sc2::UNIT_TYPEID::PROTOSS_SHIELDBATTERY;
 								const bool is_wall = true;
 								aeolusbot.RegisterBehavior(std::make_unique<BuildStructure>(to_build, base_location, is_wall));
 							}
@@ -87,10 +87,10 @@ namespace Aeolus
 						}
 					}
 				}
-				else if (mediator.GetNumberPending(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_FORGE) == 0)
+				else if (mediator.GetNumberPending(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE) == 0)
 				{
-					// need to build the forge
-					std::make_unique<BuildStructure>(::sc2::UNIT_TYPEID::PROTOSS_FORGE, base_location, true)->execute(aeolusbot);
+					// need to build the cyber core
+					std::make_unique<BuildStructure>(::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE, base_location, true)->execute(aeolusbot);
 				}
 			}
 		}
