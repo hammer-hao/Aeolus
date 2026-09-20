@@ -28,7 +28,12 @@ namespace Aeolus
 		auto all_enemy = mediator.GetAllSeenEnemyUnits(m_bot);
 		::std::map<::sc2::UNIT_TYPEID, float> stalkers_only({ { ::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.00f } });
 
-		if (all_enemy.size() < 20)
+		if (std::count_if(all_enemy.begin(), all_enemy.end(), [](const ::sc2::Unit* unit) {
+			return (unit->unit_type != ::sc2::UNIT_TYPEID::TERRAN_SCV &&
+				unit->unit_type != ::sc2::UNIT_TYPEID::TERRAN_MULE &&
+				unit->unit_type != ::sc2::UNIT_TYPEID::ZERG_DRONE &&
+				unit->unit_type != ::sc2::UNIT_TYPEID::PROTOSS_PROBE);
+			}) < 20)
 		{
 			// not enough enemy units to tell
 			m_best_army_composition = stalkers_only;
