@@ -25,7 +25,7 @@ namespace Aeolus
 	void ArmyCompositionManager::update(int iteration) 
 	{
 		// update 
-		if (iteration < 22 * 60 * 9)
+		if (iteration < 22 * 60 * 6)
 		{
 			m_best_army_composition =
 				std::map<::sc2::UNIT_TYPEID, float>{ 
