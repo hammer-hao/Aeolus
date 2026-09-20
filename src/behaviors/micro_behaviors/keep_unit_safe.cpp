@@ -25,7 +25,8 @@ namespace Aeolus
 
 		::sc2::Point2D safe_spot = { 0.0, 0.0 };
 
-		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPPRISM)
+		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPPRISM ||
+			unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS)
 		{
 			/*safe_spot = m_target.has_value() ?
 				manager.FindClosestSafeSpotTowards(aeolusbot, unit->pos, m_target.value(), 7.0, GridType::BOTH) :
