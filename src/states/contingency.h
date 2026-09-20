@@ -23,7 +23,10 @@ namespace Aeolus
 		void macro(AeolusBot& aeolusbot) override;
 
 	private:
+		void _doSCVKillerMicro(AeolusBot& aeolusbot);
+		void _releaseSCVKillers(AeolusBot& aeolusbot);
 		const ContingencyPlan m_plan;
 		bool m_build_defense_queued;
+		bool m_scv_killer_queued = false;
 	};
 }

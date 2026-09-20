@@ -17,6 +17,12 @@
 #include "../behaviors/macro_behaviors/build_geysers.h"
 #include "../behaviors/macro_behaviors/expand.h"
 #include "../behaviors/macro_behaviors/build_workers.h"
+#include "../behaviors/micro_behaviors/micro_behavior.h"
+#include "../behaviors/micro_behaviors/attack_target_unit.h"
+#include "../behaviors/micro_behaviors/path_to_target.h"
+#include "../behaviors/micro_behaviors/keep_unit_safe.h"
+#include "consolidate.h"
+#include "../utils/unit_utils.h"
 
 namespace Aeolus
 {
@@ -33,6 +39,51 @@ namespace Aeolus
 	{
 		if (aeolusbot.Observation()->GetGameLoop() < 100) return;
 		auto& mediator = ManagerMediator::getInstance();
+
+		// if against a terran and they are proxying, see if we can kill the scv before it finishes
+		if (!m_scv_killer_queued && mediator.getOpponentRace(aeolusbot) == ::sc2::Race::Terran)
+		{
+			auto& enemyStructures = mediator.GetAllEnemyStructures(aeolusbot);
+			::sc2::Point2D enemyStart = mediator.GetExpansionLocations(aeolusbot).back();
+			for (const auto& structure : enemyStructures)
+			{
+				if (sc2::DistanceSquared2D(structure->pos, aeolusbot.Observation()->GetStartLocation()) < 5000.0f ||
+					(sc2::DistanceSquared2D(structure->pos, enemyStart) > 5000.0f))
+				{
+					// is a proxy
+					if (structure->build_progress >= 1.0f) continue;
+					auto workerCandidate = mediator.SelectWorkerClosestTo(aeolusbot, structure->pos);
+					if (!workerCandidate.has_value()) continue;
+					const ::sc2::Unit* worker = workerCandidate.value();
+					float pathDistance = aeolusbot.Query()->PathingDistance(worker, structure->pos);
+					{
+						auto& typedata = aeolusbot.Observation()->GetUnitTypeData();
+						float speed = typedata[worker->unit_type].movement_speed;
+						float framesNeeded = (pathDistance / speed) * 16;
+
+						float totalBuildTime = typedata[structure->unit_type].build_time;
+						float buildTimeLeft = totalBuildTime * (1 - structure->build_progress);
+						float timeLeftForKillingSCV = buildTimeLeft - framesNeeded;
+						if (timeLeftForKillingSCV < 105) continue;
+
+						::sc2::Units allWorkers = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::GATHERING);
+						if (allWorkers.size() < 2) continue;
+
+						std::sort(allWorkers.begin(), allWorkers.end(), [&](const ::sc2::Unit* workerA, const ::sc2::Unit* workerB) {
+							return (::sc2::DistanceSquared2D(workerA->pos, structure->pos) < ::sc2::DistanceSquared2D(workerB->pos, structure->pos));
+							});
+
+						mediator.AssignRole(aeolusbot, allWorkers[0], constants::UnitRole::SCV_KILLER);
+						mediator.AssignRole(aeolusbot, allWorkers[1], constants::UnitRole::SCV_KILLER);
+
+						m_scv_killer_queued = true;
+						break;
+					};
+				}
+			}
+		}
+
+		_doSCVKillerMicro(aeolusbot);
 
 		// during the build order, we generally want to defend. However, we would still like to move out
 		// if we have enought supply
@@ -53,6 +104,62 @@ namespace Aeolus
 
 		// Perform Adept Harassment Micro
 		doAdeptHarassMicro(aeolusbot);
+	}
+
+	void ContingencyState::_doSCVKillerMicro(AeolusBot& aeolusbot)
+	{
+		auto& mediator = ManagerMediator::getInstance();
+		auto scvKillers = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::SCV_KILLER);
+		if (scvKillers.empty()) return;
+
+		std::vector<::sc2::Point2D> starting_points;
+		for (const auto& unit : scvKillers)
+		{
+			starting_points.push_back(unit->pos);
+		}
+
+		std::vector<::sc2::Units> closeEnemies = mediator.GetEnemyUnitsInRangeMap(aeolusbot, starting_points, 12);
+		std::set<::sc2::Tag> seen;
+		::sc2::Units enemySCVs;
+
+		for (const auto& group : closeEnemies)
+		{
+			for (const auto* enemy : group)
+			{
+				if (enemy->unit_type == ::sc2::UNIT_TYPEID::TERRAN_SCV &&
+					seen.insert(enemy->tag).second)
+				{
+					enemySCVs.push_back(enemy);
+				}
+			}
+		}
+
+		for (const auto& scvKiller : scvKillers)
+		{
+			auto combat_behavior = std::make_unique<MicroBehavior>(scvKiller);
+
+			if (enemySCVs.empty())
+			{
+				::sc2::Point2D target = mediator.GetAtttackTarget(aeolusbot);
+				if (::sc2::Distance2D(scvKiller->pos, target) < 9.0f)
+				{
+					combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+				}
+				else 
+				{
+					combat_behavior->AddBehavior(std::make_unique<PathToTarget>(target));
+				}
+			}
+			else
+			{
+				const ::sc2::Unit* toTarget = utils::PickAttackTarget(enemySCVs);
+				combat_behavior->AddBehavior(std::make_unique<AttackTargetUnit>(
+					toTarget
+				));
+			}
+			aeolusbot.RegisterBehavior(std::move(combat_behavior));
+		}
+
 	}
 
 	void ContingencyState::macro(AeolusBot& aeolusbot)
@@ -116,12 +223,24 @@ namespace Aeolus
 		::sc2::Units forces = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
 		if (forces.size() > 4)
 		{
+			_releaseSCVKillers(aeolusbot);
+			aeolusbot.ChangeState(MakeState<ConsolidateState>());
+		}
+		else if (aeolusbot.Observation()->GetFoodUsed() > m_plan.move_out_supply)
+		{
+			_releaseSCVKillers(aeolusbot);
 			aeolusbot.ChangeState(MakeState<ForwardPressureState>());
 		}
+	}
 
-		if (aeolusbot.Observation()->GetFoodUsed() > m_plan.move_out_supply)
+	void ContingencyState::_releaseSCVKillers(AeolusBot& aeolusbot)
+	{
+		auto& mediator = ManagerMediator::getInstance();
+		::sc2::Units toRelease = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::SCV_KILLER);
+
+		for (const auto& unit : toRelease)
 		{
-			aeolusbot.ChangeState(MakeState<ForwardPressureState>());
+			mediator.AssignRole(aeolusbot, unit, constants::UnitRole::GATHERING);
 		}
 	}
 }

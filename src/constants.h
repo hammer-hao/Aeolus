@@ -175,6 +175,7 @@ namespace Aeolus {
 			HARASS_ADEPT,
 			ADEPT_SHADE,
 			ARCHON_MAKER,
+			SCV_KILLER
 		};
 		std::string ManagerNameToString(ManagerName name);
 		std::string ManagerRequestTypeToString(ManagerRequestType requestType);
