@@ -98,60 +98,91 @@ namespace Aeolus
             if (!close_units.empty())
             {
                 auto in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, unit, close_non_structures);
-                if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS ||
-                    unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_TEMPEST)
+                if (!in_attack_range.empty())
                 {
-                    // high range units
-                    // if we are able to shoot a target in range, do so
-                    // if not, retreat to the safest spot nearby.
-                    // this way we prioritize safety of our high value, high range units over the
-                    // optimal target to shoot at.
                     combat_behavior->AddBehavior(
                         std::make_unique<ShootTargetInRange>(
-                            close_non_structures
+                            in_attack_range
                         )
                     );
-                    combat_behavior->AddBehavior(
-                        std::make_unique<ShootTargetInRange>(
-                            close_units
-                        )
-                    );
+                }
+                else
+                {
+                    auto all_in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, unit, close_units);
+                    if (!all_in_attack_range.empty())
+                    {
+                        combat_behavior->AddBehavior(
+                            std::make_unique<ShootTargetInRange>(
+                                all_in_attack_range
+                            )
+                        );
+                    }
+                }
+
+                auto enemy_target = utils::PickAttackTarget(close_units);
+
+                if ((unit->shield / unit->shield_max) < 0.1)
+                {
                     combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
                 }
                 else
                 {
-                    if (!in_attack_range.empty())
-                    {
-                        combat_behavior->AddBehavior(
-                            std::make_unique<ShootTargetInRange>(
-                                in_attack_range
-                            )
-                        );
-                    }
-                    else
-                    {
-                        auto all_in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, unit, close_units);
-                        if (!all_in_attack_range.empty())
-                        {
-                            combat_behavior->AddBehavior(
-                                std::make_unique<ShootTargetInRange>(
-                                    all_in_attack_range
-                                )
-                            );
-                        }
-                    }
-
-                    auto enemy_target = utils::PickAttackTarget(close_units);
-
-                    if ((unit->shield / unit->shield_max) < 0.1)
-                    {
-                        combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-                    }
-                    else
-                    {
-                        combat_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
-                    }
+                    combat_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
                 }
+                //if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS ||
+                //    unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_TEMPEST)
+                //{
+                //    // high range units
+                //    // if we are able to shoot a target in range, do so
+                //    // if not, retreat to the safest spot nearby.
+                //    // this way we prioritize safety of our high value, high range units over the
+                //    // optimal target to shoot at.
+                //    combat_behavior->AddBehavior(
+                //        std::make_unique<ShootTargetInRange>(
+                //            close_non_structures
+                //        )
+                //    );
+                //    combat_behavior->AddBehavior(
+                //        std::make_unique<ShootTargetInRange>(
+                //            close_units
+                //        )
+                //    );
+                //    combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                //}
+                //else
+                //{
+                //    if (!in_attack_range.empty())
+                //    {
+                //        combat_behavior->AddBehavior(
+                //            std::make_unique<ShootTargetInRange>(
+                //                in_attack_range
+                //            )
+                //        );
+                //    }
+                //    else
+                //    {
+                //        auto all_in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, unit, close_units);
+                //        if (!all_in_attack_range.empty())
+                //        {
+                //            combat_behavior->AddBehavior(
+                //                std::make_unique<ShootTargetInRange>(
+                //                    all_in_attack_range
+                //                )
+                //            );
+                //        }
+                //    }
+
+                //    auto enemy_target = utils::PickAttackTarget(close_units);
+
+                //    if ((unit->shield / unit->shield_max) < 0.1)
+                //    {
+                //        combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                //    }
+                //    else
+                //    {
+                //        combat_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
+                //    }
+                //}
             }
             else
             {
