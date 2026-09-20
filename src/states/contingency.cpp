@@ -114,7 +114,7 @@ namespace Aeolus
 		}
 
 		::sc2::Units forces = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
-		if (forces.size() > 8)
+		if (forces.size() > 4)
 		{
 			aeolusbot.ChangeState(MakeState<ForwardPressureState>());
 		}
