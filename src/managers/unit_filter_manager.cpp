@@ -220,7 +220,8 @@ namespace Aeolus
 					if (unit_type == static_cast<int>(::sc2::UNIT_TYPEID::PROTOSS_PHOTONCANNON) ||
 						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::ZERG_SPORECRAWLER) ||
 						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::ZERG_SPINECRAWLER) ||
-						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::TERRAN_MISSILETURRET))
+						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::TERRAN_MISSILETURRET) ||
+						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::TERRAN_BUNKER))
 					{
 						m_enemy_static_defenses.push_back(unit);
 					}

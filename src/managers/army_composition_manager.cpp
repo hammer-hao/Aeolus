@@ -24,19 +24,19 @@ namespace Aeolus
 
 	void ArmyCompositionManager::update(int iteration) 
 	{
-		// update 
-		if (iteration < 22 * 60 * 6)
+		auto& mediator = ManagerMediator::getInstance();
+		auto all_enemy = mediator.GetAllSeenEnemyUnits(m_bot);
+		::std::map<::sc2::UNIT_TYPEID, float> stalkers_only({ { ::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.00f } });
+
+		if (all_enemy.size() < 20)
 		{
-			m_best_army_composition =
-				std::map<::sc2::UNIT_TYPEID, float>{ 
-					{::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.00f} 
-			};
+			// not enough enemy units to tell
+			m_best_army_composition = stalkers_only;
 			return;
 		}
+
 		if (iteration % 44 == 1)
 		{
-			auto& mediator = ManagerMediator::getInstance();
-			auto all_enemy = mediator.GetAllSeenEnemyUnits(m_bot);
 
 			CompositionWeights totalWeights = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 			for (const auto& enemy_unit : all_enemy)
