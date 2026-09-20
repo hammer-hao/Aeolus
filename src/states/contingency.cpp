@@ -99,7 +99,7 @@ namespace Aeolus
 		aeolusbot.RegisterBehavior(std::make_unique<AutoSupply>());
 
 		const std::map<::sc2::UNIT_TYPEID, float> armyComp(m_plan.army_composition.begin(), m_plan.army_composition.end());
-		aeolusbot.RegisterBehavior(std::make_unique<ProductionController>(armyComp));
+		aeolusbot.RegisterBehavior(std::make_unique<ProductionController>(armyComp, false));
 		aeolusbot.RegisterBehavior(std::make_unique<SpawnController>(armyComp));
 		aeolusbot.RegisterBehavior(std::make_unique<BuildGeysers>());
 
@@ -111,6 +111,12 @@ namespace Aeolus
 			aeolusbot.RegisterBehavior(std::make_unique<BuildWorkers>(
 				mediator.GetOwnReadyTownHalls(aeolusbot).size() * 22)
 			);
+		}
+
+		::sc2::Units forces = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
+		if (forces.size() > 8)
+		{
+			aeolusbot.ChangeState(MakeState<ForwardPressureState>());
 		}
 
 		if (aeolusbot.Observation()->GetFoodUsed() > m_plan.move_out_supply)

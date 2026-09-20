@@ -115,7 +115,7 @@ namespace Aeolus
 			// "incomplete" without their signiture upgrade
 			auto existingUpgrades = aeolusbot.Observation()->GetUpgrades();
 			// some units are technically "incomplete" without their signiture upgrade
-			if (!tech_up_attempted && unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS)
+			if (!tech_up_attempted && unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS && m_research_signature_upgrades)
 			{
 				if (std::find(existingUpgrades.begin(), existingUpgrades.end(),
 					::sc2::UPGRADE_ID::EXTENDEDTHERMALLANCE) == existingUpgrades.end())
@@ -125,7 +125,7 @@ namespace Aeolus
 					tech_up_attempted = true;
 				}
 			}
-			if (!tech_up_attempted && unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER)
+			if (!tech_up_attempted && unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER && m_research_signature_upgrades)
 			{
 				if (std::find(existingUpgrades.begin(), existingUpgrades.end(),
 					::sc2::UPGRADE_ID::BLINKTECH) == existingUpgrades.end())
