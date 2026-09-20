@@ -501,7 +501,7 @@ namespace Aeolus
                     mediator.registerHarassmentStatus(
                         aeolusbot,
                         oracle->tag,
-                        HarassmentStatus::HEADING_TO_BASE);
+                        HarassmentStatus::DEFENDING);
                 }
             }
             // ----------------------------
