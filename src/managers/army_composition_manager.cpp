@@ -25,6 +25,14 @@ namespace Aeolus
 	void ArmyCompositionManager::update(int iteration) 
 	{
 		// update 
+		if (iteration < 22 * 60 * 9)
+		{
+			m_best_army_composition =
+				std::map<::sc2::UNIT_TYPEID, float>{ 
+					{::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.00f} 
+			};
+			return;
+		}
 		if (iteration % 44 == 1)
 		{
 			auto& mediator = ManagerMediator::getInstance();
