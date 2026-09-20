@@ -56,8 +56,8 @@ namespace Aeolus
 				{
 					return std::make_unique<BuildStructure>(researchedFrom, 0, false)->execute(aeolusbot);
 				}
-				// waiting for minerals & gas, return false for now
-				return false;
+				// waiting for minerals & gas, return true for now
+				return true;
 			}
 
 			for (const auto& building : allUpgradeBuildings)

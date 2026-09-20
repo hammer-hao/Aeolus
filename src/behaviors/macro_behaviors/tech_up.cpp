@@ -4,6 +4,7 @@
 #include "../../Aeolus.h"
 #include "../../utils/unit_utils.h"
 #include "build_structure.h"
+#include "upgrades_controller.h"
 
 namespace Aeolus
 {
@@ -24,7 +25,7 @@ namespace Aeolus
 
 			techTreeRoute = constants::UPGRADE_TECH_REQUIREMENT.at(upgradeId);
 		}
-		else if (constants::ALL_STRUCTURES.find(std::get<::sc2::UNIT_TYPEID>(m_target)) 
+		else if (constants::ALL_STRUCTURES.find(std::get<::sc2::UNIT_TYPEID>(m_target))
 			!= constants::ALL_STRUCTURES.end())
 		{
 			// case 2: the target is a structure
@@ -78,6 +79,21 @@ namespace Aeolus
 		// no action is executed
 		if (!toBuild.has_value())
 		{
+			// add any extra upgrades needed as part of the tech, if neccesary
+			// this should not block us teching up
+			if (std::holds_alternative<::sc2::UNIT_TYPEID>(m_target))
+			{
+				if (std::get<::sc2::UNIT_TYPEID>(m_target) == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS)
+				{
+					UpgradesController doUpgrade(std::vector<::sc2::UPGRADE_ID>{::sc2::UPGRADE_ID::EXTENDEDTHERMALLANCE});
+					doUpgrade.execute(aeolusbot);
+				}
+				else if (std::get<::sc2::UNIT_TYPEID>(m_target) == ::sc2::UNIT_TYPEID::PROTOSS_STALKER)
+				{
+					UpgradesController doUpgrade(std::vector<::sc2::UPGRADE_ID>{::sc2::UPGRADE_ID::BLINKTECH});
+					doUpgrade.execute(aeolusbot);
+				}
+			}
 			return false;
 		}
 		
