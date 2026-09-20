@@ -824,6 +824,19 @@ namespace Aeolus
 			);
 		}
 
+		/**
+		* @brief returns the cost needed ({mineral, gas}) to research an upgrade
+		*/
+		std::pair<int, int> GetUpgradeCost(AeolusBot& aeolusbot, ::sc2::UPGRADE_ID upgrade)
+		{
+			return ManagerRequest<std::pair<int, int>, ::sc2::UPGRADE_ID>(
+				aeolusbot,
+				constants::ManagerName::UNIT_PROPERTY_MANAGER,
+				constants::ManagerRequestType::GET_UPGRADE_COST,
+				upgrade
+			);
+		}
+
 		::sc2::UNIT_TYPEID GetRequiredTech(AeolusBot& aeolusbot, ::sc2::UNIT_TYPEID unit_type)
 		{
 			return ManagerRequest<::sc2::UNIT_TYPEID, ::sc2::UNIT_TYPEID>(

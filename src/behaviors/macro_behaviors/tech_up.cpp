@@ -86,22 +86,24 @@ namespace Aeolus
 				if (std::get<::sc2::UNIT_TYPEID>(m_target) == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS)
 				{
 					UpgradesController doUpgrade(std::vector<::sc2::UPGRADE_ID>{::sc2::UPGRADE_ID::EXTENDEDTHERMALLANCE});
-					doUpgrade.execute(aeolusbot);
+					return doUpgrade.execute(aeolusbot);
 				}
 				else if (std::get<::sc2::UNIT_TYPEID>(m_target) == ::sc2::UNIT_TYPEID::PROTOSS_STALKER)
 				{
 					UpgradesController doUpgrade(std::vector<::sc2::UPGRADE_ID>{::sc2::UPGRADE_ID::BLINKTECH});
-					doUpgrade.execute(aeolusbot);
+					return doUpgrade.execute(aeolusbot);
 				}
 			}
 			return false;
 		}
 		
 		// there is something to build, build it.
-		auto cost = mediator.GetUnitCost(aeolusbot, toBuild.value());
-		if (mediator.GetMinerals(aeolusbot) < cost.first || mediator.GetVespene(aeolusbot) < cost.second)
-			// waiting for minerals & gas
-			return true;
+		// Don't wait for minerals and gas, since tech up has priority over adding more production
+
+		//auto cost = mediator.GetUnitCost(aeolusbot, toBuild.value());
+		//if (mediator.GetMinerals(aeolusbot) < cost.first || mediator.GetVespene(aeolusbot) < cost.second)
+		//	// waiting for minerals & gas
+		//	return true;
 		auto opponentRace = mediator.getOpponentRace(aeolusbot);
 		bool is_wall = opponentRace == ::sc2::Race::Zerg;
 		int base_index = opponentRace == ::sc2::Race::Zerg ? 1 : 0;
