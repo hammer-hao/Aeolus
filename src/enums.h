@@ -102,6 +102,7 @@ namespace Aeolus
 		HARASSING_AT_NATURAL,
 		HARASSING_AT_THIRD,
 		SURVIVING,
+		DEFENDING,
 	};
 
 	struct CompositionWeights
