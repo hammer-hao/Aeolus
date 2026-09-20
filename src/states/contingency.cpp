@@ -43,7 +43,7 @@ namespace Aeolus
 		// if against a terran and they are proxying, see if we can kill the scv before it finishes
 		if (!m_scv_killer_queued && mediator.getOpponentRace(aeolusbot) == ::sc2::Race::Terran)
 		{
-			auto& enemyStructures = mediator.GetAllEnemyStructures(aeolusbot);
+			auto enemyStructures = mediator.GetAllEnemyStructures(aeolusbot);
 			::sc2::Point2D enemyStart = mediator.GetExpansionLocations(aeolusbot).back();
 			for (const auto& structure : enemyStructures)
 			{
