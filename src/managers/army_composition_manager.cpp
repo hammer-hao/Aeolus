@@ -41,13 +41,13 @@ namespace Aeolus
 			CompositionWeights totalWeights = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 			for (const auto& enemy_unit : all_enemy)
 			{
-				auto it = ARMY_COMPOSITION_LOOKUP.find(enemy_unit);
+				auto it = ARMY_COMPOSITION_LOOKUP.find(enemy_unit->unit_type);
 				if (it == ARMY_COMPOSITION_LOOKUP.end())
 				{
 					continue;
 				}
 				CompositionWeights counterWeights = it->second;
-				int supplyCost = mediator.GetUnitSupplyCost(m_bot, enemy_unit);
+				int supplyCost = mediator.GetUnitSupplyCost(m_bot, enemy_unit->unit_type);
 				totalWeights.stalker += supplyCost * counterWeights.stalker;
 				totalWeights.archon += supplyCost * counterWeights.archon;
 				totalWeights.immortal += supplyCost * counterWeights.immortal;

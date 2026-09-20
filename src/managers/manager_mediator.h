@@ -490,12 +490,12 @@ namespace Aeolus
 		* Returns a list of unit types, one for each enemy unit that we have seen alive
 		* and have not killed. INCLUDES WORKERS!
 		*/
-		std::vector<::sc2::UNIT_TYPEID> GetAllSeenEnemyUnits(AeolusBot& aeolusbot)
+		::sc2::Units GetAllSeenEnemyUnits(AeolusBot& aeolusbot)
 		{
-			return ManagerRequest<std::vector<::sc2::UNIT_TYPEID>, int>(
+			return ManagerRequest<::sc2::Units, int>(
 				aeolusbot,
 				constants::ManagerName::UNIT_FILTER_MANAGER,
-				constants::ManagerRequestType::GET_KNOWN_ENEMY_UNIT_TYPES,
+				constants::ManagerRequestType::GET_KNOWN_ENEMY_UNITS,
 				0
 			);
 		}
@@ -1210,14 +1210,15 @@ namespace Aeolus
 		* simulates the engagement and returns whether our army is predicted to come out
 		* on top.
 		*/
-		bool PredictEngagement(AeolusBot& aeolusbot, std::vector<::sc2::UNIT_TYPEID> own_army, std::vector<::sc2::UNIT_TYPEID> opponent_army)
+		CombatSimulationResult PredictEngagement(AeolusBot& aeolusbot, ::sc2::Units own_army, ::sc2::Units opponent_army, ::sc2::Units opponent_static_defenses)
 		{
-			return ManagerRequest<bool, std::vector<::sc2::UNIT_TYPEID>, std::vector<::sc2::UNIT_TYPEID>>(
+			return ManagerRequest<CombatSimulationResult, ::sc2::Units, ::sc2::Units>(
 				aeolusbot,
 				constants::ManagerName::COMBAT_SIM_MANAGER,
 				constants::ManagerRequestType::PREDICT_ENGAGEMENT,
 				own_army,
-				opponent_army
+				opponent_army,
+				opponent_static_defenses
 			);
 		}
 
