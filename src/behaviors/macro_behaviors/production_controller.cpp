@@ -90,7 +90,7 @@ namespace Aeolus
 			bool tech_ready = false; // start false
 			for (const auto& structure : all_own_structures)
 			{
-				if (structure->unit_type == required_tech && structure->build_progress >= 1.0f)
+				if (structure->unit_type == required_tech)
 				{
 					tech_ready = true;
 					break;
