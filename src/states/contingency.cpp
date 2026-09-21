@@ -69,13 +69,10 @@ namespace Aeolus
 						::sc2::Units allWorkers = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::GATHERING);
 						if (allWorkers.size() < 2) continue;
 
-						std::sort(allWorkers.begin(), allWorkers.end(), [&](const ::sc2::Unit* workerA, const ::sc2::Unit* workerB) {
-							return (::sc2::DistanceSquared2D(workerA->pos, structure->pos) < ::sc2::DistanceSquared2D(workerB->pos, structure->pos));
-							});
-
-						mediator.AssignRole(aeolusbot, allWorkers[0], constants::UnitRole::SCV_KILLER);
-						mediator.AssignRole(aeolusbot, allWorkers[1], constants::UnitRole::SCV_KILLER);
-
+						auto worker1 = mediator.SelectWorkerClosestTo(aeolusbot, structure->pos).value();
+						auto worker2 = mediator.SelectWorkerClosestTo(aeolusbot, structure->pos).value();
+						mediator.AssignRole(aeolusbot, worker1, constants::UnitRole::SCV_KILLER);
+						mediator.AssignRole(aeolusbot, worker2, constants::UnitRole::SCV_KILLER);
 						m_scv_killer_queued = true;
 						break;
 					};
@@ -141,13 +138,23 @@ namespace Aeolus
 			if (enemySCVs.empty())
 			{
 				::sc2::Point2D target = mediator.GetAtttackTarget(aeolusbot);
-				if (::sc2::Distance2D(scvKiller->pos, target) < 9.0f)
+				::sc2::Point2D enemyStart = mediator.GetExpansionLocations(aeolusbot).back();
+				if (sc2::DistanceSquared2D(target, aeolusbot.Observation()->GetStartLocation()) > 5000.0f &&
+					(sc2::DistanceSquared2D(target, enemyStart) <= 5000.0f))
 				{
-					combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+					_releaseSCVKillers(aeolusbot);
+					aeolusbot.ChangeState(MakeState<ConsolidateState>());
 				}
-				else 
+				else
 				{
-					combat_behavior->AddBehavior(std::make_unique<PathToTarget>(target));
+					if (::sc2::Distance2D(scvKiller->pos, target) < 9.0f)
+					{
+						combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+					}
+					else
+					{
+						combat_behavior->AddBehavior(std::make_unique<PathToTarget>(target));
+					}
 				}
 			}
 			else
