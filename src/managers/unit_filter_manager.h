@@ -63,8 +63,8 @@ namespace Aeolus
 		::sc2::Units m_enemy_static_defenses;
 		::sc2::Units m_enemy_cloaked_or_burrowed_units;
 
-		// Map to keep track of the known enemy units that are still alive
-		std::unordered_map<::sc2::Tag, ::sc2::UNIT_TYPEID> m_knownEnemyUnits;
+		// Set to keep track of the known enemy units that are still alive
+		std::unordered_map<::sc2::Tag, const ::sc2::Unit*> m_knownEnemyUnits;
 
 		// Map to keep track of the known adept shades
 		std::unordered_map<::sc2::Tag, std::pair<::sc2::Tag, int>> m_adeptShadeTracker;

@@ -10,6 +10,13 @@
 
 namespace Aeolus
 {
+	struct CombatSimulationResult {
+		int supplyLost;
+		double supplyPercentageRemaining;
+		int enemySupplyLost;
+		double enemySupplyPercentageRemaining;
+	};
+
 	struct TilePos {
 		int x, y;
 
@@ -95,6 +102,7 @@ namespace Aeolus
 		HARASSING_AT_NATURAL,
 		HARASSING_AT_THIRD,
 		SURVIVING,
+		DEFENDING,
 	};
 
 	struct CompositionWeights

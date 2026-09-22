@@ -87,9 +87,9 @@ namespace Aeolus
 		{
 			return m_enemy_cloaked_or_burrowed_units;
 		}
-		case (constants::ManagerRequestType::GET_KNOWN_ENEMY_UNIT_TYPES):
+		case (constants::ManagerRequestType::GET_KNOWN_ENEMY_UNITS):
 		{
-			std::vector<::sc2::UNIT_TYPEID> result;
+			::sc2::Units result;
 			std::transform(m_knownEnemyUnits.begin(), m_knownEnemyUnits.end(), std::back_inserter(result),
 				[](const auto& pair) {return pair.second; });
 			return result;
@@ -220,7 +220,8 @@ namespace Aeolus
 					if (unit_type == static_cast<int>(::sc2::UNIT_TYPEID::PROTOSS_PHOTONCANNON) ||
 						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::ZERG_SPORECRAWLER) ||
 						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::ZERG_SPINECRAWLER) ||
-						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::TERRAN_MISSILETURRET))
+						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::TERRAN_MISSILETURRET) ||
+						unit_type == static_cast<int>(::sc2::UNIT_TYPEID::TERRAN_BUNKER))
 					{
 						m_enemy_static_defenses.push_back(unit);
 					}
@@ -228,7 +229,7 @@ namespace Aeolus
 				else
 				{
 					m_enemy_units.push_back(unit);
-					m_knownEnemyUnits.insert({ unit->tag, unit->unit_type });
+					m_knownEnemyUnits[unit->tag] = unit;
 				}
 				if (unit->is_burrowed || unit->cloak == ::sc2::Unit::CloakState::Cloaked ||
 					unit->cloak == ::sc2::Unit::CloakState::CloakedDetected)

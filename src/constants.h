@@ -94,7 +94,7 @@ namespace Aeolus {
 			GET_ALL_ENEMY_TOWN_HALLS,
 			GET_ENEMY_STATIC_DEFENSES,
 			GET_ENEMY_CLOAKED_AND_BURROWED_UNITS,
-			GET_KNOWN_ENEMY_UNIT_TYPES,
+			GET_KNOWN_ENEMY_UNITS,
 			IS_STRUCTURE_PRESENT,
 
 			// UnitPropertyManager
@@ -175,6 +175,7 @@ namespace Aeolus {
 			HARASS_ADEPT,
 			ADEPT_SHADE,
 			ARCHON_MAKER,
+			SCV_KILLER
 		};
 		std::string ManagerNameToString(ManagerName name);
 		std::string ManagerRequestTypeToString(ManagerRequestType requestType);

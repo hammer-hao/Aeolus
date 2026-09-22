@@ -8,7 +8,7 @@ namespace Aeolus
 	{
 		ManagerMediator& mediator = ManagerMediator::getInstance();
 
-		if (mediator.GetMinerals(aeolusbot) < 400) return false;
+		if (mediator.GetMinerals(aeolusbot) < 275) return false;
 
 		size_t num_pending = mediator.GetNumberPending(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_NEXUS);
 

@@ -269,11 +269,23 @@ namespace Aeolus
             if (harassmentTracker.find(oracle->tag) ==
                 harassmentTracker.end())
             {
-                mediator.registerHarassmentStatus(
-                    aeolusbot,
-                    oracle->tag,
-                    HarassmentStatus::HEADING_TO_BASE);
-
+                // oracle just appeared, not registered as a harassment unit yet
+                if (mediator.GetGroundThreatsNearBases(aeolusbot).empty())
+                {
+                    // no ground threats near bases, go harassing
+                    mediator.registerHarassmentStatus(
+                        aeolusbot,
+                        oracle->tag,
+                        HarassmentStatus::HEADING_TO_BASE);
+                }
+                else
+                {
+                    // ground threats found
+                    mediator.registerHarassmentStatus(
+                        aeolusbot,
+                        oracle->tag,
+                        HarassmentStatus::DEFENDING);
+                }
                 continue;
             }
 
@@ -489,10 +501,74 @@ namespace Aeolus
                     mediator.registerHarassmentStatus(
                         aeolusbot,
                         oracle->tag,
-                        HarassmentStatus::HEADING_TO_BASE);
+                        HarassmentStatus::DEFENDING);
                 }
             }
+            // ----------------------------
+            // DEFENDING
+            // ----------------------------
+            else if (currentStatus ==
+                HarassmentStatus::DEFENDING)
+            {
+                if ((oracle->shield / oracle->shield_max)
+                    <= 0.15f ||
+                    beamCurrentlyOff && oracle->energy < 25.0f)
+                {
+                    mediator.registerHarassmentStatus(
+                        aeolusbot,
+                        oracle->tag,
+                        HarassmentStatus::SURVIVING);
+                    continue;
+                }
 
+                auto groundThreats = mediator.GetGroundThreatsNearBases(aeolusbot);
+                if (groundThreats.empty())
+                {
+                    // no more ground threats
+                    mediator.registerHarassmentStatus(
+                        aeolusbot,
+                        oracle->tag,
+                        HarassmentStatus::HEADING_TO_BASE);
+                    continue;
+                }
+                auto enemiesInAttackRange =
+                    mediator.GetUnitsInAtttackRange(
+                        aeolusbot,
+                        oracle,
+                        groundThreats);
+                if (!enemiesInAttackRange.empty())
+                {
+                    if (beamCurrentlyOff &&
+                        oracle->energy > 40.0f)
+                    {
+                        oracle_behavior->AddBehavior(
+                            std::make_unique<UseAbility>(
+                                ::sc2::ABILITY_ID::
+                                BEHAVIOR_PULSARBEAMON));
+                    }
+                    oracle_behavior->AddBehavior(
+                        std::make_unique<
+                        ShootTargetInRange>(
+                            enemiesInAttackRange));
+                    oracle_behavior->AddBehavior(
+                        std::make_unique<
+                        MoveTowardTargetSafely>(
+                            enemiesInAttackRange));
+                    oracle_behavior->AddBehavior(
+                        std::make_unique<
+                        KeepUnitSafe>());
+                }
+                else
+                {
+                    auto enemyTarget =
+                        utils::PickAttackTarget(
+                           groundThreats);
+                    oracle_behavior->AddBehavior(
+                        std::make_unique<
+                        MoveTowardTargetSafely>(
+                            groundThreats));
+                }
+            }
             aeolusbot.RegisterBehavior(
                 std::move(oracle_behavior));
         }

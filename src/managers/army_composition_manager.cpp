@@ -24,22 +24,35 @@ namespace Aeolus
 
 	void ArmyCompositionManager::update(int iteration) 
 	{
-		// update 
+		auto& mediator = ManagerMediator::getInstance();
+		auto all_enemy = mediator.GetAllSeenEnemyUnits(m_bot);
+		::std::map<::sc2::UNIT_TYPEID, float> stalkers_only({ { ::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.00f } });
+
+		if (std::count_if(all_enemy.begin(), all_enemy.end(), [](const ::sc2::Unit* unit) {
+			return (unit->unit_type != ::sc2::UNIT_TYPEID::TERRAN_SCV &&
+				unit->unit_type != ::sc2::UNIT_TYPEID::TERRAN_MULE &&
+				unit->unit_type != ::sc2::UNIT_TYPEID::ZERG_DRONE &&
+				unit->unit_type != ::sc2::UNIT_TYPEID::PROTOSS_PROBE);
+			}) < 20)
+		{
+			// not enough enemy units to tell
+			m_best_army_composition = stalkers_only;
+			return;
+		}
+
 		if (iteration % 44 == 1)
 		{
-			auto& mediator = ManagerMediator::getInstance();
-			auto all_enemy = mediator.GetAllSeenEnemyUnits(m_bot);
 
 			CompositionWeights totalWeights = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 			for (const auto& enemy_unit : all_enemy)
 			{
-				auto it = ARMY_COMPOSITION_LOOKUP.find(enemy_unit);
+				auto it = ARMY_COMPOSITION_LOOKUP.find(enemy_unit->unit_type);
 				if (it == ARMY_COMPOSITION_LOOKUP.end())
 				{
 					continue;
 				}
 				CompositionWeights counterWeights = it->second;
-				int supplyCost = mediator.GetUnitSupplyCost(m_bot, enemy_unit);
+				int supplyCost = mediator.GetUnitSupplyCost(m_bot, enemy_unit->unit_type);
 				totalWeights.stalker += supplyCost * counterWeights.stalker;
 				totalWeights.archon += supplyCost * counterWeights.archon;
 				totalWeights.immortal += supplyCost * counterWeights.immortal;

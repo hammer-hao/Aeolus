@@ -90,7 +90,7 @@ namespace Aeolus
 	void BuildOrderState::_ensureContingencyResponse(AeolusBot& aeolusbot)
 	{
 		auto& mediator = ManagerMediator::getInstance();
-		std::vector<::sc2::UNIT_TYPEID> enemyUnits = mediator.GetAllSeenEnemyUnits(aeolusbot);
+		::sc2::Units enemyUnits = mediator.GetAllSeenEnemyUnits(aeolusbot);
 		::sc2::Units enemyStructures = mediator.GetAllEnemyStructures(aeolusbot);
 		std::vector<ContingencyPlan> contingencyPlans = mediator.getContingencyPlans(aeolusbot);
 
@@ -100,7 +100,7 @@ namespace Aeolus
 			for (const auto& condition : contingencyPlan.conditions)
 			{
 				if (!_isConditionSatisfied(condition, aeolusbot, enemyUnits) 
-					&& !_isConditionSatisfied(condition, aeolusbot, enemyStructures)) 
+					&& !_isConditionSatisfiedByStructure(condition, aeolusbot, enemyStructures)) 
 				{
 					meets_criteria = false;
 					break;
@@ -131,7 +131,7 @@ namespace Aeolus
 		}
 	}
 
-	bool BuildOrderState::_isConditionSatisfied(const ScoutingCondition& condition, AeolusBot& aeolusbot, const std::vector<::sc2::UNIT_TYPEID>& enemyUnits)
+	bool BuildOrderState::_isConditionSatisfied(const ScoutingCondition& condition, AeolusBot& aeolusbot, const ::sc2::Units& enemyUnits)
 	{
 		int before_gameloop = static_cast<int>(condition.before_seconds * 22.4f);
 		if (aeolusbot.Observation()->GetGameLoop() > before_gameloop) return false;
@@ -139,7 +139,7 @@ namespace Aeolus
 		int count = 0;
 		for (const auto& unit : enemyUnits)
 		{
-			if (unit == condition.unitType)
+			if (unit->unit_type == condition.unitType)
 			{
 				count++;
 			}
@@ -147,7 +147,7 @@ namespace Aeolus
 		return count >= condition.count;
 	}
 
-	bool BuildOrderState::_isConditionSatisfied(const ScoutingCondition& condition, AeolusBot& aeolusbot, const ::sc2::Units& enemyStructures)
+	bool BuildOrderState::_isConditionSatisfiedByStructure(const ScoutingCondition& condition, AeolusBot& aeolusbot, const ::sc2::Units& enemyStructures)
 	{
 		int before_gameloop = static_cast<int>(condition.before_seconds * 22.4f);
 		if (aeolusbot.Observation()->GetGameLoop() > before_gameloop) return false;

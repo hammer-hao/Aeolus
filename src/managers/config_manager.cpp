@@ -136,8 +136,8 @@ namespace Aeolus
                 plan.move_out_supply =
                     plan_json["move_out_supply"].get<int>();
 
-                plan.cannons_to_add =
-                    plan_json["cannons_to_add"].get<int>();
+                plan.batteries_to_add =
+                    plan_json["batteries_to_add"].get<int>();
 
                 plan.check_no_enemy_expansion =
                     plan_json.value("check_no_enemy_expansion", false);
