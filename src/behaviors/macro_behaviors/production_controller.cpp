@@ -214,6 +214,13 @@ namespace Aeolus
 		if (existing_production_count >= std::ceil(production_demand))
 			return ProductionBuildResult::NotNeeded;
 
+		std::pair<int, int> cost = mediator.GetUnitCost(aeolusbot, production_structure_id);
+		if (mediator.GetMinerals(aeolusbot) < cost.first ||
+			mediator.GetVespene(aeolusbot) < cost.second)
+		{
+			return ProductionBuildResult::Blocked;
+		}
+
 		// We DO need more production.
 		BuildStructure build(
 			production_structure_id,
