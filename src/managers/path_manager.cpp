@@ -202,13 +202,13 @@ namespace Aeolus
 			// add the range of marines + 1;
 			double ground_cost = 20;
 			double ground_range = 6;
-			m_ground_grid.AddCost(unit->pos.x, unit->pos.y, ground_range, ground_cost);
-			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + 1.0, ground_cost);
+			m_ground_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + Config::range_buffer, ground_cost);
+			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + 1.0 + Config::range_buffer, ground_cost);
 
 			double air_cost = 20;
 			double air_Range = 6;
-			m_air_grid.AddCost(unit->pos.x, unit->pos.y, air_Range, air_cost);
-			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, air_Range + 1.0, air_cost);
+			m_air_grid.AddCost(unit->pos.x, unit->pos.y, air_Range + Config::range_buffer, air_cost);
+			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, air_Range + 1.0 + Config::range_buffer, air_cost);
 		}
 		else if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_DISRUPTORPHASED)
 		{

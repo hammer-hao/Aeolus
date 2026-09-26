@@ -22,6 +22,8 @@ namespace Aeolus
 
 		void declareExit();
 
+		void OnEnter(AeolusBot& aeolusbot) override;
+
 	protected:
 		/**
 		* @brief Perform bookkeeping macro tasks.

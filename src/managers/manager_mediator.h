@@ -280,6 +280,20 @@ namespace Aeolus
 		}
 
 		/**
+		* @brief Select the closest workers to the target location. Prioritize workers not carrying resources.
+		*/
+		std::optional<::sc2::Units> SelectWorkersClosestTo(AeolusBot& aeolusbot, ::sc2::Point2D target_location, int num_needed)
+		{
+			return ManagerRequest<std::optional<::sc2::Units>, ::sc2::Point2D, int>(
+				aeolusbot,
+				constants::ManagerName::RESOURCE_MANAGER,
+				constants::ManagerRequestType::SELECT_WORKERS_TO_TARGET,
+				target_location,
+				num_needed
+			);
+		}
+
+		/**
 		* @brief Clears the worker assignment for MINERALS ONLY.
 		*/
 		int ClearWorkerAssignment(AeolusBot& aeolusbot, const ::sc2::Unit* worker)

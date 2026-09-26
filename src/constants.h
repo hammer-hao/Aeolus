@@ -44,6 +44,7 @@ namespace Aeolus {
 			GET_WORKERS_TO_GEYSER,
 			ASSIGN_INITIAL_WORKERS,
 			SELECT_WORKER_TO_TARGET,
+			SELECT_WORKERS_TO_TARGET,
 
 			// BudgetManager
 			GET_MINERALS,
@@ -175,7 +176,8 @@ namespace Aeolus {
 			HARASS_ADEPT,
 			ADEPT_SHADE,
 			ARCHON_MAKER,
-			SCV_KILLER
+			SCV_KILLER,
+			WORKER_SOLDIERS,
 		};
 		std::string ManagerNameToString(ManagerName name);
 		std::string ManagerRequestTypeToString(ManagerRequestType requestType);

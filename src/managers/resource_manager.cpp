@@ -127,6 +127,13 @@ namespace Aeolus
 			::sc2::Point2D target_location = std::get<0>(params);
 			return _selectWorker(target_location);
 		}
+		case (constants::ManagerRequestType::SELECT_WORKERS_TO_TARGET):
+		{
+			auto params = std::any_cast<std::tuple<::sc2::Point2D, int>>(args);
+			::sc2::Point2D target_location = std::get<0>(params);
+			int num_needed = std::get<1>(params);
+			return _selectWorkers(target_location, num_needed);
+		}
 		default: return 0;
 		}
 	}
@@ -416,5 +423,59 @@ namespace Aeolus
 		auto closest_worker = utils::GetClosestUnitTo(target_position, all_available_workers);
 		if (closest_worker == nullptr) return std::nullopt;
 		return std::optional<const sc2::Unit*>{closest_worker};
+	}
+
+	std::optional<::sc2::Units> ResourceManager::_selectWorkers(::sc2::Point2D target_position, int numNeeded)
+	{
+		::sc2::Units result;
+
+		::sc2::Units all_workers = ManagerMediator::getInstance().GetUnitsFromRole(m_bot, constants::UnitRole::GATHERING);
+		::sc2::Units available_mineral_workers;
+		::sc2::Units mineral_workers;
+		::sc2::Units working_workers;
+		for (const auto& worker : all_workers)
+		{
+			if (!utils::IsWorkerCarryingResource(worker)
+				&& m_worker_to_patch.find(worker) != m_worker_to_patch.end()
+				&& m_worker_to_geyser.find(worker) == m_worker_to_geyser.end())
+			{
+				available_mineral_workers.push_back(worker);
+			}
+			else if (m_worker_to_patch.find(worker) != m_worker_to_patch.end())
+			{
+				mineral_workers.push_back(worker);
+			}
+			else
+			{
+				working_workers.push_back(worker);
+			}
+		}
+
+		auto comparePos = [&](const ::sc2::Unit* unitA, const ::sc2::Unit* unitB) { 
+			return ::sc2::DistanceSquared2D(unitA->pos, target_position) 
+				< ::sc2::DistanceSquared2D(unitB->pos, target_position); 
+			};
+
+		std::sort(available_mineral_workers.begin(), available_mineral_workers.end(), comparePos);
+		std::sort(mineral_workers.begin(), mineral_workers.end(), comparePos);
+		std::sort(working_workers.begin(), working_workers.end(), comparePos);
+
+		int count = 0;
+		for (const auto& worker : available_mineral_workers)
+		{
+			result.push_back(worker);
+			if (++count == numNeeded) return result;
+		}
+		for (const auto& worker : mineral_workers)
+		{
+			result.push_back(worker);
+			if (++count == numNeeded) return result;
+		}
+		for (const auto & worker : working_workers)
+		{
+			result.push_back(worker);
+			if (++count == numNeeded) return result;
+		}
+		return std::nullopt;
 	}
 }

@@ -57,6 +57,11 @@ namespace Aeolus
 			<< getName() << std::endl;
 	}
 
+    void BaseState::OnEnter(AeolusBot& aeolusbot)
+    {
+        aeolusbot.Actions()->SendChat(static_cast<std::string>(getName()));
+    }
+
 	void BaseState::doBookKeepingMacroTasks(AeolusBot& aeolusbot)
 	{
 		aeolusbot.RegisterBehavior(std::make_unique<Mining>());

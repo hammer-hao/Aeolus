@@ -31,7 +31,7 @@ namespace Aeolus
 		virtual void OnExit() {}
 
 		// Called once for every unit destroyed. In case a state needs to track units lost
-		virtual void OnUnitDestroyed(AeolusBot& aeolusbot, const ::sc2::Unit*) {}
+		virtual void OnUnitDestroyed(AeolusBot& aeolusbot, const ::sc2::Unit* unit) {}
 	};
 
 	// Helper to construct states

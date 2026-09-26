@@ -133,6 +133,15 @@ source_group("Source Files\\states" FILES
     states/base_state.cpp
     states/contingency.cpp)
 
+source_group("Source Files\\states\\contingencies" FILES
+    states/contingencies/cannon_rush.cpp
+    states/contingencies/one_base_marines.cpp
+    states/contingencies/proxy_gateways.cpp
+    states/contingencies/proxy_pylon.cpp
+    states/contingencies/terran_proxy.cpp
+    states/contingencies/twelve_pool.cpp
+    states/contingencies/worker_rush.cpp)
+
 source_group("Header Files\\states" FILES
     states/bot_state.h
     states/consolidate.h
@@ -140,6 +149,15 @@ source_group("Header Files\\states" FILES
     states/build_order_state.h
     states/base_state.h
     states/contingency.h)
+
+source_group("Header Files\\states\\contingencies" FILES
+    states/contingencies/cannon_rush.h
+    states/contingencies/one_base_marines.h
+    states/contingencies/proxy_gateways.h
+    states/contingencies/proxy_pylon.h
+    states/contingencies/terran_proxy.h
+    states/contingencies/twelve_pool.h
+    states/contingencies/worker_rush.h)
 
 source_group("Source Files\\Pathing" FILES
     pathing/grid.cpp
@@ -255,6 +273,13 @@ set(bot_sources
     buildorder/unitbuildorderstep.cpp
     buildorder/upgradebuildorderstep.cpp
     buildorder/scoutingbuildorderstep.cpp
+    states/contingencies/cannon_rush.cpp
+    states/contingencies/one_base_marines.cpp
+    states/contingencies/proxy_gateways.cpp
+    states/contingencies/proxy_pylon.cpp
+    states/contingencies/terran_proxy.cpp
+    states/contingencies/twelve_pool.cpp
+    states/contingencies/worker_rush.cpp
 )
 
 set(bot_headers
@@ -339,7 +364,14 @@ set(bot_headers
     buildorder/unitbuildorderstep.h
     buildorder/upgradebuildorderstep.h
     buildorder/scoutingbuildorderstep.h
-    buildorder/contingency_plan.h)
+    buildorder/contingency_plan.h
+    states/contingencies/cannon_rush.h
+    states/contingencies/one_base_marines.h
+    states/contingencies/proxy_gateways.h
+    states/contingencies/proxy_pylon.h
+    states/contingencies/terran_proxy.h
+    states/contingencies/twelve_pool.h
+    states/contingencies/worker_rush.h)
 
 include(FetchContent)
 

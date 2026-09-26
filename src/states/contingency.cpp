@@ -24,230 +24,230 @@
 #include "consolidate.h"
 #include "../utils/unit_utils.h"
 
+#include "contingencies/worker_rush.h"
+#include "contingencies/cannon_rush.h"
+#include "contingencies/proxy_gateways.h"
+#include "contingencies/terran_proxy.h"
+#include "contingencies/one_base_marines.h"
+#include "contingencies/proxy_pylon.h"
+#include "contingencies/twelve_pool.h"
+
 namespace Aeolus
 {
-	ContingencyState::ContingencyState(const ContingencyPlan& contingencyPlan) : m_plan(contingencyPlan), m_build_defense_queued(false)
-	{
-	}
-
 	std::string_view ContingencyState::getName() const
 	{
 		return "CONTINGENCY";
 	}
 
-	void ContingencyState::micro(AeolusBot& aeolusbot)
+	bool ContingencyState::ensureContingencyResponse(AeolusBot& aeolusbot)
 	{
-		if (aeolusbot.Observation()->GetGameLoop() < 100) return;
-		auto& mediator = ManagerMediator::getInstance();
+		if (aeolusbot.Observation()->GetGameLoop() % 10 != 1) return false;
 
-		// if against a terran and they are proxying, see if we can kill the scv before it finishes
-		if (!m_scv_killer_queued && mediator.getOpponentRace(aeolusbot) == ::sc2::Race::Terran)
+		::sc2::Race opponentRace = ManagerMediator::getInstance().getOpponentRace(aeolusbot);
+
+		if (opponentRace == ::sc2::Race::Protoss)
 		{
-			auto enemyStructures = mediator.GetAllEnemyStructures(aeolusbot);
-			::sc2::Point2D enemyStart = mediator.GetExpansionLocations(aeolusbot).back();
-			for (const auto& structure : enemyStructures)
-			{
-				if (sc2::DistanceSquared2D(structure->pos, aeolusbot.Observation()->GetStartLocation()) < 5000.0f ||
-					(sc2::DistanceSquared2D(structure->pos, enemyStart) > 5000.0f))
-				{
-					// is a proxy
-					if (structure->build_progress >= 1.0f) continue;
-					auto workerCandidate = mediator.SelectWorkerClosestTo(aeolusbot, structure->pos);
-					if (!workerCandidate.has_value()) continue;
-					const ::sc2::Unit* worker = workerCandidate.value();
-					float pathDistance = aeolusbot.Query()->PathingDistance(worker, structure->pos);
-					{
-						auto& typedata = aeolusbot.Observation()->GetUnitTypeData();
-						float speed = typedata[worker->unit_type].movement_speed;
-						float framesNeeded = (pathDistance / speed) * 16;
-
-						float totalBuildTime = typedata[structure->unit_type].build_time;
-						float buildTimeLeft = totalBuildTime * (1 - structure->build_progress);
-						float timeLeftForKillingSCV = buildTimeLeft - framesNeeded;
-						if (timeLeftForKillingSCV < 105) continue;
-
-						::sc2::Units allWorkers = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::GATHERING);
-						if (allWorkers.size() < 2) continue;
-
-						auto worker1 = mediator.SelectWorkerClosestTo(aeolusbot, structure->pos).value();
-						auto worker2 = mediator.SelectWorkerClosestTo(aeolusbot, structure->pos).value();
-						mediator.AssignRole(aeolusbot, worker1, constants::UnitRole::SCV_KILLER);
-						mediator.AssignRole(aeolusbot, worker2, constants::UnitRole::SCV_KILLER);
-						m_scv_killer_queued = true;
-						break;
-					};
-				}
-			}
+			return ensureResponseAgainstProtoss(aeolusbot);
 		}
-
-		_doSCVKillerMicro(aeolusbot);
-
-		// during the build order, we generally want to defend. However, we would still like to move out
-		// if we have enought supply
-		::sc2::Units forces = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
-
-		if (!forces.empty())
+		else if (opponentRace == ::sc2::Race::Terran)
 		{
-			int baseToDefend = mediator.getOpponentRace(aeolusbot) == ::sc2::Race::Zerg ? 1 : 0;
-			::sc2::Point2D target = mediator.GetDefenseTarget(aeolusbot, baseToDefend);
-			doGeneralMicro(aeolusbot, forces, target);
+			return ensureResponseAgainstTerran(aeolusbot);
 		}
-
-		// Enable prism pick up during contingency if one has been created (not likely)
-		doPrismPickUpMicro(aeolusbot);
-
-		// We are open to doing Oracle harass during the contingency stage
-		// doOracleDefensiveMicro(aeolusbot);
-
-		// Perform Adept Harassment Micro
-		doAdeptHarassMicro(aeolusbot);
-	}
-
-	void ContingencyState::_doSCVKillerMicro(AeolusBot& aeolusbot)
-	{
-		auto& mediator = ManagerMediator::getInstance();
-		auto scvKillers = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::SCV_KILLER);
-		if (scvKillers.empty()) return;
-
-		std::vector<::sc2::Point2D> starting_points;
-		for (const auto& unit : scvKillers)
+		else if (opponentRace == ::sc2::Race::Zerg)
 		{
-			starting_points.push_back(unit->pos);
+			return ensureResponseAgainstZerg(aeolusbot);
 		}
-
-		std::vector<::sc2::Units> closeEnemies = mediator.GetEnemyUnitsInRangeMap(aeolusbot, starting_points, 12);
-		std::set<::sc2::Tag> seen;
-		::sc2::Units enemySCVs;
-
-		for (const auto& group : closeEnemies)
+		else
 		{
-			for (const auto* enemy : group)
-			{
-				if (enemy->unit_type == ::sc2::UNIT_TYPEID::TERRAN_SCV &&
-					seen.insert(enemy->tag).second)
-				{
-					enemySCVs.push_back(enemy);
-				}
-			}
-		}
-
-		for (const auto& scvKiller : scvKillers)
-		{
-			auto combat_behavior = std::make_unique<MicroBehavior>(scvKiller);
-
-			if (enemySCVs.empty())
-			{
-				::sc2::Point2D target = mediator.GetAtttackTarget(aeolusbot);
-				::sc2::Point2D enemyStart = mediator.GetExpansionLocations(aeolusbot).back();
-				if (sc2::DistanceSquared2D(target, aeolusbot.Observation()->GetStartLocation()) > 5000.0f &&
-					(sc2::DistanceSquared2D(target, enemyStart) <= 5000.0f))
-				{
-					_releaseSCVKillers(aeolusbot);
-					aeolusbot.ChangeState(MakeState<ConsolidateState>());
-				}
-				else
-				{
-					if (::sc2::Distance2D(scvKiller->pos, target) < 9.0f)
-					{
-						combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-					}
-					else
-					{
-						combat_behavior->AddBehavior(std::make_unique<PathToTarget>(target));
-					}
-				}
-			}
-			else
-			{
-				const ::sc2::Unit* toTarget = utils::PickAttackTarget(enemySCVs);
-				combat_behavior->AddBehavior(std::make_unique<AttackTargetUnit>(
-					toTarget
-				));
-			}
-			aeolusbot.RegisterBehavior(std::move(combat_behavior));
-		}
-
-	}
-
-	void ContingencyState::macro(AeolusBot& aeolusbot)
-	{
-		auto& mediator = ManagerMediator::getInstance();
-		doBookKeepingMacroTasks(aeolusbot);
-
-		if (!m_build_defense_queued)
-		{
-			const int base_location = mediator.getOpponentRace(aeolusbot) == ::sc2::Race::Zerg ? 1 : 0;
-			if (m_plan.batteries_to_add == 0)
-			{
-				m_build_defense_queued = true;
-			}
-			else
-			{
-				bool stillBuildingCyberCore = false;
-				if (mediator.IsStructureAvailable(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE))
-				{
-					for (const auto& structure : mediator.GetAllOwnStructures(aeolusbot))
-					{
-						if (structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE &&
-							structure->build_progress > 0.9f)
-						{
-							for (int i = 0; i < m_plan.batteries_to_add; ++i)
-							{
-								const ::sc2::UNIT_TYPEID to_build = ::sc2::UNIT_TYPEID::PROTOSS_SHIELDBATTERY;
-								const bool is_wall = true;
-								aeolusbot.RegisterBehavior(std::make_unique<BuildStructure>(to_build, base_location, is_wall));
-							}
-							m_build_defense_queued = true;
-						}
-					}
-				}
-				else if (mediator.GetNumberPending(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE) == 0)
-				{
-					// need to build the cyber core
-					std::make_unique<BuildStructure>(::sc2::UNIT_TYPEID::PROTOSS_CYBERNETICSCORE, base_location, true)->execute(aeolusbot);
-				}
-			}
-		}
-
-		// auto supply since we are no longer relying on a build order
-		aeolusbot.RegisterBehavior(std::make_unique<AutoSupply>());
-
-		const std::map<::sc2::UNIT_TYPEID, float> armyComp(m_plan.army_composition.begin(), m_plan.army_composition.end());
-		aeolusbot.RegisterBehavior(std::make_unique<ProductionController>(armyComp, false));
-		aeolusbot.RegisterBehavior(std::make_unique<SpawnController>(armyComp));
-		aeolusbot.RegisterBehavior(std::make_unique<BuildGeysers>());
-
-		// expanding has the least priority
-		aeolusbot.RegisterBehavior(std::make_unique<Expand>());
-
-		if (mediator.GetMinerals(aeolusbot) > 250)
-		{
-			aeolusbot.RegisterBehavior(std::make_unique<BuildWorkers>(
-				mediator.GetOwnReadyTownHalls(aeolusbot).size() * 22)
-			);
-		}
-
-		::sc2::Units forces = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
-		if (forces.size() > 4)
-		{
-			_releaseSCVKillers(aeolusbot);
-			aeolusbot.ChangeState(MakeState<ConsolidateState>());
-		}
-		else if (aeolusbot.Observation()->GetFoodUsed() > m_plan.move_out_supply)
-		{
-			_releaseSCVKillers(aeolusbot);
-			aeolusbot.ChangeState(MakeState<ForwardPressureState>());
+			if (ensureResponseAgainstProtoss(aeolusbot)) return true;
+			if (ensureResponseAgainstTerran(aeolusbot)) return true;
+			if (ensureResponseAgainstZerg(aeolusbot)) return true;
+			return false;
 		}
 	}
 
-	void ContingencyState::_releaseSCVKillers(AeolusBot& aeolusbot)
+	bool ContingencyState::ensureResponseAgainstProtoss(AeolusBot& aeolusbot)
 	{
 		auto& mediator = ManagerMediator::getInstance();
-		::sc2::Units toRelease = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::SCV_KILLER);
+		auto& unitTypes = aeolusbot.Observation()->GetUnitTypeData();
+		::sc2::Units allEnemy = mediator.GetAllSeenEnemyUnits(aeolusbot);
+		int gameLoop = aeolusbot.Observation()->GetGameLoop();
 
-		for (const auto& unit : toRelease)
+		const ::sc2::Point2D enemyStartLocation = ManagerMediator::getInstance().GetExpansionLocations(aeolusbot).back();
+		int seenProbes = 0;
+
+		for (const auto& unit : allEnemy)
 		{
-			mediator.AssignRole(aeolusbot, unit, constants::UnitRole::GATHERING);
+			if (gameLoop < 2688)
+			{
+				if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_PHOTONCANNON &&
+					sc2::DistanceSquared2D(unit->pos, aeolusbot.Observation()->GetStartLocation()) < 5000.0f)
+				{
+					sendChatTag(aeolusbot, "cannon_rush");
+					aeolusbot.ChangeState(MakeState<CannonRush>());
+					return true;
+				}
+				if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_GATEWAY &&
+					(sc2::DistanceSquared2D(unit->pos, aeolusbot.Observation()->GetStartLocation()) < 5000.0f ||
+						sc2::DistanceSquared2D(unit->pos, enemyStartLocation) > 5000.0f))
+				{
+					sendChatTag(aeolusbot, "proxy_gateway");
+					aeolusbot.ChangeState(MakeState<ProxyGateways>());
+					return true;
+				}
+				if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_PYLON && (sc2::DistanceSquared2D(unit->pos, aeolusbot.Observation()->GetStartLocation()) < 5000.0f ||
+					sc2::DistanceSquared2D(unit->pos, enemyStartLocation) > 5000.0f))
+				{
+					sendChatTag(aeolusbot, "proxy_pylon");
+					aeolusbot.ChangeState(MakeState<ProxyPylon>());
+					return true;
+				}
+				if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_PROBE) seenProbes++;
+			}
 		}
+		if (seenProbes >= 8 && gameLoop < (22.4 * 60))
+		{
+			sendChatTag(aeolusbot, "worker_rush");
+			sendChatTag(aeolusbot, "probe_rush");
+
+			aeolusbot.ChangeState(MakeState<WorkerRush>());
+			return true;
+		}
+		return false;
+	}
+
+	bool ContingencyState::ensureResponseAgainstTerran(AeolusBot& aeolusbot)
+	{
+		auto& mediator = ManagerMediator::getInstance();
+		auto& unitTypes = aeolusbot.Observation()->GetUnitTypeData();
+		::sc2::Units allEnemy = mediator.GetAllSeenEnemyUnits(aeolusbot);
+		int gameLoop = aeolusbot.Observation()->GetGameLoop();
+
+		const ::sc2::Point2D enemyStartLocation = ManagerMediator::getInstance().GetExpansionLocations(aeolusbot).back();
+		int seenSCVs = 0;
+		int seenMarines = 0;
+		int seenCCs = 0;
+		int seenBarracks = 0;
+		int seenFactories = 0;
+		bool seenTerranNatural = false;
+		::sc2::Point2D enemyNaturalPos = mediator.GetEnemyNaturalPosition(aeolusbot);
+		for (const auto& unit : allEnemy)
+		{
+			if (gameLoop < 2688)
+			{
+				if (unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_BARRACKS ||
+					unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_FACTORY ||
+					unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_BUNKER)
+				{
+					if (sc2::DistanceSquared2D(unit->pos, aeolusbot.Observation()->GetStartLocation()) < 5000.0f ||
+						(sc2::DistanceSquared2D(unit->pos, enemyStartLocation) > 5000.0f))
+					{
+						sendChatTag(aeolusbot, "terran_proxy");
+						aeolusbot.ChangeState(MakeState<TerranProxy>());
+						return true;
+					}
+				}
+			}
+			if (unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_SCV)
+			{
+				seenSCVs++;
+			}
+			if (unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_MARINE)
+			{
+				seenMarines++;
+			}
+			if (unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_COMMANDCENTER
+				|| unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_ORBITALCOMMAND
+				|| unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_PLANETARYFORTRESS)
+			{
+				seenCCs++;
+				if (sc2::DistanceSquared2D(unit->pos, enemyNaturalPos) < 9)
+				{
+					seenTerranNatural = true;
+				}
+			}
+			if (unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_BARRACKS)
+			{
+				seenBarracks++;
+			}
+			if (unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_FACTORY)
+			{
+				seenFactories++;
+			}
+		}
+
+		if (seenSCVs >= 8 && gameLoop < (22.4 * 60))
+		{
+			sendChatTag(aeolusbot, "worker_rush");
+			sendChatTag(aeolusbot, "scv_rush");
+			aeolusbot.ChangeState(MakeState<WorkerRush>());
+			return true;
+		}
+
+		if (seenMarines >= 4 && !seenTerranNatural && gameLoop < (22.4 * 180))
+		{
+			sendChatTag(aeolusbot, "terran_one_base_marines");
+			aeolusbot.ChangeState(MakeState<OneBaseMarines>());
+			return true;
+		}
+		//if (seenBarracks >= 2 && !seenTerranNatural)
+		//{
+		//	sendChatTag(aeolusbot, "terran_one_base_bio");
+		//}
+		//if (seenFactories > 0 && !seenTerranNatural)
+		//{
+		//	sendChatTag(aeolusbot, "terran_one_base");
+		//}
+
+		return false;
+	}
+
+	bool ContingencyState::ensureResponseAgainstZerg(AeolusBot& aeolusbot)
+	{
+		auto& mediator = ManagerMediator::getInstance();
+		::sc2::Units allEnemy = mediator.GetAllSeenEnemyUnits(aeolusbot);
+		int dronesSeen = 0;
+		int gameLoop = aeolusbot.Observation()->GetGameLoop();
+		for (const auto& unit : allEnemy)
+		{
+			if (unit->unit_type == ::sc2::UNIT_TYPEID::ZERG_SPAWNINGPOOL)
+			{
+				float buildTime = aeolusbot.Observation()->GetUnitTypeData()[unit->unit_type].build_time;
+				float buildProgress = unit->build_progress;
+				float timeSpentBuilding = buildTime * buildProgress;
+				float startedAt = gameLoop - timeSpentBuilding;
+
+				if (startedAt < 650)
+				{
+					sendChatTag(aeolusbot, "12_pool");
+					aeolusbot.ChangeState(MakeState<TwelvePool>());
+					return true;
+				}
+
+				//if (startedAt < 1150)
+				//{
+				//	sendChatTag(aeolusbot, "pool_first");
+				//	break;
+				//}
+			}
+			if (unit->unit_type == ::sc2::UNIT_TYPEID::ZERG_DRONE) dronesSeen++;
+		}
+
+		if (dronesSeen >= 8 && gameLoop < (22.4 * 60))
+		{
+			sendChatTag(aeolusbot, "worker_rush");
+			sendChatTag(aeolusbot, "drone_rush");
+			aeolusbot.ChangeState(MakeState<WorkerRush>());
+			return true;
+		}
+		return false;
+	}
+
+	void ContingencyState::sendChatTag(AeolusBot& aeolusbot, std::string to_send)
+	{
+		std::stringstream scoutedTag;
+		scoutedTag << "Tag:";
+		scoutedTag << to_send;
+		aeolusbot.Actions()->SendChat(scoutedTag.str());
 	}
 }

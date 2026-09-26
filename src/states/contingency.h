@@ -14,19 +14,16 @@ namespace Aeolus
 	class ContingencyState : public BaseState
 	{
 	public:
-		ContingencyState(const ContingencyPlan& contingencyPlan);
-
+		ContingencyState() {}
 		std::string_view getName() const override;
-		
-		void micro(AeolusBot& aeolusbot) override;
+		static bool ensureContingencyResponse(AeolusBot& aeolusbot);
 
-		void macro(AeolusBot& aeolusbot) override;
+	protected:
+		static bool ensureResponseAgainstProtoss(AeolusBot& aeolusbot);
+		static bool ensureResponseAgainstTerran(AeolusBot& aeolusbot);
+		static bool ensureResponseAgainstZerg(AeolusBot& aeolusbot);
 
-	private:
-		void _doSCVKillerMicro(AeolusBot& aeolusbot);
-		void _releaseSCVKillers(AeolusBot& aeolusbot);
-		const ContingencyPlan m_plan;
-		bool m_build_defense_queued;
+		static void sendChatTag(AeolusBot& aeolusbot, std::string to_send);
 		bool m_scv_killer_queued = false;
 	};
 }
