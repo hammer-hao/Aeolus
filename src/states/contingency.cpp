@@ -185,13 +185,6 @@ namespace Aeolus
 					return true;
 				}
 			}
-
-			if (gameLoop > (22.4 * 160))
-			{
-				sendChatTag(aeolusbot, "marauder_rush");
-				aeolusbot.ChangeState(MakeState<MarauderRush>());
-				return true;
-			}
 		}
 
 		if (seenSCVs >= 8 && gameLoop < (22.4 * 60))

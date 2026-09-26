@@ -341,7 +341,7 @@ namespace Aeolus
         }
 
         // Preserve the intended safety-check scheduling and army selection.
-        if (aeolusbot.Observation()->GetGameLoop() % 100 == 0 && aeolusbot.Observation()->GetGameLoop() > 6000)
+        if (aeolusbot.Observation()->GetGameLoop() % 100 == 0)
         {
             auto ownAttacking = mediator.GetUnitsFromRole(
                 aeolusbot, constants::UnitRole::ATTACKING);
