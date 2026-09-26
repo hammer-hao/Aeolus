@@ -22,6 +22,12 @@ namespace Aeolus
             arrival_distance * arrival_distance)
             return false;
 
+        if (::sc2::DistanceSquared2D(unit->pos, m_target) < 10)
+        {
+            Move move(m_target);
+            return move.execute(aeolusbot, unit);
+        }
+
         const GridType gridType = unit->is_flying
             ? ((unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPPRISM)
                 ? GridType::BOTH : GridType::AIR)

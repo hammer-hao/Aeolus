@@ -140,7 +140,8 @@ source_group("Source Files\\states\\contingencies" FILES
     states/contingencies/proxy_pylon.cpp
     states/contingencies/terran_proxy.cpp
     states/contingencies/twelve_pool.cpp
-    states/contingencies/worker_rush.cpp)
+    states/contingencies/worker_rush.cpp
+    states/contingencies/marauder_rush.cpp)
 
 source_group("Header Files\\states" FILES
     states/bot_state.h
@@ -157,7 +158,8 @@ source_group("Header Files\\states\\contingencies" FILES
     states/contingencies/proxy_pylon.h
     states/contingencies/terran_proxy.h
     states/contingencies/twelve_pool.h
-    states/contingencies/worker_rush.h)
+    states/contingencies/worker_rush.h
+    states/contingencies/marauder_rush.h)
 
 source_group("Source Files\\Pathing" FILES
     pathing/grid.cpp
@@ -280,6 +282,7 @@ set(bot_sources
     states/contingencies/terran_proxy.cpp
     states/contingencies/twelve_pool.cpp
     states/contingencies/worker_rush.cpp
+    states/contingencies/marauder_rush.cpp
 )
 
 set(bot_headers
@@ -371,7 +374,8 @@ set(bot_headers
     states/contingencies/proxy_pylon.h
     states/contingencies/terran_proxy.h
     states/contingencies/twelve_pool.h
-    states/contingencies/worker_rush.h)
+    states/contingencies/worker_rush.h
+    states/contingencies/marauder_rush.h)
 
 include(FetchContent)
 

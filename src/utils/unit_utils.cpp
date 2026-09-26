@@ -171,6 +171,12 @@ namespace Aeolus
 			bool can_attack_air = ManagerMediator::getInstance().CanAttackAir(aeolusbot, unit);
 			bool can_attack_ground = ManagerMediator::getInstance().CanAttackGround(aeolusbot, unit);
 
+			if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_VOIDRAY)
+			{
+				can_attack_air = true;
+				can_attack_ground = true;
+			}
+
 			if (!can_attack_air
 				&& !can_attack_ground
 				&& !(unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ORACLE))

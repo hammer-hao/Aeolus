@@ -178,6 +178,7 @@ namespace Aeolus {
 			ARCHON_MAKER,
 			SCV_KILLER,
 			WORKER_SOLDIERS,
+			DEFENSIVE_VOIDRAY,
 		};
 		std::string ManagerNameToString(ManagerName name);
 		std::string ManagerRequestTypeToString(ManagerRequestType requestType);

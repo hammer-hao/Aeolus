@@ -31,6 +31,7 @@
 #include "contingencies/one_base_marines.h"
 #include "contingencies/proxy_pylon.h"
 #include "contingencies/twelve_pool.h"
+#include "contingencies/marauder_rush.h"
 
 namespace Aeolus
 {
@@ -173,6 +174,23 @@ namespace Aeolus
 			if (unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_FACTORY)
 			{
 				seenFactories++;
+			}
+			if (unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_MARAUDER)
+			{
+				if (sc2::DistanceSquared2D(unit->pos, aeolusbot.Observation()->GetStartLocation()) < 5000.0f &&
+					gameLoop < (22.4 * 180))
+				{
+					sendChatTag(aeolusbot, "marauder_rush");
+					aeolusbot.ChangeState(MakeState<MarauderRush>());
+					return true;
+				}
+			}
+
+			if (gameLoop > (22.4 * 160))
+			{
+				sendChatTag(aeolusbot, "marauder_rush");
+				aeolusbot.ChangeState(MakeState<MarauderRush>());
+				return true;
 			}
 		}
 
