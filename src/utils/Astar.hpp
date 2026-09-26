@@ -1,243 +1,197 @@
 #pragma once
 
-#include "../pathing/grid.h"
+#include "Eigen/Dense"
 #include <sc2api/sc2_common.h>
+#include <algorithm>
+#include <array>
 #include <cmath>
-#include <queue>
 #include <limits>
+#include <queue>
+#include <utility>
+#include <vector>
 
 namespace Aeolus
 {
-	struct Node
-	{
-		int row;
-		int col;
-		double gCost; // cost from the start to this node
-		double fCost; // gCost + heuristic
-	};
+    // Contract: matrix(row, col) is the cost of entering the unit-square cell
+    // [col, col+1) x [row, row+1). Finite positive costs are traversable;
+    // nonpositive and nonfinite costs are blocked. Encode ALL movement blockers,
+    // including cells outside playable bounds, before calling this function.
+    // This is a point-agent grid search: unit radius/clearance is an input-grid
+    // responsibility, not something this function infers from SC2 observations.
+    inline const double kAStarDiagonalCost = std::sqrt(2.0);
 
-	struct CompareNode 
-	{
-		bool operator()(const Node& a, const Node& b) const
-		{
-			return a.fCost > b.fCost;
-		}
-	};
+    struct Node
+    {
+        int row;
+        int col;
+        double gCost;
+        double fCost;
+    };
 
-	/**
-	 * @brief Compute heuristic cost from current node to goal.
-	 */
-	inline double heuristic(int y1, int x1, int y2, int x2)
-	{
-		// euclidean distance
-		double dx = static_cast<double>(x1 - x2);
-		double dy = static_cast<double>(y1 - y2);
-		return std::sqrt(dx * dx + dy * dy);
-	}
+    struct CompareNode
+    {
+        bool operator()(const Node& a, const Node& b) const
+        {
+            return a.fCost > b.fCost;
+        }
+    };
 
-	/**
-	 * @brief Check if (x, y) is valid (in range) and not blocked in the costMap.
-	 * @param costMap Eigen::MatrixXd that holds cost for each cell.
-	 * @param x Cow index.
-	 * @param y Rol index.
-	 */
-	inline bool isValid(const Eigen::MatrixXd& costMap, int y, int x)
-	{
-		if (y < 0 || y >= costMap.rows()) return false;
-		if (x < 0 || x >= costMap.cols()) return false;
-		// If cost is infinite, treat as blocked.
-		if (std::isinf(costMap(y, x))) return false;
-		return true;
-	}
+    // Octile distance for this exact eight-neighbor movement model.
+    inline double heuristic(int y1, int x1, int y2, int x2)
+    {
+        const int dx = std::abs(x1 - x2);
+        const int dy = std::abs(y1 - y2);
+        return static_cast<double>(std::max(dx, dy)) +
+            (kAStarDiagonalCost - 1.0) * std::min(dx, dy);
+    }
 
-	/**
-	 * @brief Reconstruct the path by backtracking from goal to start.
-	 * @param cameFrom 2D array of parent indices: cameFrom[row][col] = (parentRow, parentCol).
-	 * @param goal
-	 * @return Vector of (row, col) from start to goal.
-	 */
-	inline std::vector<::sc2::Point2D> reconstructPath(
-		const std::vector<std::vector<std::pair<int, int>>>& cameFrom,
-		int goalRow, int goalCol)
-	{
-		std::vector<::sc2::Point2D> path;
-		int currentRow = goalRow;
-		int currentCol = goalCol;
+    inline bool isValid(const Eigen::MatrixXd& grid, int y, int x)
+    {
+        if (y < 0 || y >= grid.rows() || x < 0 || x >= grid.cols())
+            return false;
+        const double cost = grid(y, x);
+        return std::isfinite(cost) && cost > 0.0;
+    }
 
-		while (cameFrom[currentRow][currentCol].first != -1 &&
-			cameFrom[currentRow][currentCol].second != -1)
-		{
-			path.push_back(::sc2::Point2D(currentCol, currentRow));
-			auto parent = cameFrom[currentRow][currentCol];
-			currentRow = parent.first;
-			currentCol = parent.second;
-		}
-		// Finally add the start node
-		path.push_back(::sc2::Point2D(currentCol, currentRow));
+    inline std::vector<sc2::Point2D> reconstructPath(
+        const std::vector<std::vector<std::pair<int, int>>>& cameFrom,
+        int goalRow, int goalCol)
+    {
+        std::vector<sc2::Point2D> path;
+        int row = goalRow;
+        int col = goalCol;
+        while (row != -1 && col != -1)
+        {
+            // Return cell centers, consistent with floor-based indexing.
+            path.emplace_back(static_cast<float>(col) + 0.5f,
+                static_cast<float>(row) + 0.5f);
+            const auto parent = cameFrom[row][col];
+            row = parent.first;
+            col = parent.second;
+        }
+        std::reverse(path.begin(), path.end());
+        return path;
+    }
 
-		// Reverse the path so it's from start -> goal
-		std::reverse(path.begin(), path.end());
-		return path;
-	}
+    // Conservative smoothing: only merge consecutive steps in the SAME
+    // direction. It preserves the exact grid route, its turns, and its costs.
+    // Both endpoints, including the start, remain in the result.
+    // sensitivity <= 1 leaves the path unchanged, including zero/negative input.
+    inline std::vector<sc2::Point2D> smoothPath(
+        const std::vector<sc2::Point2D>& path, int sensitivity)
+    {
+        if (path.size() <= 2 || sensitivity <= 1)
+            return path;
 
-	inline std::vector<sc2::Point2D> smoothPath(const std::vector<sc2::Point2D>& path, int sensitivity) {
-		// If the path is empty or has only 1 point, there's nothing to skip or smooth
-		if (path.size() <= 1) {
-			return path;
-		}
+        std::vector<sc2::Point2D> result;
+        result.push_back(path.front());
+        std::size_t begin = 0;
+        while (begin + 1 < path.size())
+        {
+            std::size_t end = begin + 1;
+            const float dx = path[end].x - path[begin].x;
+            const float dy = path[end].y - path[begin].y;
+            while (end + 1 < path.size() &&
+                end - begin < static_cast<std::size_t>(sensitivity) &&
+                path[end + 1].x - path[end].x == dx &&
+                path[end + 1].y - path[end].y == dy)
+            {
+                ++end;
+            }
+            result.push_back(path[end]);
+            begin = end;
+        }
+        return result;
+    }
 
-		// Complete path: in Python, we did "list(map(Point2, path))"
-		// but here we already have sc2::Point2D, so just copy:
-		std::vector<sc2::Point2D> complete_path(path);
+    inline std::vector<sc2::Point2D> AStarPathFind(
+        sc2::Point2D start, sc2::Point2D goal, const Eigen::MatrixXd& grid,
+        bool smoothing = false, int sensitivity = 5)
+    {
+        const auto inBounds = [&grid](const sc2::Point2D& p)
+            {
+                return std::isfinite(p.x) && std::isfinite(p.y) &&
+                    p.x >= 0.0f && p.y >= 0.0f &&
+                    static_cast<double>(p.x) < grid.cols() &&
+                    static_cast<double>(p.y) < grid.rows();
+            };
 
-		// skipped_path = complete_path[0:-1:sensitivity]
-		std::vector<sc2::Point2D> skipped_path;
-		// Loop up to the second-last element in steps of 'sensitivity'
-		// so i goes 0, sensitivity, 2*sensitivity, ..., up to < (size - 1)
-		for (int i = 0; i < static_cast<int>(complete_path.size()) - 1; i += sensitivity) {
-			skipped_path.push_back(complete_path[i]);
-		}
+        if (grid.rows() <= 0 || grid.cols() <= 0 ||
+            grid.rows() > std::numeric_limits<int>::max() ||
+            grid.cols() > std::numeric_limits<int>::max() ||
+            !inBounds(start) || !inBounds(goal))
+            return {};
 
-		// if skipped_path not empty, pop(0) in Python => erase the front
-		if (!skipped_path.empty()) {
-			skipped_path.erase(skipped_path.begin()); // Remove first element
-		}
+        const int start_x = static_cast<int>(std::floor(start.x));
+        const int start_y = static_cast<int>(std::floor(start.y));
+        const int goal_x = static_cast<int>(std::floor(goal.x));
+        const int goal_y = static_cast<int>(std::floor(goal.y));
+        if (!isValid(grid, start_y, start_x) || !isValid(grid, goal_y, goal_x))
+            return {};
 
-		// Append the very last node from the complete path
-		skipped_path.push_back(complete_path.back());
+        const int rows = static_cast<int>(grid.rows());
+        const int cols = static_cast<int>(grid.cols());
+        const double infinity = std::numeric_limits<double>::infinity();
 
-		return skipped_path;
-	}
+        // A lower bound is essential when callers use positive weights < 1.
+        double minWeight = infinity;
+        for (int y = 0; y < rows; ++y)
+            for (int x = 0; x < cols; ++x)
+                if (isValid(grid, y, x))
+                    minWeight = std::min(minWeight, grid(y, x));
 
+        std::vector<std::vector<double>> gCost(
+            rows, std::vector<double>(cols, infinity));
+        std::vector<std::vector<std::pair<int, int>>> cameFrom(
+            rows, std::vector<std::pair<int, int>>(cols, { -1, -1 }));
+        std::priority_queue<Node, std::vector<Node>, CompareNode> openSet;
+        gCost[start_y][start_x] = 0.0;
+        openSet.push({ start_y, start_x, 0.0,
+            minWeight * heuristic(start_y, start_x, goal_y, goal_x) });
 
-	/*
-	@brief Given a start point, a goal point, and a grid with enemy influence,
-	find the shortest safe path from start point to the goal point and returns
-	the next point to move to in that path.
-	*/
-	inline std::vector<::sc2::Point2D> AStarPathFind(::sc2::Point2D start, ::sc2::Point2D goal,
-		const Eigen::MatrixXd& grid, bool smoothing = false, int sensitivity = 5)
-	{
-		int start_x = static_cast<int>(std::round(start.x));
-		int start_y = static_cast<int>(std::round(start.y));
-		int goal_x = static_cast<int>(std::round(goal.x));
-		int goal_y = static_cast<int>(std::round(goal.y));
+        constexpr std::array<std::pair<int, int>, 8> directions = { {
+            {-1, 0}, {1, 0}, {0, -1}, {0, 1},
+            {-1, -1}, {1, 1}, {-1, 1}, {1, -1}
+        } };
 
-		// Sanity checks
-		if (!isValid(grid, start_y, start_x)) {
-			std::cerr << "Start is invalid or blocked.\n";
-			return {};
-		}
-		if (!isValid(grid, goal_y, goal_x)) {
-			std::cerr << "Goal is invalid or blocked.\n";
-			return {};
-		}
+        while (!openSet.empty())
+        {
+            const Node current = openSet.top();
+            openSet.pop();
+            if (current.gCost > gCost[current.row][current.col])
+                continue;
 
-		int rows = grid.rows();
-		int cols = grid.cols();
+            if (current.row == goal_y && current.col == goal_x)
+            {
+                auto path = reconstructPath(cameFrom, goal_y, goal_x);
+                return smoothing ? smoothPath(path, sensitivity) : path;
+            }
 
-		// We store gCosts in a 2D array initialized to infinity.
-		std::vector<std::vector<double>> gCost(rows, std::vector<double>(cols, std::numeric_limits<double>::infinity()));
-		// We store the node’s parent for path reconstruction
-		std::vector<std::vector<std::pair<int, int>>> cameFrom(rows, std::vector<std::pair<int, int>>(
-			cols, std::make_pair(-1, -1)));
+            for (const auto& direction : directions)
+            {
+                const int nr = current.row + direction.first;
+                const int nc = current.col + direction.second;
+                if (!isValid(grid, nr, nc))
+                    continue;
 
-		// Min-heap for open set
-		std::priority_queue<Node, std::vector<Node>, CompareNode> openSet;
+                const bool diagonal = direction.first != 0 && direction.second != 0;
+                if (diagonal &&
+                    (!isValid(grid, current.row + direction.first, current.col) ||
+                        !isValid(grid, current.row, current.col + direction.second)))
+                    continue;
 
-		// Initialize the start node
-		Node startNode;
-		startNode.row = start_y;
-		startNode.col = start_x;
-		startNode.gCost = 0.0;
-		startNode.fCost = heuristic(start_y, start_x, static_cast<int>(goal.y), static_cast<int>(goal.x));
-		gCost[start_y][start_x] = 0.0;
-
-		openSet.push(startNode);
-
-		std::vector<std::pair<int, int>> directions = {
-		{-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, -1}, {1, 1}, {-1, 1}, {1, -1}
-		};
-
-		while (!openSet.empty())
-		{
-			Node current = openSet.top();
-			openSet.pop();
-
-			// If we reached the goal, reconstruct path
-			if (current.row == goal_y && current.col == goal_x) 
-			{
-				// Reconstruct and optionally smooth
-				auto path = reconstructPath(cameFrom, static_cast<int>(goal_y), static_cast<int>(goal_x));
-				if (smoothing && path.size() > 1) {
-					return smoothPath(path, sensitivity); // the first step beyond the start, adjusted for sensitivity
-				}
-				return path; // if path has only one point, start==goal
-			}
-
-			// If this node's gCost is already worse than what's recorded, skip
-			if (current.gCost > gCost[current.row][current.col]) 
-			{
-				continue;
-			}
-
-			// Check neighbors
-			for (auto& dir : directions)
-			{
-				int nr = current.row + dir.first;
-				int nc = current.col + dir.second;
-
-				// If the move is diagonal.
-				if (std::abs(dir.first) == 1 && std::abs(dir.second) == 1)
-				{
-					// Check the two adjacent cardinal neighbors:
-					// For example, for {-1, 1}: check up (current.row - 1, current.col)
-					// and right (current.row, current.col + 1)
-					if (!isValid(grid, current.row + dir.first, current.col) &&
-						!isValid(grid, current.row, current.col + dir.second))
-					{
-						// Both adjacent cells are blocked, so skip this diagonal move.
-						continue;
-					}
-				}
-
-				/*
-				// step height check: if height difference > 1.5 then it is not possible
-				double hcur = heightMap.TerrainHeight({ current.col, current.row });
-				double hnbr = heightMap.TerrainHeight({ nc, nr });
-				if (std::abs(hcur - hnbr) > 1.5f) continue;
-				*/
-
-
-				if (!isValid(grid, nr, nc))
-				{
-					continue;
-				}
-
-				double moveCost = grid(nr, nc);
-				if (std::abs(dir.first) == 1 && std::abs(dir.second) == 1)
-					moveCost *= 1.41421;  // Approx sqrt(2)
-
-				// The cost to move to neighbor depends on costMap + gCost
-				double tentativeG = gCost[current.row][current.col] + moveCost;
-				// If we found a better way to get to neighbor
-				if (tentativeG < gCost[nr][nc]) {
-					gCost[nr][nc] = tentativeG;
-					cameFrom[nr][nc] = { current.row, current.col };
-
-					Node neighbor;
-					neighbor.row = nr;
-					neighbor.col = nc;
-					neighbor.gCost = tentativeG;
-					neighbor.fCost = tentativeG +
-						heuristic(nr, nc, goal_y, goal_x);
-					openSet.push(neighbor);
-				}
-			}
-		}
-
-		// If we exit the loop, no path was found
-		std::cerr << "No path found from start to goal.\n";
-		return {};
-	}
+                const double stepCost = grid(nr, nc) *
+                    (diagonal ? kAStarDiagonalCost : 1.0);
+                const double tentativeG = current.gCost + stepCost;
+                if (tentativeG < gCost[nr][nc])
+                {
+                    gCost[nr][nc] = tentativeG;
+                    cameFrom[nr][nc] = { current.row, current.col };
+                    openSet.push({ nr, nc, tentativeG,
+                        tentativeG + minWeight * heuristic(nr, nc, goal_y, goal_x) });
+                }
+            }
+        }
+        return {};
+    }
 }

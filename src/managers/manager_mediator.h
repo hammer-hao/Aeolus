@@ -698,23 +698,20 @@ namespace Aeolus
 			);
 		}
 
-		::sc2::Point2D FindNextPathingPoint(AeolusBot& aeolusbot, GridType gridType, ::sc2::Point2D start,
-			::sc2::Point2D goal, bool sense_danger = true, int danger_distance = 20,
+		std::optional<::sc2::Point2D> FindNextPathingPoint(
+			AeolusBot& aeolusbot, GridType gridType,
+			::sc2::Point2D start, ::sc2::Point2D goal,
+			bool sense_danger = true, int danger_distance = 20,
 			float danger_threshold = 5.0f, bool smoothing = false, int sensitivity = 5)
 		{
-			return ManagerRequest<::sc2::Point2D, ::sc2::Point2D, ::sc2::Point2D, GridType, bool, int, float, bool, int>(
-				aeolusbot,
-				constants::ManagerName::PATH_MANAGER,
-				constants::ManagerRequestType::GET_NEXT_PATH_POINT,
-				start,
-				goal,
-				gridType,
-				sense_danger,
-				danger_distance,
-				danger_threshold,
-				smoothing,
-				sensitivity
-			);
+			return ManagerRequest<
+				std::optional<::sc2::Point2D>,
+				::sc2::Point2D, ::sc2::Point2D, GridType, bool, int, float, bool, int>(
+					aeolusbot,
+					constants::ManagerName::PATH_MANAGER,
+					constants::ManagerRequestType::GET_NEXT_PATH_POINT,
+					start, goal, gridType, sense_danger, danger_distance,
+					danger_threshold, smoothing, sensitivity);
 		}
 
 		/**

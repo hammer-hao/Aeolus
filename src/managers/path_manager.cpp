@@ -9,6 +9,10 @@
 #include <any>
 #include <tuple>
 
+#include <optional>
+#include <cmath>
+#include <limits>
+
 namespace Aeolus
 {
 	void PathManager::update(int iteration)
@@ -349,9 +353,18 @@ namespace Aeolus
 
 	void PathManager::_reset_grids()
 	{
-		m_ground_grid.Reset();
+		m_ground_grid = m_mapdata.GetAStarGrid();
 		m_air_grid.Reset();
-		m_prism_grid.Reset();
+		m_prism_grid = m_ground_grid;
+
+		// Freshly assigned grids need their playable bounds reapplied.
+		const auto& info = m_bot.Observation()->GetGameInfo();
+		m_ground_grid.SetPlayableBounds(
+			info.playable_min, info.playable_max);
+		m_air_grid.SetPlayableBounds(
+			info.playable_min, info.playable_max);
+		m_prism_grid.SetPlayableBounds(
+			info.playable_min, info.playable_max);
 	}
 
 	void PathManager::_reset_danger_tiles()
@@ -375,57 +388,40 @@ namespace Aeolus
 		return m_mapdata.GetFloodFillArea(starting_point, max_distance);
 	}
 
-	::sc2::Point2D PathManager::AStarPathFindNext(::sc2::Point2D start, ::sc2::Point2D goal,
-		GridType gridType, bool sense_danger, int danger_distance,
-		float danger_threshold, bool smoothing, int sensitivity)
+	std::optional<::sc2::Point2D> PathManager::AStarPathFindNext(
+		::sc2::Point2D start, ::sc2::Point2D goal, GridType gridType,
+		bool sense_danger, int danger_distance, float danger_threshold,
+		bool smoothing, int sensitivity)
 	{
-		Grid& avoidanceGrid = m_ground_grid;
-		
-		if (gridType == GridType::AIR) avoidanceGrid = m_air_grid;
-		else if (gridType == GridType::BOTH) avoidanceGrid = m_prism_grid; // gridType == GridType::BOTH
+		// Correctness baseline: always run the grid search. Reintroduce a shortcut
+		// only with explicit destination, reachability, and route-safety checks.
+		(void)sense_danger;
+		(void)danger_distance;
+		(void)danger_threshold;
 
-		const auto& cost_grid = avoidanceGrid.GetGrid();
+		const Grid& avoidanceGrid =
+			(gridType == GridType::AIR) ? m_air_grid :
+			(gridType == GridType::BOTH) ? m_prism_grid : m_ground_grid;
+		auto cost_grid = avoidanceGrid.GetGrid();
 
-		if (sense_danger)
-		{
-			std::vector<std::pair<int, int>> dangers;
+		// AStarPathFind sees only the matrix, not Grid's playable-bounds metadata.
+		// Prefer baking this mask into each rebuilt baseline for performance.
+		for (int y = 0; y < cost_grid.rows(); ++y)
+			for (int x = 0; x < cost_grid.cols(); ++x)
+				if (!avoidanceGrid.IsCellValid(x, y))
+					cost_grid(y, x) = std::numeric_limits<double>::infinity();
 
-			if (m_danger_tiles_is_cached) dangers = m_danger_tiles_cache;
-			else
-			{
-				for (int y = 0; y < cost_grid.rows(); ++y)
-				{
-					for (int x = 0; x < cost_grid.cols(); ++x)
-					{
-						if (cost_grid(y, x) > danger_threshold && cost_grid(y, x) != std::numeric_limits<double>::infinity()) 
-							dangers.emplace_back(x, y);
-					}
-				}
-				m_danger_tiles_is_cached = true;
-			}
-			
-			if (!dangers.empty())
-			{
-				double closest_danger_distance = std::numeric_limits<double>::infinity();
-				for (const auto& danger : dangers)
-				{
-					// std::cout << "Danger at: " << danger.first << " " << danger.second << std::endl;
-					closest_danger_distance = std::min(
-						(std::pow(danger.first - start.x, 2) + std::pow(danger.second - start.y, 2)),
-						closest_danger_distance);
-				}
-				if (closest_danger_distance >= (danger_distance * danger_distance))
-					return goal;
-			}
-			else return goal;
-		}
+		const auto path = AStarPathFind(start, goal, cost_grid, smoothing, sensitivity);
+		if (path.empty())
+			return std::nullopt;
 
-		auto heightMap = ::sc2::HeightMap(m_bot.Observation()->GetGameInfo());
+		// One node means both positions are in the same validated cell. Finish at
+		// the requested continuous position, not at that cell's center.
+		if (path.size() == 1)
+			return goal;
 
-		// sensed danger and danger is within distance, perform custom pathfinding.
-		auto path = AStarPathFind(start, goal, cost_grid, smoothing, sensitivity);
-
-		return (path.size() > 1) ? path[1] : goal;
+		// Both smoothed and unsmoothed results retain start at index zero.
+		return path[1];
 	}
 }
 
