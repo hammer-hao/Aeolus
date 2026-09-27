@@ -59,8 +59,13 @@ namespace Aeolus
         auto voidRays = mediator.GetUnitsFromRole(
             aeolusbot, constants::UnitRole::DEFENSIVE_VOIDRAY);
 
+        std::vector<::sc2::Point2D> starting_positions;
+        for (const auto& voidray : voidRays)
+        {
+            starting_positions.push_back(voidray->pos);
+        }
         auto voidRayTargets =
-            mediator.GetGroundThreatsNearBases(aeolusbot);
+            mediator.GetUnitsInRange(aeolusbot, starting_positions, 16.0f);
 
         for (const auto* voidRay : voidRays)
         {

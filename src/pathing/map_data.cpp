@@ -104,9 +104,9 @@ namespace Aeolus
 
 		if (m_minerals_included.size() != ManagerMediator::getInstance().GetAllMineralPatches(m_bot).size())
 		{
-			std::stringstream debugMessage;
-			debugMessage << "Detected Mineral change!";
-			m_bot.Actions()->SendChat(debugMessage.str());
+			// std::stringstream debugMessage;
+			// debugMessage << "Detected Mineral change!";
+			// m_bot.Actions()->SendChat(debugMessage.str());
 			std::set<std::tuple<float, float>> current_minerals;
 			for (auto& mineral : ManagerMediator::getInstance().GetAllMineralPatches(m_bot))
 			{

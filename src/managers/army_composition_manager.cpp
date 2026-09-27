@@ -8,6 +8,8 @@
 #include <iostream>
 #include <iomanip>
 
+#include "../../Aeolus.h"
+
 namespace Aeolus
 {
 	std::any ArmyCompositionManager::ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args)
@@ -28,12 +30,20 @@ namespace Aeolus
 		auto all_enemy = mediator.GetAllSeenEnemyUnits(m_bot);
 		::std::map<::sc2::UNIT_TYPEID, float> stalkers_only({ { ::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.00f } });
 
-		if (std::count_if(all_enemy.begin(), all_enemy.end(), [](const ::sc2::Unit* unit) {
-			return (unit->unit_type != ::sc2::UNIT_TYPEID::TERRAN_SCV &&
+		auto& unitData = m_bot.Observation()->GetUnitTypeData();
+		int count_enemy_supply = 0;
+		for (const auto& unit : all_enemy)
+		{
+			if (unit->unit_type != ::sc2::UNIT_TYPEID::TERRAN_SCV &&
 				unit->unit_type != ::sc2::UNIT_TYPEID::TERRAN_MULE &&
 				unit->unit_type != ::sc2::UNIT_TYPEID::ZERG_DRONE &&
-				unit->unit_type != ::sc2::UNIT_TYPEID::PROTOSS_PROBE);
-			}) < 20)
+				unit->unit_type != ::sc2::UNIT_TYPEID::PROTOSS_PROBE)
+			{
+				count_enemy_supply += unitData[unit->unit_type].food_required;
+			}
+		}
+		auto own_town_halls = mediator.GetOwnReadyTownHalls(m_bot);
+		if (count_enemy_supply < 20 && own_town_halls.size() < 4)
 		{
 			// not enough enemy units to tell
 			m_best_army_composition = stalkers_only;
