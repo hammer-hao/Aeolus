@@ -72,6 +72,11 @@ namespace Aeolus
 		auto& mediator = ManagerMediator::getInstance();
 		auto& unitTypes = aeolusbot.Observation()->GetUnitTypeData();
 		::sc2::Units allEnemy = mediator.GetAllSeenEnemyUnits(aeolusbot);
+		::sc2::Units allEnemyStructures = mediator.GetAllEnemyStructures(aeolusbot);
+		for (const auto& structure : allEnemyStructures)
+		{
+			allEnemy.push_back(structure);
+		}
 		int gameLoop = aeolusbot.Observation()->GetGameLoop();
 
 		const ::sc2::Point2D enemyStartLocation = ManagerMediator::getInstance().GetExpansionLocations(aeolusbot).back();
@@ -222,6 +227,11 @@ namespace Aeolus
 	{
 		auto& mediator = ManagerMediator::getInstance();
 		::sc2::Units allEnemy = mediator.GetAllSeenEnemyUnits(aeolusbot);
+		::sc2::Units allEnemyStructures = mediator.GetAllEnemyStructures(aeolusbot);
+		for (const auto& structure : allEnemyStructures)
+		{
+			allEnemy.push_back(structure);
+		}
 		int dronesSeen = 0;
 		int gameLoop = aeolusbot.Observation()->GetGameLoop();
 		for (const auto& unit : allEnemy)
