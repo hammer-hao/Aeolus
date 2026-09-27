@@ -43,7 +43,7 @@ namespace Aeolus
 		::sc2::Units forces = mediator.GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
 
 		int baseToDefend = 1; // defend the natural base as terran opponents often do bunker contains
-		::sc2::Point2D target = mediator.GetDefenseTarget(aeolusbot, baseToDefend);
+		::sc2::Point2D target = mediator.GetAtttackTarget(aeolusbot);
 
 		_doSCVKillerMicro(aeolusbot);
 		doGeneralMicro(aeolusbot, forces, target);
