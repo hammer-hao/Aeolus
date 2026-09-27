@@ -59,7 +59,9 @@ namespace Aeolus
 
     void BaseState::OnEnter(AeolusBot& aeolusbot)
     {
+#ifndef BUILD_FOR_LADDER
         aeolusbot.Actions()->SendChat(static_cast<std::string>(getName()));
+#endif // !BUILD_FOR_LADDER
     }
 
 	void BaseState::doBookKeepingMacroTasks(AeolusBot& aeolusbot)

@@ -412,7 +412,9 @@ namespace Aeolus
 
     void MarauderRush::OnEnter(AeolusBot& aeolusbot)
     {
+#ifndef BUILD_FOR_LADDER
         aeolusbot.Actions()->SendChat(static_cast<std::string>(getName()));
+#endif
         auto& mediator = ManagerMediator::getInstance();
         auto scoutCandidate = mediator.SelectWorkerClosestTo(aeolusbot, mediator.GetEnemyNaturalPosition(aeolusbot));
         if (scoutCandidate) mediator.registerScout(aeolusbot, scoutCandidate.value(), {2, 3, 4, 5});
