@@ -82,7 +82,7 @@ namespace Aeolus
 
 		// check if we are safe
 		if (aeolusbot.Observation()->GetGameLoop() % 22 != 1) return;
-		auto allEnemy = ManagerMediator::getInstance().GetAllSeenEnemyUnits(aeolusbot);
+		auto allEnemy = ManagerMediator::getInstance().GetAllEnemyStructures(aeolusbot);
 		bool structureLeft = std::any_of(allEnemy.begin(), allEnemy.end(), [&](const ::sc2::Unit* enemy) {
 			return (enemy->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_PHOTONCANNON ||
 				enemy->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_PYLON) &&
