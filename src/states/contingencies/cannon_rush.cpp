@@ -28,6 +28,7 @@
 #include "../../constants.h"
 
 #include "../consolidate.h"
+#include "../build_order_state.h"
 
 namespace Aeolus
 {
@@ -90,7 +91,7 @@ namespace Aeolus
 			});
 		if (!structureLeft) {
 			unpullAllProbes(aeolusbot);
-			aeolusbot.ChangeState(MakeState<ConsolidateState>());
+			aeolusbot.ChangeState(MakeState<BuildOrderState>());
 		}
 	}
 

@@ -24,8 +24,11 @@
 #include "../../behaviors/micro_behaviors/path_to_target.h"
 #include "../../behaviors/micro_behaviors/attack_target_unit.h"
 #include "../../behaviors/micro_behaviors/keep_unit_safe.h"
+#include "../../behaviors/micro_behaviors/a_move.h"
+#include "../../behaviors/macro_behaviors/build_geysers.h"
 #include "../../utils/unit_utils.h"
 #include "../../states/consolidate.h"
+#include "../../states/build_order_state.h"
 
 namespace Aeolus
 {
@@ -105,7 +108,7 @@ namespace Aeolus
 		aeolusbot.RegisterBehavior(std::make_unique<Scout>());
 		// prioritize unit production
 		aeolusbot.RegisterBehavior(std::make_unique<SpawnController>(m_army_comp));
-		aeolusbot.RegisterBehavior(std::make_unique<ProductionController>(m_army_comp));
+		aeolusbot.RegisterBehavior(std::make_unique<ProductionController>(m_army_comp, false));
 
 		// auto supply since we are no longer relying on a build order
 		aeolusbot.RegisterBehavior(std::make_unique<AutoSupply>());
@@ -113,6 +116,7 @@ namespace Aeolus
 		aeolusbot.RegisterBehavior(std::make_unique<BuildWorkers>(22));
 		aeolusbot.RegisterBehavior(std::make_unique<ChronoController>());
 		aeolusbot.RegisterBehavior(std::make_unique<RepowerStructures>());
+		aeolusbot.RegisterBehavior(std::make_unique<BuildGeysers>());
 
 		// check if we are safe
 		if (aeolusbot.Observation()->GetGameLoop() % 22 != 1) return;
@@ -126,7 +130,7 @@ namespace Aeolus
 			});
 		if (!structureLeft) {
 			_releaseSCVKillers(aeolusbot);
-			aeolusbot.ChangeState(MakeState<ConsolidateState>());
+			aeolusbot.ChangeState(MakeState<BuildOrderState>());
 		}
 	}
 
@@ -176,6 +180,7 @@ namespace Aeolus
 					if (::sc2::Distance2D(scvKiller->pos, target) < 9.0f)
 					{
 						combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+						combat_behavior->AddBehavior(std::make_unique<AMove>(target));
 					}
 					else
 					{
@@ -202,7 +207,15 @@ namespace Aeolus
 
 		for (const auto& unit : toRelease)
 		{
-			mediator.AssignRole(aeolusbot, unit, constants::UnitRole::GATHERING);
+			mediator.AssignRole(
+				aeolusbot,
+				unit,
+				constants::UnitRole::GATHERING);
+
+			// Cancel command left over from SCV_KILLER role.
+			aeolusbot.Actions()->UnitCommand(
+				unit,
+				::sc2::ABILITY_ID::STOP);
 		}
 	}
 }

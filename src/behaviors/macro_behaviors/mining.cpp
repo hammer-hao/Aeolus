@@ -103,9 +103,20 @@ namespace Aeolus
 				debug->DebugSphereOut(debugPos, 0.5, ::sc2::Colors::Red);
 #endif // BUILD_WITH_RENDERER
 
-				// mined out of minerals / gas
+				// mined out of minerals
 				mediator.ClearWorkerAssignment(aeolusbot, worker);
 				continue;
+			}
+
+			if (mining_target.value()->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR ||
+				mining_target.value()->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATORRICH)
+			{
+				if (mining_target.value()->vespene_contents < 5)
+				{
+					// mined out of gas
+					mediator.ClearWorkerAssignment(aeolusbot, worker);
+					continue;
+				}
 			}
 
 			distance_to_resource = ::sc2::Distance2D(

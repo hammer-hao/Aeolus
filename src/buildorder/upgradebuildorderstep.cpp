@@ -80,6 +80,11 @@ namespace Aeolus
 		::sc2::UNIT_TYPEID researched_from = constants::isResearchedFrom(m_to_research);
 
 		::sc2::ABILITY_ID creationAbility = mediator.GetUpgradeCreationAbility(aeolusbot, m_to_research);
+		auto doneUpgrades = aeolusbot.Observation()->GetUpgrades();
+		for (const auto& upgrade : doneUpgrades)
+		{
+			if (upgrade == m_to_research) return true;
+		}
 		for (const auto& structure : mediator.GetAllOwnStructures(aeolusbot))
 		{
 			for (const auto& order : structure->orders)
