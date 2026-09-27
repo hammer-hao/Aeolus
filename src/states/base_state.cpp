@@ -126,7 +126,10 @@ namespace Aeolus
 
                 auto enemy_target = utils::PickAttackTarget(close_units);
 
-                if ((unit->shield / unit->shield_max) < 0.1)
+                bool locked_on = std::any_of(unit->buffs.begin(), unit->buffs.end(), [](::sc2::BUFF_ID buff) {
+                    return buff == ::sc2::BUFF_ID::LOCKON;
+                    });
+                if ((unit->shield / unit->shield_max) < 0.1 || locked_on)
                 {
                     combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
                 }
