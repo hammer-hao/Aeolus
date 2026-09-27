@@ -43,6 +43,8 @@ namespace Aeolus
 
 		bool execute(AeolusBot& aeolusbot) override;
 
+		static bool hasAvailableGasSprings(AeolusBot& aeolusbot);
+
 	private:
 		int m_supply_threshold;
 		::sc2::UNIT_TYPEID m_to_build; // the id of the structure we want to build
