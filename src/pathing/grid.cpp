@@ -5,9 +5,8 @@
 
 namespace Aeolus
 {
-	Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> Grid::GetGrid() const
+	const Eigen::MatrixXd& Grid::GetGrid() const
 	{
-		// Get the value in Eigen Matrix form
 		return m_grid;
 	}
 
@@ -63,6 +62,7 @@ namespace Aeolus
 		m_grid = m_grid.unaryExpr([default_weight](double val) {
 			return (val != 0.0) ? default_weight : std::numeric_limits<double>::infinity();
 			});
+		_applyPlayableBoundsMask();
 		UpdateCache(); // sync the cached grid
 	}
 
@@ -286,19 +286,27 @@ namespace Aeolus
 
 	void Grid::SetPlayableBounds(::sc2::Point2D playable_min, ::sc2::Point2D playable_max)
 	{
-		m_playable_min_x = static_cast<int>(std::floor(playable_min.x));
-		m_playable_min_y = static_cast<int>(std::floor(playable_min.y));
+		m_playable_min_x =
+			static_cast<int>(std::floor(playable_min.x));
 
-		m_playable_max_x = static_cast<int>(std::ceil(playable_max.x));
-		m_playable_max_y = static_cast<int>(std::ceil(playable_max.y));
+		m_playable_min_y =
+			static_cast<int>(std::floor(playable_min.y));
+
+		m_playable_max_x =
+			static_cast<int>(std::ceil(playable_max.x));
+
+		m_playable_max_y =
+			static_cast<int>(std::ceil(playable_max.y));
 
 		m_has_playable_bounds = true;
+
+		_applyPlayableBoundsMask();
 	}
 
 	bool Grid::IsPositionValid(::sc2::Point2D position) const
 	{
-		int x = static_cast<int>(position.x);
-		int y = static_cast<int>(position.y);
+		int x = static_cast<int>(std::floor(position.x));
+		int y = static_cast<int>(std::floor(position.y));
 
 		if (x < 0 || x >= m_width || y < 0 || y >= m_height)
 		{
@@ -321,5 +329,28 @@ namespace Aeolus
 		return IsPositionValid(::sc2::Point2D(
 			static_cast<float>(x),
 			static_cast<float>(y)));
+	}
+
+	void Grid::_applyPlayableBoundsMask()
+	{
+		if (!m_has_playable_bounds)
+			return;
+
+		const double infinity =
+			std::numeric_limits<double>::infinity();
+
+		for (int y = 0; y < m_height; ++y)
+		{
+			for (int x = 0; x < m_width; ++x)
+			{
+				if (x < m_playable_min_x ||
+					x >= m_playable_max_x ||
+					y < m_playable_min_y ||
+					y >= m_playable_max_y)
+				{
+					m_grid(y, x) = infinity;
+				}
+			}
+		}
 	}
 }

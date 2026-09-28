@@ -1192,8 +1192,10 @@ namespace Aeolus
 
 		float naturalHeight = m_height_map.TerrainHeight({ static_cast<int>(naturalPos.x), static_cast<int>(naturalPos.y) });
 
+		AStarWorkspace workSpace;
+
 		std::vector<::sc2::Point2D> astarPath = AStarPathFind(naturalPos, enemyBase,
-			ManagerMediator::getInstance().GetAstarGrid(m_bot).GetGrid());
+			ManagerMediator::getInstance().GetAstarGrid(m_bot).GetGrid(), workSpace);
 
 		// for (const auto& pathPoint : astarPath)
 		// {

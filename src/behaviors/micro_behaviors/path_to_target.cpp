@@ -22,7 +22,10 @@ namespace Aeolus
             arrival_distance * arrival_distance)
             return false;
 
-        if (::sc2::DistanceSquared2D(unit->pos, m_target) < 10)
+        constexpr float direct_move_distance = 2.0f;
+
+        if (::sc2::DistanceSquared2D(unit->pos, m_target) <
+            direct_move_distance * direct_move_distance)
         {
             Move move(m_target);
             return move.execute(aeolusbot, unit);
@@ -33,8 +36,14 @@ namespace Aeolus
                 ? GridType::BOTH : GridType::AIR)
             : GridType::GROUND;
 
+        float lookahead_distance = 2.0f;
+
+        if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ORACLE) lookahead_distance = 5.0f;
+        else if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_VOIDRAY) lookahead_distance = 3.0f;
+
         const auto next = ManagerMediator::getInstance().FindNextPathingPoint(
-            aeolusbot, gridType, unit->pos, m_target);
+            aeolusbot, gridType, unit->pos, m_target, true, 20, 5.0f, true,
+            5, lookahead_distance);
         if (!next)
         {
             Move move(m_target);

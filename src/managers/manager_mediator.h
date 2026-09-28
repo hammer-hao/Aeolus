@@ -702,16 +702,16 @@ namespace Aeolus
 			AeolusBot& aeolusbot, GridType gridType,
 			::sc2::Point2D start, ::sc2::Point2D goal,
 			bool sense_danger = true, int danger_distance = 20,
-			float danger_threshold = 5.0f, bool smoothing = false, int sensitivity = 5)
+			float danger_threshold = 5.0f, bool smoothing = false, int sensitivity = 5, float lookahead_distance = 1.0f)
 		{
 			return ManagerRequest<
 				std::optional<::sc2::Point2D>,
-				::sc2::Point2D, ::sc2::Point2D, GridType, bool, int, float, bool, int>(
+				::sc2::Point2D, ::sc2::Point2D, GridType, bool, int, float, bool, int, float>(
 					aeolusbot,
 					constants::ManagerName::PATH_MANAGER,
 					constants::ManagerRequestType::GET_NEXT_PATH_POINT,
 					start, goal, gridType, sense_danger, danger_distance,
-					danger_threshold, smoothing, sensitivity);
+					danger_threshold, smoothing, sensitivity, lookahead_distance);
 		}
 
 		/**

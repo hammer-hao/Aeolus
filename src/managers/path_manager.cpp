@@ -15,6 +15,8 @@
 
 namespace Aeolus
 {
+	constexpr double min_weight = 1.0;
+
 	void PathManager::update(int iteration)
 	{
 		if (iteration == 0)
@@ -149,7 +151,7 @@ namespace Aeolus
 		}
 		case (constants::ManagerRequestType::GET_NEXT_PATH_POINT):
 		{
-			auto params = std::any_cast<std::tuple <::sc2::Point2D, ::sc2::Point2D, GridType, bool, int, float, bool, int>>(args);
+			auto params = std::any_cast<std::tuple <::sc2::Point2D, ::sc2::Point2D, GridType, bool, int, float, bool, int, float>>(args);
 			::sc2::Point2D start = std::get<0>(params);
 			::sc2::Point2D goal = std::get<1>(params);
 			GridType gridType = std::get<2>(params);
@@ -158,7 +160,8 @@ namespace Aeolus
 			float danger_threshold = std::get<5>(params);
 			bool smoothing = std::get<6>(params);
 			int sensitivity = std::get<7>(params);
-			return AStarPathFindNext(start, goal, gridType, sense_danger, danger_distance, danger_threshold, smoothing, sensitivity);
+			float lookahead_distance = std::get<8>(params);
+			return AStarPathFindNext(start, goal, gridType, sense_danger, danger_distance, danger_threshold, smoothing, sensitivity, lookahead_distance);
 		}
 		case (constants::ManagerRequestType::IS_SPOT_SAFER_THAN):
 		{
@@ -389,38 +392,39 @@ namespace Aeolus
 	}
 
 	std::optional<::sc2::Point2D> PathManager::AStarPathFindNext(
-		::sc2::Point2D start, ::sc2::Point2D goal, GridType gridType,
-		bool sense_danger, int danger_distance, float danger_threshold,
-		bool smoothing, int sensitivity)
+		::sc2::Point2D start,
+		::sc2::Point2D goal,
+		GridType gridType,
+		bool sense_danger,
+		int danger_distance,
+		float danger_threshold,
+		bool smoothing,
+		int sensitivity,
+		float lookahead_distance)
 	{
-		// Correctness baseline: always run the grid search. Reintroduce a shortcut
-		// only with explicit destination, reachability, and route-safety checks.
 		(void)sense_danger;
 		(void)danger_distance;
 		(void)danger_threshold;
 
+		sensitivity = std::round(lookahead_distance);
+
 		const Grid& avoidanceGrid =
 			(gridType == GridType::AIR) ? m_air_grid :
-			(gridType == GridType::BOTH) ? m_prism_grid : m_ground_grid;
-		auto cost_grid = avoidanceGrid.GetGrid();
+			(gridType == GridType::BOTH) ? m_prism_grid :
+			m_ground_grid;
 
-		// AStarPathFind sees only the matrix, not Grid's playable-bounds metadata.
-		// Prefer baking this mask into each rebuilt baseline for performance.
-		for (int y = 0; y < cost_grid.rows(); ++y)
-			for (int x = 0; x < cost_grid.cols(); ++x)
-				if (!avoidanceGrid.IsCellValid(x, y))
-					cost_grid(y, x) = std::numeric_limits<double>::infinity();
+		const Eigen::MatrixXd& cost_grid = avoidanceGrid.GetGrid();
 
-		const auto path = AStarPathFind(start, goal, cost_grid, smoothing, sensitivity);
+		const auto path =
+			AStarPathFind(start, goal, cost_grid, m_astar_workspace, smoothing, sensitivity, min_weight);
+
 		if (path.empty())
 			return std::nullopt;
 
-		// One node means both positions are in the same validated cell. Finish at
-		// the requested continuous position, not at that cell's center.
+		// Same validated grid cell.
 		if (path.size() == 1)
 			return goal;
 
-		// Both smoothed and unsmoothed results retain start at index zero.
 		return path[1];
 	}
 }

@@ -44,8 +44,10 @@ namespace Aeolus
 		{
 			bool found = false;
 
+			AStarWorkspace workspace;
+
 			std::vector<::sc2::Point2D> astarPath = AStarPathFind(expansionLocations[i], expansionLocations.back(),
-				mediator.GetAstarGrid(m_bot).GetGrid());
+				mediator.GetAstarGrid(m_bot).GetGrid(), workspace);
 
 			for (const auto& pathpt : astarPath)
 			{
