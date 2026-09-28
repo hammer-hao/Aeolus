@@ -12,6 +12,24 @@ namespace Aeolus
 		if (aeolusbot.Observation()->GetGameLoop() % 2 == 0) return false;
 		auto& mediator = ManagerMediator::getInstance();
 
+		const auto allOwnStructures = mediator.GetAllOwnStructures(aeolusbot);
+		::sc2::Units robos;
+		::sc2::Units stargates;
+		const auto allEnemyUnits = mediator.GetAllEnemyUnits(aeolusbot);
+		bool hasInvisible = std::any_of(
+			allEnemyUnits.begin(),
+			allEnemyUnits.end(),
+			[](const ::sc2::Unit* unit) {
+				bool match = unit->is_burrowed || unit->cloak == ::sc2::Unit::CloakState::Cloaked
+					|| unit->unit_type == ::sc2::UNIT_TYPEID::TERRAN_BANSHEE
+					|| unit->cloak == ::sc2::Unit::CloakState::CloakedDetected;
+				if (match) std::cout << "cloaked unit: " << ::sc2::UnitTypeToName(unit->unit_type) << std::endl;
+				return match;
+			}
+		);
+
+		if (!hasInvisible && !m_force) return false; // no need for detection if no cloaked units
+
 		const auto allUnits = mediator.GetAllOwnUnits(aeolusbot);
 		bool hasObserver = std::any_of(
 			allUnits.begin(),
@@ -20,20 +38,55 @@ namespace Aeolus
 				return unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_OBSERVER;
 			}
 		);
-		if (hasObserver) return false;
+		bool hasReadyOracle = std::any_of(
+			allUnits.begin(),
+			allUnits.end(),
+			[](const ::sc2::Unit* unit)
+			{
+				return unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ORACLE &&
+					unit->energy >= 25.0f;
+			});
 
-		const auto allEnemyUnits = mediator.GetAllEnemyUnits(aeolusbot);
-		bool hasInvisible = std::any_of(
-			allEnemyUnits.begin(),
-			allEnemyUnits.end(),
-			[](const ::sc2::Unit* unit) {
-				bool match = unit->is_burrowed || unit->cloak == ::sc2::Unit::CloakState::Cloaked;
-				if (match) std::cout << "cloaked unit: " << ::sc2::UnitTypeToName(unit->unit_type) << std::endl;
-				return match;
+		bool hasOracle = std::any_of(
+			allUnits.begin(),
+			allUnits.end(),
+			[](const ::sc2::Unit* unit)
+			{
+				return unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ORACLE;
+			});
+
+		if (hasReadyOracle)
+		{
+			auto tracker = mediator.getHarassmentTracker(aeolusbot);
+			for (const auto& [tag, status] : tracker)
+			{
+				auto unit = aeolusbot.Observation()->GetUnit(tag);
+				if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ORACLE && status != HarassmentStatus::ORACLE_DETECTION)
+				{
+					mediator.registerHarassmentStatus(aeolusbot, tag, HarassmentStatus::ORACLE_DETECTION);
+				}
 			}
-		);
+			return false;
+		}
 
-		if (!hasInvisible && !m_force) return false; // no need for detection if no cloaked units
+		std::copy_if(allOwnStructures.begin(), allOwnStructures.end(), std::back_inserter(stargates),
+			[](const ::sc2::Unit* structure) {
+				return structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STARGATE && structure->build_progress >= 1.0 && structure->orders.empty();
+			});
+
+		if (!stargates.empty() && !hasOracle)
+		{
+			aeolusbot.Actions()->UnitCommand(stargates.front(), ::sc2::ABILITY_ID::TRAIN_ORACLE);
+			return true;
+		}
+
+		if (std::any_of(allOwnStructures.begin(), allOwnStructures.end(), [](const ::sc2::Unit* structure) {
+			return structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STARGATE &&
+				!structure->orders.empty()
+				&& structure->orders.front().ability_id == ::sc2::ABILITY_ID::TRAIN_ORACLE;
+			})) return true;
+
+		if (hasObserver) return true;
 
 		std::make_unique<TechUp>(::sc2::UNIT_TYPEID::PROTOSS_OBSERVER)->execute(aeolusbot);
 		if (!mediator.IsStructureAvailable(aeolusbot, ::sc2::UNIT_TYPEID::PROTOSS_ROBOTICSFACILITY))

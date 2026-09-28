@@ -103,6 +103,7 @@ namespace Aeolus
 		HARASSING_AT_THIRD,
 		SURVIVING,
 		DEFENDING,
+		ORACLE_DETECTION
 	};
 
 	struct CompositionWeights
