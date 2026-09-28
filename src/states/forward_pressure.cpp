@@ -66,7 +66,7 @@ namespace Aeolus
 
         doPrismPickUpMicro(aeolusbot);
 
-        doOracleHarassMicro(aeolusbot);
+        doOracleHarassMicro(aeolusbot, false);
 
         doObserverMicro(aeolusbot);
 

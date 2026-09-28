@@ -79,7 +79,7 @@ namespace Aeolus
         doPrismPickUpMicro(aeolusbot);
 
 		// We are open to doing Oracle harass during the build order stage
-		doOracleHarassMicro(aeolusbot);
+		doOracleHarassMicro(aeolusbot, false);
 
 		// Perform Adept Harassment Micro
 		doAdeptHarassMicro(aeolusbot);
