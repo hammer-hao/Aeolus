@@ -52,5 +52,9 @@ namespace Aeolus
 		void _handleConstructionOrders();
 
 		void _clearBuildingOrders();
+
+		void _cancelBuildingsIfNeeded();
+
+		std::unordered_map<::sc2::Tag, float> m_building_health;
 	};
 }

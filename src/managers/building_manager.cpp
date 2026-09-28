@@ -44,6 +44,7 @@ namespace Aeolus
 	void BuildingManager::update(int iteration)
 	{
 		_handleConstructionOrders();
+		_cancelBuildingsIfNeeded();
 	}
 
 	bool BuildingManager::_buildWithSpecificWorker(const ::sc2::Unit* worker, ::sc2::UNIT_TYPEID structure_type,
@@ -204,6 +205,8 @@ namespace Aeolus
 
 	void BuildingManager::OnUnitDestroyed(const ::sc2::Unit* unit)
 	{
+		m_building_health.erase(unit->tag);
+
 		// check if the destroyed unit is a worker with assigned building
 		auto it = m_building_tracker.find(unit);
 		if (it != m_building_tracker.end())
@@ -272,5 +275,40 @@ namespace Aeolus
 		}
 
 		m_building_tracker.clear();
+	}
+
+	void BuildingManager::_cancelBuildingsIfNeeded()
+	{
+		auto& mediator = ManagerMediator::getInstance();
+		auto allOwnStructures = mediator.GetAllOwnStructures(m_bot);
+
+		for (const auto& structure : allOwnStructures)
+		{
+			auto it = m_building_health.find(structure->tag);
+			if (structure->build_progress < 1.0f)
+			{
+				float totalHealth = structure->shield + structure->health;
+				if (it == m_building_health.end())
+				{
+					m_building_health.insert({ structure->tag, totalHealth });
+				}
+				else
+				{
+					float previousHealth = it->second;
+					if (totalHealth < previousHealth && ((previousHealth - totalHealth) > totalHealth || totalHealth < 10.0f))
+					{
+						m_bot.Actions()->UnitCommand(structure, ::sc2::ABILITY_ID::CANCEL);
+					}
+					it->second = totalHealth;
+				}
+			}
+			else
+			{
+				if (it != m_building_health.end())
+				{
+					m_building_health.erase(it);
+				}
+			}
+		}
 	}
 }
