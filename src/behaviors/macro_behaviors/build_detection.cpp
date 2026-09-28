@@ -55,7 +55,7 @@ namespace Aeolus
 				return unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ORACLE;
 			});
 
-		if (hasReadyOracle)
+		if (hasReadyOracle && hasInvisible)
 		{
 			auto tracker = mediator.getHarassmentTracker(aeolusbot);
 			for (const auto& [tag, status] : tracker)

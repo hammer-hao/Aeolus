@@ -43,7 +43,7 @@ namespace Aeolus
 	{
         doBookKeepingMacroTasks(aeolusbot);
 
-        doHighEconomyMacroTasks(aeolusbot, true); // force build detection since we want to be as safe as possible
+        doHighEconomyMacroTasks(aeolusbot, false); // force build detection since we want to be as safe as possible
 
         if (aeolusbot.Observation()->GetGameLoop() % 100 == 0)
         {
