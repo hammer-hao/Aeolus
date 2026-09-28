@@ -92,6 +92,11 @@ namespace Aeolus
 		aeolusbot.RegisterBehavior(std::make_unique<RepowerStructures>());
 
 		::sc2::Units allEnemy = mediator.GetAllSeenEnemyUnits(aeolusbot);
+		::sc2::Units allEnemyStructures = mediator.GetAllEnemyStructures(aeolusbot);
+		for (const auto& structure : allEnemyStructures)
+		{
+			allEnemy.push_back(structure);
+		}
 		const ::sc2::Point2D enemyStartLocation = ManagerMediator::getInstance().GetExpansionLocations(aeolusbot).back();
 		int gameLoop = aeolusbot.Observation()->GetGameLoop();
 
