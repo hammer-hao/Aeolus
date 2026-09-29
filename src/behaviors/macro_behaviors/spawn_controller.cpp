@@ -9,6 +9,7 @@
 #include <optional>
 #include <algorithm>
 #include <iterator>
+#include <random>
 
 #include "../../Aeolus.h"
 #include "../../managers/manager_mediator.h"
@@ -193,7 +194,7 @@ namespace Aeolus
 		auto allGasSprings = ManagerMediator::getInstance().GetAllVespeneGeysers(aeolusbot);
 		::sc2::Units allPylons;
 		std::copy_if(allStructures.begin(), allStructures.end(), std::back_inserter(allPylons),
-			[](const ::sc2::Unit* structure) {return structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_PYLON; });
+			[](const ::sc2::Unit* structure) {return structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_PYLON && structure->build_progress >= 1.0f; });
 
 		if (allPylons.empty()) return target; // no pylons left, we lost anyways!
 		
@@ -221,6 +222,10 @@ namespace Aeolus
 			::sc2::Units nearUnits = ManagerMediator::getInstance().GetOwnUnitsInRange(aeolusbot,
 				warpPositions, 1.75);
 			nearUnits.insert(nearUnits.end(), allGasSprings.begin(), allGasSprings.end());
+
+			// Randomize search order.
+			static std::mt19937 rng(std::random_device{}());
+			std::shuffle(warpPositions.begin(), warpPositions.end(), rng);
 
 			for (const auto& position : warpPositions)
 			{
@@ -300,10 +305,11 @@ namespace Aeolus
 					continue;
 				}
 
-				::sc2::Point2D enemySpawn = ManagerMediator::getInstance().GetExpansionLocations(aeolusbot).back();
-				::sc2::Point2D warpInPosition = _calculateWarpInSpot(aeolusbot, enemySpawn);
+				// try to spawn near our natural
+				::sc2::Point2D attackTarget = ManagerMediator::getInstance().GetDefenseTarget(aeolusbot, 1);
+				::sc2::Point2D warpInPosition = _calculateWarpInSpot(aeolusbot, attackTarget);
 
-				if (warpInPosition == enemySpawn)
+				if (warpInPosition == attackTarget)
 				{
 					executed = false;
 					continue;

@@ -9,8 +9,14 @@
 #include <any>
 #include <tuple>
 
+#include <optional>
+#include <cmath>
+#include <limits>
+
 namespace Aeolus
 {
+	constexpr double min_weight = 1.0;
+
 	void PathManager::update(int iteration)
 	{
 		if (iteration == 0)
@@ -145,7 +151,7 @@ namespace Aeolus
 		}
 		case (constants::ManagerRequestType::GET_NEXT_PATH_POINT):
 		{
-			auto params = std::any_cast<std::tuple <::sc2::Point2D, ::sc2::Point2D, GridType, bool, int, float, bool, int>>(args);
+			auto params = std::any_cast<std::tuple <::sc2::Point2D, ::sc2::Point2D, GridType, bool, int, float, bool, int, float>>(args);
 			::sc2::Point2D start = std::get<0>(params);
 			::sc2::Point2D goal = std::get<1>(params);
 			GridType gridType = std::get<2>(params);
@@ -154,7 +160,8 @@ namespace Aeolus
 			float danger_threshold = std::get<5>(params);
 			bool smoothing = std::get<6>(params);
 			int sensitivity = std::get<7>(params);
-			return AStarPathFindNext(start, goal, gridType, sense_danger, danger_distance, danger_threshold, smoothing, sensitivity);
+			float lookahead_distance = std::get<8>(params);
+			return AStarPathFindNext(start, goal, gridType, sense_danger, danger_distance, danger_threshold, smoothing, sensitivity, lookahead_distance);
 		}
 		case (constants::ManagerRequestType::IS_SPOT_SAFER_THAN):
 		{
@@ -202,13 +209,13 @@ namespace Aeolus
 			// add the range of marines + 1;
 			double ground_cost = 20;
 			double ground_range = 6;
-			m_ground_grid.AddCost(unit->pos.x, unit->pos.y, ground_range, ground_cost);
-			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + 1.0, ground_cost);
+			m_ground_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + Config::range_buffer, ground_cost);
+			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, ground_range + 1.0 + Config::range_buffer, ground_cost);
 
 			double air_cost = 20;
 			double air_Range = 6;
-			m_air_grid.AddCost(unit->pos.x, unit->pos.y, air_Range, air_cost);
-			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, air_Range + 1.0, air_cost);
+			m_air_grid.AddCost(unit->pos.x, unit->pos.y, air_Range + Config::range_buffer, air_cost);
+			m_prism_grid.AddCost(unit->pos.x, unit->pos.y, air_Range + 1.0 + Config::range_buffer, air_cost);
 		}
 		else if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_DISRUPTORPHASED)
 		{
@@ -349,9 +356,18 @@ namespace Aeolus
 
 	void PathManager::_reset_grids()
 	{
-		m_ground_grid.Reset();
+		m_ground_grid = m_mapdata.GetAStarGrid();
 		m_air_grid.Reset();
-		m_prism_grid.Reset();
+		m_prism_grid = m_ground_grid;
+
+		// Freshly assigned grids need their playable bounds reapplied.
+		const auto& info = m_bot.Observation()->GetGameInfo();
+		m_ground_grid.SetPlayableBounds(
+			info.playable_min, info.playable_max);
+		m_air_grid.SetPlayableBounds(
+			info.playable_min, info.playable_max);
+		m_prism_grid.SetPlayableBounds(
+			info.playable_min, info.playable_max);
 	}
 
 	void PathManager::_reset_danger_tiles()
@@ -375,57 +391,41 @@ namespace Aeolus
 		return m_mapdata.GetFloodFillArea(starting_point, max_distance);
 	}
 
-	::sc2::Point2D PathManager::AStarPathFindNext(::sc2::Point2D start, ::sc2::Point2D goal,
-		GridType gridType, bool sense_danger, int danger_distance,
-		float danger_threshold, bool smoothing, int sensitivity)
+	std::optional<::sc2::Point2D> PathManager::AStarPathFindNext(
+		::sc2::Point2D start,
+		::sc2::Point2D goal,
+		GridType gridType,
+		bool sense_danger,
+		int danger_distance,
+		float danger_threshold,
+		bool smoothing,
+		int sensitivity,
+		float lookahead_distance)
 	{
-		Grid& avoidanceGrid = m_ground_grid;
-		
-		if (gridType == GridType::AIR) avoidanceGrid = m_air_grid;
-		else if (gridType == GridType::BOTH) avoidanceGrid = m_prism_grid; // gridType == GridType::BOTH
+		(void)sense_danger;
+		(void)danger_distance;
+		(void)danger_threshold;
 
-		const auto& cost_grid = avoidanceGrid.GetGrid();
+		sensitivity = std::round(lookahead_distance);
 
-		if (sense_danger)
-		{
-			std::vector<std::pair<int, int>> dangers;
+		const Grid& avoidanceGrid =
+			(gridType == GridType::AIR) ? m_air_grid :
+			(gridType == GridType::BOTH) ? m_prism_grid :
+			m_ground_grid;
 
-			if (m_danger_tiles_is_cached) dangers = m_danger_tiles_cache;
-			else
-			{
-				for (int y = 0; y < cost_grid.rows(); ++y)
-				{
-					for (int x = 0; x < cost_grid.cols(); ++x)
-					{
-						if (cost_grid(y, x) > danger_threshold && cost_grid(y, x) != std::numeric_limits<double>::infinity()) 
-							dangers.emplace_back(x, y);
-					}
-				}
-				m_danger_tiles_is_cached = true;
-			}
-			
-			if (!dangers.empty())
-			{
-				double closest_danger_distance = std::numeric_limits<double>::infinity();
-				for (const auto& danger : dangers)
-				{
-					// std::cout << "Danger at: " << danger.first << " " << danger.second << std::endl;
-					closest_danger_distance = std::min(
-						(std::pow(danger.first - start.x, 2) + std::pow(danger.second - start.y, 2)),
-						closest_danger_distance);
-				}
-				if (closest_danger_distance >= (danger_distance * danger_distance))
-					return goal;
-			}
-			else return goal;
-		}
+		const Eigen::MatrixXd& cost_grid = avoidanceGrid.GetGrid();
 
-		auto heightMap = ::sc2::HeightMap(m_bot.Observation()->GetGameInfo());
+		const auto path =
+			AStarPathFind(start, goal, cost_grid, m_astar_workspace, smoothing, sensitivity, min_weight);
 
-		// sensed danger and danger is within distance, perform custom pathfinding.
-		auto path = AStarPathFind(start, goal, cost_grid, smoothing, sensitivity);
+		if (path.empty())
+			return std::nullopt;
 
-		return (path.size() > 1) ? path[1] : goal;
+		// Same validated grid cell.
+		if (path.size() == 1)
+			return goal;
+
+		return path[1];
 	}
 }
 

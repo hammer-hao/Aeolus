@@ -8,6 +8,8 @@
 #include <iostream>
 #include <iomanip>
 
+#include "../../Aeolus.h"
+
 namespace Aeolus
 {
 	std::any ArmyCompositionManager::ProcessRequest(AeolusBot& aeolusbot, constants::ManagerRequestType request, std::any args)
@@ -24,22 +26,43 @@ namespace Aeolus
 
 	void ArmyCompositionManager::update(int iteration) 
 	{
-		// update 
+		auto& mediator = ManagerMediator::getInstance();
+		auto all_enemy = mediator.GetAllSeenEnemyUnits(m_bot);
+		::std::map<::sc2::UNIT_TYPEID, float> stalkers_only({ { ::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.00f } });
+
+		auto& unitData = m_bot.Observation()->GetUnitTypeData();
+		int count_enemy_supply = 0;
+		for (const auto& unit : all_enemy)
+		{
+			if (unit->unit_type != ::sc2::UNIT_TYPEID::TERRAN_SCV &&
+				unit->unit_type != ::sc2::UNIT_TYPEID::TERRAN_MULE &&
+				unit->unit_type != ::sc2::UNIT_TYPEID::ZERG_DRONE &&
+				unit->unit_type != ::sc2::UNIT_TYPEID::PROTOSS_PROBE)
+			{
+				count_enemy_supply += unitData[unit->unit_type].food_required;
+			}
+		}
+		auto own_town_halls = mediator.GetOwnReadyTownHalls(m_bot);
+		if (count_enemy_supply < 20 && own_town_halls.size() < 4)
+		{
+			// not enough enemy units to tell
+			m_best_army_composition = stalkers_only;
+			return;
+		}
+
 		if (iteration % 44 == 1)
 		{
-			auto& mediator = ManagerMediator::getInstance();
-			auto all_enemy = mediator.GetAllSeenEnemyUnits(m_bot);
 
 			CompositionWeights totalWeights = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 			for (const auto& enemy_unit : all_enemy)
 			{
-				auto it = ARMY_COMPOSITION_LOOKUP.find(enemy_unit);
+				auto it = ARMY_COMPOSITION_LOOKUP.find(enemy_unit->unit_type);
 				if (it == ARMY_COMPOSITION_LOOKUP.end())
 				{
 					continue;
 				}
 				CompositionWeights counterWeights = it->second;
-				int supplyCost = mediator.GetUnitSupplyCost(m_bot, enemy_unit);
+				int supplyCost = mediator.GetUnitSupplyCost(m_bot, enemy_unit->unit_type);
 				totalWeights.stalker += supplyCost * counterWeights.stalker;
 				totalWeights.archon += supplyCost * counterWeights.archon;
 				totalWeights.immortal += supplyCost * counterWeights.immortal;

@@ -22,6 +22,8 @@ namespace Aeolus
 
 		void declareExit();
 
+		void OnEnter(AeolusBot& aeolusbot) override;
+
 	protected:
 		/**
 		* @brief Perform bookkeeping macro tasks.
@@ -55,7 +57,7 @@ namespace Aeolus
 		* @brief Execute Oracle Harassment micro
 		* Will gather existing oracles and "harass" micro them against an array of target points.
 		*/
-		void doOracleHarassMicro(AeolusBot& aeolusbot);
+		void doOracleHarassMicro(AeolusBot& aeolusbot, bool attacking);
 
 		/**
 		* @brief Perform harassment with the adept

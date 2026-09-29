@@ -3,8 +3,12 @@
 #include "manager.h"
 #include "../pathing/map_data.h"
 #include "../pathing/grid.h"
+#include "../utils/Astar.hpp"
 
 #include <sc2api/sc2_common.h>
+#include <optional>
+#include <cmath>
+#include <limits>
 
 namespace Aeolus
 {
@@ -79,8 +83,10 @@ namespace Aeolus
 		find the shortest safe path from start point to the goal point and returns
 		the next point to move to in that path.
 		*/
-		::sc2::Point2D AStarPathFindNext(::sc2::Point2D start, ::sc2::Point2D goal,
+		std::optional<::sc2::Point2D> AStarPathFindNext(::sc2::Point2D start, ::sc2::Point2D goal,
 			GridType gridType, bool sense_danger = true, int danger_distance = 20,
-			float danger_threshold = 5.0f, bool smoothing = false, int sensitivity = 5);
+			float danger_threshold = 5.0f, bool smoothing = false, int sensitivity = 5, float lookahead_distance = 1.0f);
+
+		AStarWorkspace m_astar_workspace;
 	};
 }

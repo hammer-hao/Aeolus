@@ -9,47 +9,60 @@
 #include "../../managers/manager_mediator.h"
 #include "../../Aeolus.h"
 
+#include "../../utils/position_utils.h"
+
 namespace Aeolus
 {
 	bool KeepUnitSafe::execute(AeolusBot& aeolusbot, const ::sc2::Unit* unit)
 	{
 		auto& manager = ManagerMediator::getInstance();
 
+		bool locked_on = std::any_of(unit->buffs.begin(), unit->buffs.end(), [](::sc2::BUFF_ID buff) {
+			return buff == ::sc2::BUFF_ID::LOCKON;
+			});
+
 		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPPRISM)
 		{
-			if (unit->cargo_space_taken == 0 && manager.IsAirPositionSafe(aeolusbot, unit->pos)) return false;
-			else if (manager.IsGroundPositionSafe(aeolusbot, unit->pos) && manager.IsAirPositionSafe(aeolusbot, unit->pos)) return false;
+			if (!locked_on && unit->cargo_space_taken == 0 && manager.IsAirPositionSafe(aeolusbot, unit->pos)) return false;
+			else if (!locked_on && manager.IsGroundPositionSafe(aeolusbot, unit->pos) && manager.IsAirPositionSafe(aeolusbot, unit->pos)) return false;
 		}
-		else if (!unit->is_flying && manager.IsGroundPositionSafe(aeolusbot, unit->pos)) return false;
-		else if (unit->is_flying && manager.IsAirPositionSafe(aeolusbot, unit->pos)) return false;
+		else if (!locked_on && !unit->is_flying && manager.IsGroundPositionSafe(aeolusbot, unit->pos)) return false;
+		else if (!locked_on && unit->is_flying && manager.IsAirPositionSafe(aeolusbot, unit->pos)) return false;
 
 		::sc2::Point2D safe_spot = { 0.0, 0.0 };
 
-		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPPRISM ||
-			unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS)
+		if (locked_on)
 		{
-			/*safe_spot = m_target.has_value() ?
-				manager.FindClosestSafeSpotTowards(aeolusbot, unit->pos, m_target.value(), 7.0, GridType::BOTH) :
-				manager.FindClosestPrismSafeSpot(aeolusbot, unit->pos, 7.0);*/
-
-			safe_spot = manager.FindClosestPrismSafeSpot(aeolusbot, unit->pos, 7.0);
-		}
-		else
-		{
-			safe_spot = (!unit->is_flying) ?
-				manager.FindClosestGroundSafeSpot(aeolusbot, unit->pos, 7.0) :
-				manager.FindClosestAirSafeSpot(aeolusbot, unit->pos, 7.0);
-			/*if (m_target.has_value())
+			::sc2::Point2D starting_point = unit->pos;
+			::sc2::Units all_close = manager.GetUnitsInRange(aeolusbot, { starting_point }, 15.0f);
+			::sc2::Units cyclones;
+			std::copy_if(all_close.begin(), all_close.end(), std::back_inserter(cyclones),
+				[](const ::sc2::Unit* unit_) {return unit_->unit_type == ::sc2::UNIT_TYPEID::TERRAN_CYCLONE;  });
+			if (cyclones.empty())
 			{
-				GridType gridType = unit->is_flying ? GridType::AIR : GridType::GROUND;
-				safe_spot = manager.FindClosestSafeSpotTowards(aeolusbot, unit->pos, m_target.value(), 7.0, gridType);
+				locked_on = false;
+			}
+			else
+			{
+				std::sort(cyclones.begin(), cyclones.end(), [&](const ::sc2::Unit* unitA, const ::sc2::Unit* unitB) {
+					return ::sc2::DistanceSquared2D(unitA->pos, unit->pos) < ::sc2::DistanceSquared2D(unitB->pos, unit->pos);
+					});
+				safe_spot = utils::GetPositionTowards(cyclones.front()->pos, unit->pos, 15.0f, false);
+			}
+		}
+		if (!locked_on)
+		{
+			if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPPRISM ||
+				unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS)
+			{
+				safe_spot = manager.FindClosestPrismSafeSpot(aeolusbot, unit->pos, 7.0);
 			}
 			else
 			{
 				safe_spot = (!unit->is_flying) ?
 					manager.FindClosestGroundSafeSpot(aeolusbot, unit->pos, 7.0) :
 					manager.FindClosestAirSafeSpot(aeolusbot, unit->pos, 7.0);
-			}*/
+			}
 		}
 
 		if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER &&

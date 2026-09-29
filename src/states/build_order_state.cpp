@@ -47,10 +47,8 @@ namespace Aeolus
 			&& aeolusbot.Observation()->GetGameLoop() > 3400)
 			aeolusbot.RegisterBehavior(std::make_unique<AutoSupply>());
 
-		if (aeolusbot.Observation()->GetGameLoop() % 22 == 0)
-		{
-			_ensureContingencyResponse(aeolusbot);
-		}
+		// change to corresponding state if we scout anything
+		ContingencyState::ensureContingencyResponse(aeolusbot);
 
 		// done with the build, default to forward pressuring.
 		if (aeolusbot.isBuildFinished()) aeolusbot.ChangeState(MakeState<ForwardPressureState>());
@@ -81,97 +79,9 @@ namespace Aeolus
         doPrismPickUpMicro(aeolusbot);
 
 		// We are open to doing Oracle harass during the build order stage
-		doOracleHarassMicro(aeolusbot);
+		doOracleHarassMicro(aeolusbot, false);
 
 		// Perform Adept Harassment Micro
 		doAdeptHarassMicro(aeolusbot);
-	}
-
-	void BuildOrderState::_ensureContingencyResponse(AeolusBot& aeolusbot)
-	{
-		auto& mediator = ManagerMediator::getInstance();
-		std::vector<::sc2::UNIT_TYPEID> enemyUnits = mediator.GetAllSeenEnemyUnits(aeolusbot);
-		::sc2::Units enemyStructures = mediator.GetAllEnemyStructures(aeolusbot);
-		std::vector<ContingencyPlan> contingencyPlans = mediator.getContingencyPlans(aeolusbot);
-
-		for (const auto& contingencyPlan : contingencyPlans)
-		{
-			bool meets_criteria = true;
-			for (const auto& condition : contingencyPlan.conditions)
-			{
-				if (!_isConditionSatisfied(condition, aeolusbot, enemyUnits) 
-					&& !_isConditionSatisfied(condition, aeolusbot, enemyStructures)) 
-				{
-					meets_criteria = false;
-					break;
-				}
-			}
-			if (contingencyPlan.check_no_enemy_expansion)
-			{
-				::sc2::Units enemyth = mediator.GetAllEnemyTownHalls(aeolusbot);
-				::sc2::Point2D enemyNaturalPos = mediator.GetEnemyNaturalPosition(aeolusbot);
-				for (const auto& th : enemyStructures)
-				{
-					if (sc2::DistanceSquared2D(th->pos, enemyNaturalPos) < 9)
-					{
-						meets_criteria = false;
-						break;
-					}
-				}
-			}
-			if (meets_criteria) {
-				std::stringstream scoutedTag;
-				scoutedTag << "Tag:";
-				scoutedTag << contingencyPlan.name;
-				aeolusbot.Actions()->SendChat(scoutedTag.str());
-
-				mediator.ClearBuildingOrders(aeolusbot);
-				aeolusbot.ChangeState(MakeState<ContingencyState>(contingencyPlan));
-			}
-		}
-	}
-
-	bool BuildOrderState::_isConditionSatisfied(const ScoutingCondition& condition, AeolusBot& aeolusbot, const std::vector<::sc2::UNIT_TYPEID>& enemyUnits)
-	{
-		int before_gameloop = static_cast<int>(condition.before_seconds * 22.4f);
-		if (aeolusbot.Observation()->GetGameLoop() > before_gameloop) return false;
-
-		int count = 0;
-		for (const auto& unit : enemyUnits)
-		{
-			if (unit == condition.unitType)
-			{
-				count++;
-			}
-		}
-		return count >= condition.count;
-	}
-
-	bool BuildOrderState::_isConditionSatisfied(const ScoutingCondition& condition, AeolusBot& aeolusbot, const ::sc2::Units& enemyStructures)
-	{
-		int before_gameloop = static_cast<int>(condition.before_seconds * 22.4f);
-		if (aeolusbot.Observation()->GetGameLoop() > before_gameloop) return false;
-
-		const ::sc2::Point2D enemyStartLocation = ManagerMediator::getInstance().GetExpansionLocations(aeolusbot).back();
-
-		int count = 0;
-		for (const auto& structure : enemyStructures)
-		{
-			{
-				if (condition.is_proxied)
-				{
-					if (sc2::DistanceSquared2D(structure->pos, aeolusbot.Observation()->GetStartLocation()) < 5000.0f ||
-						(sc2::DistanceSquared2D(structure->pos, enemyStartLocation) > 5000.0f))
-					{
-						count++;
-					}
-				}
-				else if (structure->unit_type == condition.unitType && structure->build_progress > 0.9f)
-				{
-					count++;
-				}
-			}
-		}
-		return count >= condition.count;
 	}
 }

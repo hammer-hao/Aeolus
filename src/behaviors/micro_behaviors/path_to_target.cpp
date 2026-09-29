@@ -13,27 +13,44 @@ namespace Aeolus
 {
 	bool PathToTarget::execute(AeolusBot& aeolusbot, const ::sc2::Unit* unit)
 	{
-		if (::sc2::DistanceSquared2D(unit->pos, m_target) <= 0.0) return false;
+        if (!unit)
+            return false;
 
-		// std::cout << "Path to target: retrieving grid... " << std::endl;
-		GridType influenceGridType = (unit->is_flying) ?
-			((unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPPRISM) ? GridType::BOTH : GridType::AIR) :
-			GridType::GROUND;
+        // Tune this tolerance to your behavior scheduler and desired arrival radius.
+        constexpr float arrival_distance = 0.1f;
+        if (::sc2::DistanceSquared2D(unit->pos, m_target) <=
+            arrival_distance * arrival_distance)
+            return false;
 
-		// std::cout << "Path to target: retrieved grid... " << std::endl;
+        constexpr float direct_move_distance = 2.0f;
 
-		::sc2::Point2D move_to = ManagerMediator::getInstance().FindNextPathingPoint(
-			aeolusbot, 
-			influenceGridType, 
-			unit->pos, 
-			m_target
-		);
+        if (::sc2::DistanceSquared2D(unit->pos, m_target) <
+            direct_move_distance * direct_move_distance)
+        {
+            Move move(m_target);
+            return move.execute(aeolusbot, unit);
+        }
 
-		//aeolusbot.Actions()->UnitCommand(unit, ::sc2::ABILITY_ID::MOVE_MOVE, m_target);
-		//return true;
+        const GridType gridType = unit->is_flying
+            ? ((unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_WARPPRISM)
+                ? GridType::BOTH : GridType::AIR)
+            : GridType::GROUND;
 
-		Move move = Move(move_to);
+        float lookahead_distance = 2.0f;
 
-		return move.execute(aeolusbot, unit);
+        if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ORACLE) lookahead_distance = 5.0f;
+        else if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_VOIDRAY) lookahead_distance = 3.0f;
+
+        const auto next = ManagerMediator::getInstance().FindNextPathingPoint(
+            aeolusbot, gridType, unit->pos, m_target, true, 20, 5.0f, true,
+            5, lookahead_distance);
+        if (!next)
+        {
+            Move move(m_target);
+            return move.execute(aeolusbot, unit);
+        }
+
+        Move move(*next);
+        return move.execute(aeolusbot, unit);
 	}
 }

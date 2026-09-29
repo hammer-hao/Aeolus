@@ -16,7 +16,7 @@
           "ZEALOT": 0.1
         },
         "move_out_supply": 75,
-        "cannons_to_add": 2
+        "batteries_to_add": 2
       },
       {
         "name": "zergling_rush",
@@ -33,7 +33,7 @@
           "ZEALOT": 0.1
         },
         "move_out_supply": 75,
-        "cannons_to_add": 2
+        "batteries_to_add": 2
       },
       {
         "name": "roach_attack",
@@ -50,7 +50,7 @@
           "IMMORTAL": 0.2
         },
         "move_out_supply": 90,
-        "cannons_to_add": 1
+        "batteries_to_add": 1
       },
       {
         "name": "drone_rush",
@@ -66,7 +66,7 @@
           "STALKER": 1.0
         },
         "move_out_supply": 40,
-        "cannons_to_add": 0
+        "batteries_to_add": 0
       }
     ],
     "terran": [
@@ -84,7 +84,7 @@
           "STALKER": 1.0
         },
         "move_out_supply": 40,
-        "cannons_to_add": 0
+        "batteries_to_add": 0
       },
       {
         "name": "marine_rush",
@@ -101,7 +101,7 @@
           "STALKER": 1.0
         },
         "move_out_supply": 75,
-        "cannons_to_add": 0
+        "batteries_to_add": 0
       },
       {
         "name": "proxy_barracks",
@@ -114,11 +114,10 @@
           }
         ],
         "army_composition": {
-          "STALKER": 0.9,
-          "ZEALOT": 0.1
+          "STALKER": 1.0
         },
         "move_out_supply": 75,
-        "cannons_to_add": 2
+        "batteries_to_add": 1
       }
     ],
     "protoss": [
@@ -136,7 +135,7 @@
           "STALKER": 1.0
         },
         "move_out_supply": 75,
-        "cannons_to_add": 0
+        "batteries_to_add": 0
       },
       {
         "name": "probe_rush",
@@ -152,7 +151,7 @@
           "STALKER": 1.0
         },
         "move_out_supply": 40,
-        "cannons_to_add": 0
+        "batteries_to_add": 0
       }
     ]
   }

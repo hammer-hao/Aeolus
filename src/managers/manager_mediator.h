@@ -280,6 +280,20 @@ namespace Aeolus
 		}
 
 		/**
+		* @brief Select the closest workers to the target location. Prioritize workers not carrying resources.
+		*/
+		std::optional<::sc2::Units> SelectWorkersClosestTo(AeolusBot& aeolusbot, ::sc2::Point2D target_location, int num_needed)
+		{
+			return ManagerRequest<std::optional<::sc2::Units>, ::sc2::Point2D, int>(
+				aeolusbot,
+				constants::ManagerName::RESOURCE_MANAGER,
+				constants::ManagerRequestType::SELECT_WORKERS_TO_TARGET,
+				target_location,
+				num_needed
+			);
+		}
+
+		/**
 		* @brief Clears the worker assignment for MINERALS ONLY.
 		*/
 		int ClearWorkerAssignment(AeolusBot& aeolusbot, const ::sc2::Unit* worker)
@@ -490,12 +504,12 @@ namespace Aeolus
 		* Returns a list of unit types, one for each enemy unit that we have seen alive
 		* and have not killed. INCLUDES WORKERS!
 		*/
-		std::vector<::sc2::UNIT_TYPEID> GetAllSeenEnemyUnits(AeolusBot& aeolusbot)
+		::sc2::Units GetAllSeenEnemyUnits(AeolusBot& aeolusbot)
 		{
-			return ManagerRequest<std::vector<::sc2::UNIT_TYPEID>, int>(
+			return ManagerRequest<::sc2::Units, int>(
 				aeolusbot,
 				constants::ManagerName::UNIT_FILTER_MANAGER,
-				constants::ManagerRequestType::GET_KNOWN_ENEMY_UNIT_TYPES,
+				constants::ManagerRequestType::GET_KNOWN_ENEMY_UNITS,
 				0
 			);
 		}
@@ -684,23 +698,20 @@ namespace Aeolus
 			);
 		}
 
-		::sc2::Point2D FindNextPathingPoint(AeolusBot& aeolusbot, GridType gridType, ::sc2::Point2D start,
-			::sc2::Point2D goal, bool sense_danger = true, int danger_distance = 20,
-			float danger_threshold = 5.0f, bool smoothing = false, int sensitivity = 5)
+		std::optional<::sc2::Point2D> FindNextPathingPoint(
+			AeolusBot& aeolusbot, GridType gridType,
+			::sc2::Point2D start, ::sc2::Point2D goal,
+			bool sense_danger = true, int danger_distance = 20,
+			float danger_threshold = 5.0f, bool smoothing = false, int sensitivity = 5, float lookahead_distance = 1.0f)
 		{
-			return ManagerRequest<::sc2::Point2D, ::sc2::Point2D, ::sc2::Point2D, GridType, bool, int, float, bool, int>(
-				aeolusbot,
-				constants::ManagerName::PATH_MANAGER,
-				constants::ManagerRequestType::GET_NEXT_PATH_POINT,
-				start,
-				goal,
-				gridType,
-				sense_danger,
-				danger_distance,
-				danger_threshold,
-				smoothing,
-				sensitivity
-			);
+			return ManagerRequest<
+				std::optional<::sc2::Point2D>,
+				::sc2::Point2D, ::sc2::Point2D, GridType, bool, int, float, bool, int, float>(
+					aeolusbot,
+					constants::ManagerName::PATH_MANAGER,
+					constants::ManagerRequestType::GET_NEXT_PATH_POINT,
+					start, goal, gridType, sense_danger, danger_distance,
+					danger_threshold, smoothing, sensitivity, lookahead_distance);
 		}
 
 		/**
@@ -1210,14 +1221,15 @@ namespace Aeolus
 		* simulates the engagement and returns whether our army is predicted to come out
 		* on top.
 		*/
-		bool PredictEngagement(AeolusBot& aeolusbot, std::vector<::sc2::UNIT_TYPEID> own_army, std::vector<::sc2::UNIT_TYPEID> opponent_army)
+		CombatSimulationResult PredictEngagement(AeolusBot& aeolusbot, ::sc2::Units own_army, ::sc2::Units opponent_army, ::sc2::Units opponent_static_defenses)
 		{
-			return ManagerRequest<bool, std::vector<::sc2::UNIT_TYPEID>, std::vector<::sc2::UNIT_TYPEID>>(
+			return ManagerRequest<CombatSimulationResult, ::sc2::Units, ::sc2::Units>(
 				aeolusbot,
 				constants::ManagerName::COMBAT_SIM_MANAGER,
 				constants::ManagerRequestType::PREDICT_ENGAGEMENT,
 				own_army,
-				opponent_army
+				opponent_army,
+				opponent_static_defenses
 			);
 		}
 

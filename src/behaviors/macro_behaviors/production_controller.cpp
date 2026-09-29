@@ -90,7 +90,7 @@ namespace Aeolus
 			bool tech_ready = false; // start false
 			for (const auto& structure : all_own_structures)
 			{
-				if (structure->unit_type == required_tech && structure->build_progress >= 1.0f)
+				if (structure->unit_type == required_tech)
 				{
 					tech_ready = true;
 					break;
@@ -115,7 +115,7 @@ namespace Aeolus
 			// "incomplete" without their signiture upgrade
 			auto existingUpgrades = aeolusbot.Observation()->GetUpgrades();
 			// some units are technically "incomplete" without their signiture upgrade
-			if (!tech_up_attempted && unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS)
+			if (!tech_up_attempted && unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS && m_research_signature_upgrades)
 			{
 				if (std::find(existingUpgrades.begin(), existingUpgrades.end(),
 					::sc2::UPGRADE_ID::EXTENDEDTHERMALLANCE) == existingUpgrades.end())
@@ -125,7 +125,7 @@ namespace Aeolus
 					tech_up_attempted = true;
 				}
 			}
-			if (!tech_up_attempted && unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER)
+			if (!tech_up_attempted && unit_type == ::sc2::UNIT_TYPEID::PROTOSS_STALKER && m_research_signature_upgrades)
 			{
 				if (std::find(existingUpgrades.begin(), existingUpgrades.end(),
 					::sc2::UPGRADE_ID::BLINKTECH) == existingUpgrades.end())
@@ -213,6 +213,13 @@ namespace Aeolus
 		// We don't need more production for this unit.
 		if (existing_production_count >= std::ceil(production_demand))
 			return ProductionBuildResult::NotNeeded;
+
+		std::pair<int, int> cost = mediator.GetUnitCost(aeolusbot, production_structure_id);
+		if (mediator.GetMinerals(aeolusbot) < cost.first ||
+			mediator.GetVespene(aeolusbot) < cost.second)
+		{
+			return ProductionBuildResult::Blocked;
+		}
 
 		// We DO need more production.
 		BuildStructure build(

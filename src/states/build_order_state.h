@@ -29,10 +29,5 @@ namespace Aeolus
 		void macro(AeolusBot& aeolusbot) override;
 
 		void OnUnitDestroyed(AeolusBot& aeolusbot, const ::sc2::Unit*) override {}
-
-	private:
-		void _ensureContingencyResponse(AeolusBot& aeolusbot);
-		bool _isConditionSatisfied(const ScoutingCondition& condition, AeolusBot& aeolusbot, const std::vector<::sc2::UNIT_TYPEID>& enemyUnits);
-		bool _isConditionSatisfied(const ScoutingCondition& condition, AeolusBot& aeolusbot, const ::sc2::Units& enemyStructures);
 	};
 }

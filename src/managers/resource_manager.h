@@ -65,6 +65,8 @@ namespace Aeolus
 		void _removeWorkerFromMineral(const ::sc2::Unit* worker);
 
 		std::optional<const ::sc2::Unit*> _selectWorker(::sc2::Point2D target_position);
+		
+		std::optional<::sc2::Units> _selectWorkers(::sc2::Point2D target_position, int numNeeded);
 
 		void CalculateMineralGatheringPoints(
 			AeolusBot& aeolusbot, 

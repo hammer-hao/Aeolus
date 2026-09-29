@@ -43,29 +43,32 @@ namespace Aeolus
 	{
         doBookKeepingMacroTasks(aeolusbot);
 
-        doHighEconomyMacroTasks(aeolusbot, true); // force build detection since we want to be as safe as possible
+        doHighEconomyMacroTasks(aeolusbot, false); // force build detection since we want to be as safe as possible
 
         if (aeolusbot.Observation()->GetGameLoop() % 100 == 0)
         {
             auto ownAttacking = ManagerMediator::getInstance().GetUnitsFromRole(aeolusbot, constants::UnitRole::ATTACKING);
-            std::vector<::sc2::UNIT_TYPEID> own_army;
-            std::vector<::sc2::UNIT_TYPEID> opponent_army;
+            ::sc2::Units own_army;
+            ::sc2::Units opponent_army;
+            ::sc2::Units opponent_static_defenses = ManagerMediator::getInstance().GetAllEnemyStaticDefenses(aeolusbot);
 
-            for (const auto* unit : ownAttacking) own_army.push_back(unit->unit_type);
+            for (const auto* unit : ownAttacking) own_army.push_back(unit);
             auto opponent_units = ManagerMediator::getInstance().GetAllSeenEnemyUnits(aeolusbot);
 
-            for (const auto& unit_type : opponent_units)
+            for (const auto& unit : opponent_units)
             {
-                if (unit_type != ::sc2::UNIT_TYPEID::PROTOSS_PROBE &&
-                    unit_type != ::sc2::UNIT_TYPEID::TERRAN_SCV &&
-                    unit_type != ::sc2::UNIT_TYPEID::ZERG_DRONE &&
-                    unit_type != ::sc2::UNIT_TYPEID::TERRAN_MULE &&
-                    unit_type != ::sc2::UNIT_TYPEID::ZERG_OVERLORD)
-                    opponent_army.push_back(unit_type);
+                if (unit->unit_type != ::sc2::UNIT_TYPEID::PROTOSS_PROBE &&
+                    unit->unit_type != ::sc2::UNIT_TYPEID::TERRAN_SCV &&
+                    unit->unit_type != ::sc2::UNIT_TYPEID::ZERG_DRONE)
+                    opponent_army.push_back(unit);
             }
 
-            bool won_engagement = ManagerMediator::getInstance().PredictEngagement(aeolusbot, own_army, opponent_army);
-            if (won_engagement) aeolusbot.ChangeState(MakeState<ForwardPressureState>());
+            CombatSimulationResult combatResult = ManagerMediator::getInstance().PredictEngagement(aeolusbot, own_army, opponent_army, opponent_static_defenses);
+            float armyRemainingDifference = combatResult.supplyPercentageRemaining - combatResult.enemySupplyPercentageRemaining;
+            if (armyRemainingDifference > 0.7f || aeolusbot.Observation()->GetFoodUsed() >= 195)
+            {
+                aeolusbot.ChangeState(MakeState<ForwardPressureState>());
+            }
         }
 	}
 
@@ -78,7 +81,7 @@ namespace Aeolus
 
         doPrismPickUpMicro(aeolusbot);
 
-        doOracleHarassMicro(aeolusbot);
+        doOracleHarassMicro(aeolusbot, false);
 
         doObserverMicro(aeolusbot);
 

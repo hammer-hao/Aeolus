@@ -104,9 +104,9 @@ namespace Aeolus
 
 		if (m_minerals_included.size() != ManagerMediator::getInstance().GetAllMineralPatches(m_bot).size())
 		{
-			std::stringstream debugMessage;
-			debugMessage << "Detected Mineral change!";
-			m_bot.Actions()->SendChat(debugMessage.str());
+			// std::stringstream debugMessage;
+			// debugMessage << "Detected Mineral change!";
+			// m_bot.Actions()->SendChat(debugMessage.str());
 			std::set<std::tuple<float, float>> current_minerals;
 			for (auto& mineral : ManagerMediator::getInstance().GetAllMineralPatches(m_bot))
 			{
@@ -188,8 +188,8 @@ namespace Aeolus
 
 		// BFS queue
 		std::queue<std::pair<int, int>> q;
-		int start_col = static_cast<int>(std::round(start_point.x));
-		int start_row = static_cast<int>(std::round(start_point.y));
+		int start_col = static_cast<int>(std::floor(start_point.x));
+		int start_row = static_cast<int>(std::floor(start_point.y));
 		q.push({ start_row, start_col });
 		visited[start_row][start_col] = true;
 

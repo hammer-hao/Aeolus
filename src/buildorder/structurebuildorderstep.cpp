@@ -57,6 +57,10 @@ namespace Aeolus
 						}
 					}
 				}
+				if (m_to_build == ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR && !hasAvailableGasSprings(aeolusbot))
+				{
+					return true;
+				}
 				return false;
 			}
 			else
@@ -112,11 +116,58 @@ namespace Aeolus
 				}
 			}
 		}
+		if (m_to_build == ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR && !hasAvailableGasSprings(aeolusbot))
+		{
+			return true;
+		}
 		return false;
 	}
 
 	bool StructureBuildOrderStep::started()
 	{
 		return m_started;
+	}
+
+	bool StructureBuildOrderStep::hasAvailableGasSprings(AeolusBot& aeolusbot)
+	{
+		auto* observation = aeolusbot.Observation();
+		auto& mediator = ManagerMediator::getInstance();
+
+		::sc2::Units existing_geysers;
+		for (const auto& structure : ManagerMediator::getInstance().GetAllOwnStructures(aeolusbot))
+		{
+			if (structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATOR ||
+				structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATORRICH)
+			{
+				existing_geysers.push_back(structure);
+			}
+		}
+		::sc2::Units all_gas_springs = ManagerMediator::getInstance().GetAllVespeneGeysers(aeolusbot);
+		::sc2::Units own_town_halls = ManagerMediator::getInstance().GetOwnTownHalls(aeolusbot);
+		::sc2::Units available_gas_springs;
+
+		for (const auto& gas : all_gas_springs)
+		{
+			bool valid = true;
+			for (const auto& geyser : existing_geysers)
+			{
+				if (::sc2::DistanceSquared2D(gas->pos, geyser->pos) < 25.0f)
+				{
+					valid = false;
+					break;
+				}
+			}
+			if (valid == false) continue;
+
+			for (const auto& town_hall : own_town_halls)
+			{
+				if (::sc2::DistanceSquared2D(town_hall->pos, gas->pos) < 144.0f
+					&& town_hall->build_progress > 0.9f)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

@@ -33,12 +33,16 @@ namespace Aeolus
 
 		void Initialize();
 
+		void OnUnitDestroyed(const ::sc2::Unit* unit);
+
 	private:
 		AeolusBot& m_bot;
 
 		::sc2::Point2D m_attackTarget;
 
 		std::vector<::sc2::Point2D> m_defenseTarget;
+
+		std::vector<::sc2::Point2D> m_defenseTargetExtended;
 
 		::sc2::Point2D m_prismTarget;
 
@@ -49,5 +53,7 @@ namespace Aeolus
 		::sc2::Point2D getDefenseTarget(int baseLocation);
 
 		int m_currentBaseTarget;
+
+		const ::sc2::Unit* m_patrolling = nullptr;
 	};
 }

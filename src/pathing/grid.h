@@ -92,7 +92,7 @@ namespace Aeolus
             m_cached_grid = m_grid;
 		}
 
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> GetGrid() const;
+        const Eigen::MatrixXd& GetGrid() const;
 
         void Reset() 
         {
@@ -155,5 +155,7 @@ namespace Aeolus
 
         void _applyDiskToGrid(const double& pos_x, const double& pos_y, const std::vector<std::pair<int, int>>& disk,
             const double& weight, bool safe, const double& initialDefaultWeight);
+
+        void _applyPlayableBoundsMask();
 	};
 }
