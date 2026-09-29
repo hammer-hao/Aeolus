@@ -404,6 +404,9 @@ namespace Aeolus
                         constants::UnitRole::ATTACKING);
                 }
 
+                auto scoutCandidate = mediator.SelectWorkerClosestTo(aeolusbot, mediator.GetEnemyNaturalPosition(aeolusbot));
+                if (scoutCandidate) mediator.registerScout(aeolusbot, scoutCandidate.value(), { 2, 3, 4, 5 });
+
                 aeolusbot.ChangeState(
                     MakeState<ForwardPressureState>());
             }

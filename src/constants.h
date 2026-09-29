@@ -179,6 +179,7 @@ namespace Aeolus {
 			SCV_KILLER,
 			WORKER_SOLDIERS,
 			DEFENSIVE_VOIDRAY,
+			PATROLLING,
 		};
 		std::string ManagerNameToString(ManagerName name);
 		std::string ManagerRequestTypeToString(ManagerRequestType requestType);

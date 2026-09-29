@@ -52,7 +52,7 @@ namespace Aeolus
             {::sc2::UNIT_TYPEID::TERRAN_CYCLONE, {1.00f, 0.00f, 0.00f, 0.00f, 0.00f}},
             {::sc2::UNIT_TYPEID::TERRAN_SIEGETANK, {0.00f, 0.00f, 1.00f, 0.00f, 0.00f}},
             {::sc2::UNIT_TYPEID::TERRAN_THOR, {1.00f, 0.00f, 0.00f, 0.00f, 0.00f}},
-            {::sc2::UNIT_TYPEID::TERRAN_VIKINGFIGHTER, {1.00f, 0.00f, 0.00f, 0.00f, 0.00f}},
+            {::sc2::UNIT_TYPEID::TERRAN_VIKINGFIGHTER, {0.50f, 0.00f, 0.50f, 0.00f, 0.00f}},
             {::sc2::UNIT_TYPEID::TERRAN_MEDIVAC, {0.60f, 0.00f, 0.40f, 0.00f, 0.00f}},
             {::sc2::UNIT_TYPEID::TERRAN_LIBERATOR, {0.00f, 0.00f, 1.00f, 0.00f, 0.00f}},
             {::sc2::UNIT_TYPEID::TERRAN_BANSHEE, {0.50f, 0.00f, 0.50f, 0.00f, 0.00f}},

@@ -35,6 +35,7 @@ namespace Aeolus
 	void TargetManager::Initialize()
 	{
 		m_defenseTarget.clear();
+		m_defenseTargetExtended.clear();
 
 		ManagerMediator& mediator = ManagerMediator::getInstance();
 
@@ -43,27 +44,61 @@ namespace Aeolus
 		for (int i = 0; i < 5 && expansionLocations.size() > i; ++i)
 		{
 			bool found = false;
+			bool found_extended = false;
 
 			AStarWorkspace workspace;
 
-			std::vector<::sc2::Point2D> astarPath = AStarPathFind(expansionLocations[i], expansionLocations.back(),
-				mediator.GetAstarGrid(m_bot).GetGrid(), workspace);
+			const auto astarPath = AStarPathFind(expansionLocations[i], expansionLocations.back(), mediator.GetAstarGrid(m_bot).GetGrid(), workspace);
 
 			for (const auto& pathpt : astarPath)
 			{
-				if (sc2::DistanceSquared2D(expansionLocations[i], pathpt) >= 25)
+				const float distSq =
+					sc2::DistanceSquared2D(expansionLocations[i], pathpt);
+
+				if (!found && distSq >= 25.0f)
 				{
-					found = true;
 					m_defenseTarget.push_back(pathpt);
-					break;
+					found = true;
 				}
+
+				if (!found_extended && distSq >= 100.0f)
+				{
+					m_defenseTargetExtended.push_back(pathpt);
+					found_extended = true;
+				}
+
+				if (found && found_extended)
+					break;
 			}
 
 			if (!found)
 			{
-				std::cout << "something went wrong when calculating defensive position for base "
+				std::cout
+					<< "something went wrong when calculating defensive position for base "
 					<< i << std::endl;
-				m_defenseTarget.push_back(utils::GetPositionTowards(expansionLocations[i], expansionLocations.back(), 6.0f));
+
+				m_defenseTarget.push_back(
+					utils::GetPositionTowards(
+						expansionLocations[i],
+						expansionLocations.back(),
+						6.0f
+					)
+				);
+			}
+
+			if (!found_extended)
+			{
+				std::cout
+					<< "something went wrong when calculating extended defensive position for base "
+					<< i << std::endl;
+
+				m_defenseTargetExtended.push_back(
+					utils::GetPositionTowards(
+						expansionLocations[i],
+						expansionLocations.back(),
+						10.0f
+					)
+				);
 			}
 		}
 	}
@@ -85,7 +120,6 @@ namespace Aeolus
 		}
 		if (!filtered_structures.empty())
 		{
-			
 			m_attackTarget = utils::GetClosestUnitTo(m_bot.Observation()->GetStartLocation(), filtered_structures)->pos;
 		}
 		else if (m_bot.Observation()->GetGameLoop() / 22.4f < 240.0f)
@@ -123,91 +157,39 @@ namespace Aeolus
 
 		if (seed) m_prismTarget = seed->pos;
 
-		/*
-		// Use a DBSCAN-like algorithm to find main army cluster
-
-		// stalker radius is 0.625 -> two next to each other would be 1.3 apart.
-		// Use 2 to allow some spread
-		// monitor this value closely
-		constexpr float clusterRadius = 5.0f;
-		// Minimum number of neighbors to form a cluster, use 5 for now. i.e. 4 other attacking units within a 5.0 range
-		constexpr int minPts = 5;
-		
-		// initialize unvisited to track units to go to, and clusters to store the results
-		std::unordered_set<::sc2::Tag> visited;
-		std::vector<std::vector<const ::sc2::Unit*>> clusters;
-
-		for (const auto* unit : attackingUnits)
+		if (iteration > 22)
 		{
-			if (visited.count(unit->tag)) continue; // already visited
-
-			::sc2::Units neighbours = mediator.GetOwnAttackingUnitsInRange(m_bot, { unit->pos }, clusterRadius);
-
-			if (neighbours.size() < minPts)
+			auto ownTownHalls = mediator.GetOwnTownHalls(m_bot);
+			if (ownTownHalls.size() >= 3)
 			{
-				visited.insert(unit->tag); // not enough neighbors, ignore this unit
-				continue;
-			}
-
-			std::vector<const ::sc2::Unit*> cluster;
-			std::queue<const ::sc2::Unit*> expandQueue;
-			expandQueue.push(unit);
-			visited.insert(unit->tag);
-
-			while (!expandQueue.empty())
-			{
-				const ::sc2::Unit* current = expandQueue.front(); expandQueue.pop();
-				cluster.push_back(current);
-
-				::sc2::Units currNeighbours = mediator.GetOwnAttackingUnitsInRange(m_bot, { current->pos }, clusterRadius);
-				if (currNeighbours.size() > minPts)
+				std::vector<::sc2::Point2D> startingPoints;
+				for (const auto& th : ownTownHalls)
 				{
-					for (const auto* neighbour : currNeighbours)
+					startingPoints.push_back(th->pos);
+				}
+				auto threats = mediator.GetUnitsInRange(m_bot, startingPoints, 15.0f);
+
+				if (threats.empty() && m_patrolling == nullptr)
+				{
+					auto candidate = mediator.SelectWorkerClosestTo(m_bot, m_defenseTarget[1]);
+					if (candidate)
 					{
-						if (!visited.count(neighbour->tag))
-						{
-							visited.insert(neighbour->tag);
-							expandQueue.push(neighbour);
-						}
+						mediator.AssignRole(m_bot, candidate.value(), constants::UnitRole::PATROLLING);
+						m_patrolling = candidate.value();
+						m_bot.Actions()->UnitCommand(m_patrolling, ::sc2::ABILITY_ID::MOVE_MOVE, m_defenseTargetExtended[2], false);
+						m_bot.Actions()->UnitCommand(m_patrolling, ::sc2::ABILITY_ID::MOVE_MOVEPATROL, m_defenseTargetExtended[3], true);
 					}
 				}
 			}
-
-			clusters.push_back(std::move(cluster));
 		}
+	}
 
-		// std::cout << "found " << clusters.size() << " army clusters." << '\n';
-		*/
-
-		/*
-
-		// End timer
-		auto end = std::chrono::high_resolution_clock::now();
-
-		// Duration in microseconds (ms)
-		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-
-		std::cout << "Execution time: " << duration.count() << "us" << std::endl;
-
-		*/
-
-		/*
-
-#ifdef BUILD_WITH_RENDERER
-
-		if (m_prismTarget != ::sc2::Point2D(0.0f, 0.0f))
+	void TargetManager::OnUnitDestroyed(const ::sc2::Unit* unit)
+	{
+		if (unit->tag == m_patrolling->tag)
 		{
-			auto* debug = m_bot.Debug();
-			::sc2::HeightMap heightMap(m_bot.Observation()->GetGameInfo());
-			float z = heightMap.TerrainHeight({ static_cast<int>(m_prismTarget.x), static_cast<int>(m_prismTarget.y) });
-			debug->DebugSphereOut({ m_prismTarget.x, m_prismTarget.y, z }, 1.0f, ::sc2::Colors::Green);
-
-			debug->SendDebug();
+			m_patrolling = nullptr;
 		}
-
-#endif // 
-		*/
-
 	}
 
 	::sc2::Point2D TargetManager::getDefenseTarget(int baseLocation)
