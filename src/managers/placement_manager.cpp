@@ -1503,13 +1503,92 @@ namespace Aeolus
 
 		auto* query = m_bot.Query();
 		auto* observation = m_bot.Observation();
-		auto* debug = m_bot.Debug();
 
-		std::sort(expansion_locations.begin(), expansion_locations.end(), [query, observation](::sc2::Point2D first, ::sc2::Point2D second) {
-			return query->PathingDistance(observation->GetStartLocation(), first) < query->PathingDistance(observation->GetStartLocation(), second);
+		const ::sc2::Point2D self_start =
+			observation->GetStartLocation();
+
+		const auto& enemy_starts =
+			observation->GetGameInfo().enemy_start_locations;
+
+		// First, preserve the conventional ordering by our distance.
+		// This guarantees [0] = main and [1] = natural.
+		std::sort(
+			expansion_locations.begin(),
+			expansion_locations.end(),
+			[&](const ::sc2::Point2D& a, const ::sc2::Point2D& b)
+			{
+				return query->PathingDistance(self_start, a)
+					< query->PathingDistance(self_start, b);
 			});
 
-		for (const auto& location : observation->GetGameInfo().enemy_start_locations)
+		// Main and natural have special meaning elsewhere in PlacementManager.
+		// Strategically rank only third base onward.
+		if (expansion_locations.size() > 2 && !enemy_starts.empty())
+		{
+			constexpr float enemy_distance_weight = 0.4f;
+
+			struct ExpansionScore
+			{
+				::sc2::Point2D position;
+				float self_distance;
+				float enemy_distance;
+				float score;
+			};
+
+			std::vector<ExpansionScore> scored;
+			scored.reserve(expansion_locations.size() - 2);
+
+			for (size_t i = 2; i < expansion_locations.size(); ++i)
+			{
+				const auto& pos = expansion_locations[i];
+
+				const float self_distance =
+					query->PathingDistance(self_start, pos);
+
+				// Conservative if there are multiple possible enemy starts:
+				// measure against the closest possible enemy start.
+				float enemy_distance = std::numeric_limits<float>::max();
+
+				for (const auto& enemy_start : enemy_starts)
+				{
+					const float distance =
+						query->PathingDistance(enemy_start, pos);
+
+					if (distance > 0.0f)
+						enemy_distance = std::min(enemy_distance, distance);
+				}
+
+				// If somehow no enemy start is pathable, don't give the
+				// expansion an enormous artificial bonus.
+				if (enemy_distance == std::numeric_limits<float>::max())
+					enemy_distance = 0.0f;
+
+				scored.push_back({
+					pos,
+					self_distance,
+					enemy_distance,
+					self_distance - enemy_distance_weight * enemy_distance
+					});
+			}
+
+			std::sort(
+				scored.begin(),
+				scored.end(),
+				[](const ExpansionScore& a, const ExpansionScore& b)
+				{
+					if (a.score != b.score)
+						return a.score < b.score;
+
+					// Deterministic tie-breaker: prefer closer base.
+					return a.self_distance < b.self_distance;
+				});
+
+			for (size_t i = 0; i < scored.size(); ++i)
+				expansion_locations[i + 2] = scored[i].position;
+		}
+
+		// Keep the existing convention that enemy starts live at the end.
+		for (const auto& location : enemy_starts)
 		{
 			expansion_locations.push_back(location);
 		}
