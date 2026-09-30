@@ -135,6 +135,16 @@ namespace Aeolus
 					tech_up_attempted = true;
 				}
 			}
+			if (!tech_up_attempted && unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ADEPT && m_research_signature_upgrades)
+			{
+				if (std::find(existingUpgrades.begin(), existingUpgrades.end(),
+					::sc2::UPGRADE_ID::ADEPTPIERCINGATTACK) == existingUpgrades.end())
+				{
+					TechUp techup(unit_type);
+					techup.execute(aeolusbot);
+					tech_up_attempted = true;
+				}
+			}
 
 			float extraDemands = _getProductionDemand(aeolusbot, unit_type, mineral_collection_rate, gas_collection_rate,
 				target_proportion);
