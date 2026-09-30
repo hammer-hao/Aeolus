@@ -80,8 +80,11 @@ namespace Aeolus
         std::vector<::sc2::Point2D> starting_points;
         float search_radius = 15.0f;
         for (const auto& unit : forces) starting_points.push_back(unit->pos);
+        auto& mediator = ManagerMediator::getInstance();
+        auto adeptShadeTracker = mediator.GetAdeptShadeTracker(aeolusbot);
         auto enemies_in_range = ManagerMediator::getInstance().GetEnemyUnitsInRangeMap(aeolusbot,
             starting_points, search_radius);
+        std::unordered_set<::sc2::Tag> attackingAdepts;
 
         for (int i = 0; i < forces.size(); ++i)
         {
@@ -100,6 +103,21 @@ namespace Aeolus
             ::sc2::Units close_non_structures;
             for (const auto& enemy : close_units) if (constants::ALL_STRUCTURES.find(enemy->unit_type) == constants::ALL_STRUCTURES.end())
                 close_non_structures.push_back(enemy);
+
+            if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ADEPT && adeptShadeTracker.find(unit->tag) == adeptShadeTracker.end()
+                && !close_units.empty())
+            {
+                auto available_abilities = aeolusbot.Query()->GetAbilitiesForUnit(unit).abilities;
+                if (std::any_of(available_abilities.begin(), available_abilities.end(), [](::sc2::AvailableAbility ability) {
+                    return ability.ability_id == ::sc2::ABILITY_ID::EFFECT_ADEPTPHASESHIFT;
+                    })) {
+                    combat_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::EFFECT_ADEPTPHASESHIFT, target));
+                }
+            }
+            if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ADEPT)
+            {
+                attackingAdepts.insert(unit->tag);
+            }
 
             // Add the path behavior if no close enemy is spotted
             if (!close_units.empty())
@@ -139,60 +157,6 @@ namespace Aeolus
                 {
                     combat_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
                 }
-                //if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS ||
-                //    unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_TEMPEST)
-                //{
-                //    // high range units
-                //    // if we are able to shoot a target in range, do so
-                //    // if not, retreat to the safest spot nearby.
-                //    // this way we prioritize safety of our high value, high range units over the
-                //    // optimal target to shoot at.
-                //    combat_behavior->AddBehavior(
-                //        std::make_unique<ShootTargetInRange>(
-                //            close_non_structures
-                //        )
-                //    );
-                //    combat_behavior->AddBehavior(
-                //        std::make_unique<ShootTargetInRange>(
-                //            close_units
-                //        )
-                //    );
-                //    combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-                //}
-                //else
-                //{
-                //    if (!in_attack_range.empty())
-                //    {
-                //        combat_behavior->AddBehavior(
-                //            std::make_unique<ShootTargetInRange>(
-                //                in_attack_range
-                //            )
-                //        );
-                //    }
-                //    else
-                //    {
-                //        auto all_in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, unit, close_units);
-                //        if (!all_in_attack_range.empty())
-                //        {
-                //            combat_behavior->AddBehavior(
-                //                std::make_unique<ShootTargetInRange>(
-                //                    all_in_attack_range
-                //                )
-                //            );
-                //        }
-                //    }
-
-                //    auto enemy_target = utils::PickAttackTarget(close_units);
-
-                //    if ((unit->shield / unit->shield_max) < 0.1)
-                //    {
-                //        combat_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-                //    }
-                //    else
-                //    {
-                //        combat_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
-                //    }
-                //}
             }
             else
             {
@@ -208,6 +172,34 @@ namespace Aeolus
             }
             // Now register the combat behavior
             aeolusbot.RegisterBehavior(std::move(combat_behavior));
+        }
+
+        for (const auto& [adeptTag, shadeInfo] : adeptShadeTracker)
+        {
+            if (attackingAdepts.find(adeptTag) == attackingAdepts.end()) return;
+            auto shadeTag = shadeInfo.first;
+            auto framesLeft = shadeInfo.second;
+
+            auto adept = aeolusbot.Observation()->GetUnit(adeptTag);
+            auto shade = aeolusbot.Observation()->GetUnit(shadeTag);
+            auto shade_behavior = std::make_unique<MicroBehavior>(shade);
+
+            if (framesLeft == 1)
+            {
+                // only finish our shade if it is safe / safer than current position
+                if (!mediator.IsGroundPositionSafe(aeolusbot, shade->pos) &&
+                    !mediator.IsSpotSaferThan(aeolusbot, shade->pos, adept->pos, GridType::GROUND))
+                {
+                    shade_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::CANCEL));
+                }
+            }
+            if (framesLeft <= 44)
+            {
+                shade_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+            }
+            shade_behavior->AddBehavior(std::make_unique<PathToTarget>(target));
+
+            aeolusbot.RegisterBehavior(std::move(shade_behavior));
         }
 	}
 
@@ -794,15 +786,9 @@ namespace Aeolus
                 const ::sc2::Unit* adeptShade = aeolusbot.Observation()->GetUnit(adeptShadeTracker[adept->tag].first);
                 auto adept_shade_behavior = std::make_unique<MicroBehavior>(adeptShade);
 
-                if (adeptShadeTracker[adept->tag].second <= 44)
-                {
-                    adept_shade_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
-                }
-
                 auto target = _getAdeptShadeTargetFromHarassmentStatus(currentStatus,
                     positionsBehindEnemyMainNaturalThirdBase,
                     aeolusbot.Observation()->GetStartLocation());
-                adept_shade_behavior->AddBehavior(std::make_unique<Move>(target));
 
                 if (adeptShadeTracker[adept->tag].second == 1)
                 {
@@ -827,6 +813,13 @@ namespace Aeolus
                         adept_shade_behavior->AddBehavior(std::make_unique<UseAbility>(::sc2::ABILITY_ID::CANCEL));
                     }
                 }
+
+                if (adeptShadeTracker[adept->tag].second <= 44)
+                {
+                    adept_shade_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
+                }
+
+                adept_shade_behavior->AddBehavior(std::make_unique<PathToTarget>(target));
 
                 aeolusbot.RegisterBehavior(std::move(adept_shade_behavior));
             }
