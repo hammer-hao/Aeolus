@@ -126,7 +126,7 @@ namespace Aeolus
 				enemy->unit_type == ::sc2::UNIT_TYPEID::TERRAN_FACTORY ||
 				enemy->unit_type == ::sc2::UNIT_TYPEID::TERRAN_STARPORT ||
 				enemy->unit_type == ::sc2::UNIT_TYPEID::TERRAN_BUNKER) &&
-				::sc2::DistanceSquared2D(enemy->pos, aeolusbot.Observation()->GetStartLocation()) < 5000;
+				::sc2::DistanceSquared2D(enemy->pos, aeolusbot.Observation()->GetStartLocation()) < 5000 || (sc2::DistanceSquared2D(enemy->pos, enemyStart) > 5000.0f);
 			});
 		if (!structureLeft) {
 			_releaseSCVKillers(aeolusbot);
