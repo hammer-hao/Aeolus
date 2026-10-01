@@ -90,6 +90,7 @@ namespace Aeolus
         for (int i = 0; i < forces.size(); ++i)
         {
             const ::sc2::Unit* unit = forces[i];
+            bool canAttackAir = mediator.CanAttackAir(aeolusbot, unit);
 
             // 1) Create the MicroBehavior as a unique_ptr
             auto combat_behavior = std::make_unique<MicroBehavior>(unit);
@@ -97,9 +98,16 @@ namespace Aeolus
             // 2) Filter out close enemies
             ::sc2::Units close_units;
             for (const auto& enemy : enemies_in_range[i])
+            {
                 if (enemy->display_type != ::sc2::Unit::DisplayType::Snapshot
                     && constants::IGNORED_UNITS.find(enemy->unit_type) == constants::IGNORED_UNITS.end())
-                    close_units.push_back(enemy);
+                {
+                    if (canAttackAir || !enemy->is_flying)
+                    {
+                        close_units.push_back(enemy);
+                    }
+                }
+            }
 
             ::sc2::Units close_non_structures;
             for (const auto& enemy : close_units) if (constants::ALL_STRUCTURES.find(enemy->unit_type) == constants::ALL_STRUCTURES.end())
