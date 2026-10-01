@@ -85,7 +85,17 @@ namespace Aeolus
         auto enemies_in_range = ManagerMediator::getInstance().GetEnemyUnitsInRangeMap(aeolusbot,
             starting_points, search_radius);
         std::unordered_set<::sc2::Tag> attackingAdepts;
-        bool apm_restricted = aeolusbot.Observation()->GetFoodUsed() > 100 && mediator.GetAllEnemyStructures(aeolusbot).empty();
+
+        auto enemy_structures = mediator.GetAllEnemyStructures(aeolusbot);
+        ::sc2::Units filtered_structures;
+        for (const auto& structure : enemy_structures)
+        {
+            if (structure->unit_type != ::sc2::UNIT_TYPEID::ZERG_CREEPTUMOR
+                && structure->unit_type != ::sc2::UNIT_TYPEID::ZERG_CREEPTUMORBURROWED
+                && structure->unit_type != ::sc2::UNIT_TYPEID::ZERG_CREEPTUMORQUEEN)
+                filtered_structures.push_back(structure);
+        }
+        bool apm_restricted = aeolusbot.Observation()->GetFoodUsed() > 100 && filtered_structures.empty();
         std::cout << "micro apm restricted: " << apm_restricted << std::endl;
 
         for (int i = 0; i < forces.size(); ++i)
@@ -174,17 +184,18 @@ namespace Aeolus
                     combat_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
                 }
             }
-            if (!apm_restricted)
+            if (apm_restricted && close_units.empty())
             {
+                combat_behavior->AddBehavior(std::make_unique<Move>(target));
+            }
+            else
+            {
+                combat_behavior->AddBehavior(std::make_unique<Move>(target));
                 combat_behavior->AddBehavior(std::make_unique<PathToTarget>(target));
                 combat_behavior->AddBehavior(
                     std::make_unique<AMove>(
                         target
                     ));
-            }
-            else
-            {
-                combat_behavior->AddBehavior(std::make_unique<Move>(target));
             }
             // Now register the combat behavior
             aeolusbot.RegisterBehavior(std::move(combat_behavior));
