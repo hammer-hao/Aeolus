@@ -235,6 +235,17 @@ namespace Aeolus
 			startingPoints.push_back(th->pos);
 		}
 		auto threats = ManagerMediator::getInstance().GetUnitsInRange(m_bot, startingPoints, 15.0f);
+		::sc2::Units high_priority_threats;
+		std::copy_if(threats.begin(), threats.end(), std::back_inserter(high_priority_threats), [](const ::sc2::Unit* threat) {
+			return threat->unit_type != ::sc2::UNIT_TYPEID::ZERG_OVERLORD && threat->unit_type != ::sc2::UNIT_TYPEID::ZERG_OVERSEER
+				&& threat->unit_type != ::sc2::UNIT_TYPEID::ZERG_OVERLORDCOCOON && threat->unit_type != ::sc2::UNIT_TYPEID::ZERG_OVERSEERSIEGEMODE;
+			});
+
+		if (!high_priority_threats.empty())
+		{
+			auto* target = utils::GetClosestUnitTo(m_defenseTarget[baseLocation], high_priority_threats);
+			return target->pos;
+		}
 
 		if (!threats.empty())
 		{
