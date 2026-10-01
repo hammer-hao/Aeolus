@@ -159,11 +159,18 @@ namespace Aeolus
                     combat_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
                 }
             }
-            combat_behavior->AddBehavior(std::make_unique<PathToTarget>(target));
-            combat_behavior->AddBehavior(
-                std::make_unique<AMove>(
-                    target
-                ));
+            if (!apm_restricted)
+            {
+                combat_behavior->AddBehavior(std::make_unique<PathToTarget>(target));
+                combat_behavior->AddBehavior(
+                    std::make_unique<AMove>(
+                        target
+                    ));
+            }
+            else
+            {
+                combat_behavior->AddBehavior(std::make_unique<Move>(target));
+            }
             // Now register the combat behavior
             aeolusbot.RegisterBehavior(std::move(combat_behavior));
         }
@@ -191,13 +198,17 @@ namespace Aeolus
             {
                 shade_behavior->AddBehavior(std::make_unique<KeepUnitSafe>());
             }
-            if (apm_restricted)
+            if (!apm_restricted)
             {
-                shade_behavior->AddBehavior(std::make_unique<Move>(target));
+                shade_behavior->AddBehavior(std::make_unique<PathToTarget>(target));
+                shade_behavior->AddBehavior(
+                    std::make_unique<AMove>(
+                        target
+                    ));
             }
             else
             {
-                shade_behavior->AddBehavior(std::make_unique<PathToTarget>(target));
+                shade_behavior->AddBehavior(std::make_unique<Move>(target));
             }
 
             aeolusbot.RegisterBehavior(std::move(shade_behavior));
