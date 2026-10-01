@@ -113,7 +113,7 @@
     "Pylon AIE": [
       {
         "starting_point": [175, 76],
-        "natural_pylon": [145, 78],
+        "natural_pylon": [144, 78],
         "natural_three_by_threes": [
           [ 138, 79 ],
           [ 142, 81 ],
