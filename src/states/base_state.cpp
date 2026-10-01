@@ -86,6 +86,7 @@ namespace Aeolus
             starting_points, search_radius);
         std::unordered_set<::sc2::Tag> attackingAdepts;
         bool apm_restricted = aeolusbot.Observation()->GetFoodUsed() > 100 && mediator.GetAllEnemyStructures(aeolusbot).empty();
+        std::cout << "micro apm restricted: " << apm_restricted << std::endl;
 
         for (int i = 0; i < forces.size(); ++i)
         {
