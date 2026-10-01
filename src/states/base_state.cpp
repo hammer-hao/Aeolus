@@ -131,6 +131,12 @@ namespace Aeolus
             // Add the path behavior if no close enemy is spotted
             if (!close_units.empty())
             {
+                if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ADEPT)
+                {
+                    std::cout << "close units: " << std::endl;
+                    for (const auto& cunit : close_units)
+                        std::cout << ::sc2::UnitTypeToName(cunit->unit_type) << std::endl;
+                }
                 auto in_attack_range = ManagerMediator::getInstance().GetUnitsInAtttackRange(aeolusbot, unit, close_non_structures);
                 if (!in_attack_range.empty())
                 {
