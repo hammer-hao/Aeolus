@@ -27,11 +27,11 @@ namespace Aeolus
 
         inline static const std::unordered_map<::sc2::UNIT_TYPEID, CompositionWeights> ARMY_COMPOSITION_LOOKUP = {
             // stalker; immortal; tempest; colossus; adept;
-            {::sc2::UNIT_TYPEID::ZERG_ZERGLING, {0.30f, 0.00f, 0.00f, 0.00f, 0.70f}},
+            {::sc2::UNIT_TYPEID::ZERG_ZERGLING, {0.00f, 0.00f, 0.00f, 0.00f, 1.00f}},
             {::sc2::UNIT_TYPEID::ZERG_BANELING, {1.00f, 0.00f, 0.00f, 0.00f, 0.00f}},
             {::sc2::UNIT_TYPEID::ZERG_ROACH, {0.50f, 0.50f, 0.00f, 0.00f, 0.00f}},
             {::sc2::UNIT_TYPEID::ZERG_RAVAGER, {0.80f, 0.20f, 0.00f, 0.00f, 0.00f}},
-            {::sc2::UNIT_TYPEID::ZERG_HYDRALISK, {1.00f, 0.00f, 0.00f, 0.00f, 0.00f}},
+            {::sc2::UNIT_TYPEID::ZERG_HYDRALISK, {0.00f, 0.00f, 0.00f, 0.00f, 1.00f}},
             {::sc2::UNIT_TYPEID::ZERG_LURKERMP, {0.00f, 0.00f, 1.00f, 0.00f, 0.00f}},
             {::sc2::UNIT_TYPEID::ZERG_MUTALISK, {1.00f, 0.00f, 0.00f, 0.00f, 0.00f}},
             {::sc2::UNIT_TYPEID::ZERG_CORRUPTOR, {1.00f, 0.00f, 0.00f, 0.00f, 0.00f}},
