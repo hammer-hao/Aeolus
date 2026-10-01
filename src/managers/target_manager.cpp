@@ -162,7 +162,6 @@ namespace Aeolus
 				}
 
 				m_attackTarget = targets[m_currentBaseTarget];
-				std::cout << "[TargetManager]: Changed Attack Target to base index: " << m_currentBaseTarget << std::endl;
 			}
 		}
 
