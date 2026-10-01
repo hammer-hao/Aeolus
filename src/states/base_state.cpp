@@ -159,21 +159,11 @@ namespace Aeolus
                     combat_behavior->AddBehavior(std::make_unique<StutterUnitBack>(enemy_target));
                 }
             }
-            else
-            {
-                if (apm_restricted)
-                {
-                    combat_behavior->AddBehavior(std::make_unique<Move>(target));
-                }
-                else
-                {
-                    combat_behavior->AddBehavior(std::make_unique<PathToTarget>(target));
-                }
-                combat_behavior->AddBehavior(
-                    std::make_unique<AMove>(
-                        target
-                    ));
-            }
+            combat_behavior->AddBehavior(std::make_unique<PathToTarget>(target));
+            combat_behavior->AddBehavior(
+                std::make_unique<AMove>(
+                    target
+                ));
             // Now register the combat behavior
             aeolusbot.RegisterBehavior(std::move(combat_behavior));
         }
