@@ -296,6 +296,11 @@ namespace Aeolus
 					spawn_ability = ::sc2::ABILITY_ID::TRAINWARP_STALKER;
 					break;
 				}
+				case ::sc2::UNIT_TYPEID::PROTOSS_ADEPT:
+				{
+					spawn_ability = ::sc2::ABILITY_ID::TRAINWARP_ADEPT;
+					break;
+				}
 				case ::sc2::UNIT_TYPEID::PROTOSS_HIGHTEMPLAR:
 				{
 					spawn_ability = ::sc2::ABILITY_ID::TRAINWARP_HIGHTEMPLAR;

@@ -93,6 +93,11 @@ namespace Aeolus
 					UpgradesController doUpgrade(std::vector<::sc2::UPGRADE_ID>{::sc2::UPGRADE_ID::BLINKTECH});
 					return doUpgrade.execute(aeolusbot);
 				}
+				else if (std::get <::sc2::UNIT_TYPEID>(m_target) == ::sc2::UNIT_TYPEID::PROTOSS_ADEPT)
+				{
+					UpgradesController doUpgrade(std::vector<::sc2::UPGRADE_ID>{::sc2::UPGRADE_ID::ADEPTPIERCINGATTACK});
+					return doUpgrade.execute(aeolusbot);
+				}
 			}
 			return false;
 		}

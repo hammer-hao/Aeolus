@@ -126,14 +126,43 @@ namespace Aeolus
 			m_attackTarget = mediator.GetExpansionLocations(m_bot).back();
 		else
 		{
-			auto targets = mediator.GetExpansionLocations(m_bot);
-			if (m_bot.Observation()->GetVisibility(targets[m_currentBaseTarget]) == ::sc2::Visibility::Visible)
+			const auto targets = mediator.GetExpansionLocations(m_bot);
+			const auto* observation = m_bot.Observation();
+
+			if (!targets.empty())
 			{
-				if (m_currentBaseTarget == 0) m_currentBaseTarget = (targets.size() - 1);
-				else if (m_currentBaseTarget == targets.size() - 1) m_currentBaseTarget = 1;
-				else m_currentBaseTarget = (m_currentBaseTarget + 1) % targets.size();
+				// Current search location has been checked.
+				if (observation->GetVisibility(targets[m_currentBaseTarget]) ==
+					::sc2::Visibility::Visible)
+				{
+					const size_t start = m_currentBaseTarget;
+					bool foundUnsearched = false;
+
+					for (size_t offset = 1; offset < targets.size(); ++offset)
+					{
+						const size_t candidate =
+							(start + offset) % targets.size();
+
+						if (observation->GetVisibility(targets[candidate]) !=
+							::sc2::Visibility::Visible)
+						{
+							m_currentBaseTarget = candidate;
+							foundUnsearched = true;
+							break;
+						}
+					}
+
+					// IMPORTANT:
+					// If every expansion is currently visible, DON'T cycle
+					// through all of them one per frame.
+					if (!foundUnsearched)
+					{
+						m_currentBaseTarget = start;
+					}
+				}
+
+				m_attackTarget = targets[m_currentBaseTarget];
 			}
-			m_attackTarget = targets[m_currentBaseTarget];
 		}
 
 		// calculate prism target
@@ -206,6 +235,17 @@ namespace Aeolus
 			startingPoints.push_back(th->pos);
 		}
 		auto threats = ManagerMediator::getInstance().GetUnitsInRange(m_bot, startingPoints, 15.0f);
+		::sc2::Units high_priority_threats;
+		std::copy_if(threats.begin(), threats.end(), std::back_inserter(high_priority_threats), [](const ::sc2::Unit* threat) {
+			return threat->unit_type != ::sc2::UNIT_TYPEID::ZERG_OVERLORD && threat->unit_type != ::sc2::UNIT_TYPEID::ZERG_OVERSEER
+				&& threat->unit_type != ::sc2::UNIT_TYPEID::ZERG_OVERLORDCOCOON && threat->unit_type != ::sc2::UNIT_TYPEID::ZERG_OVERSEERSIEGEMODE;
+			});
+
+		if (!high_priority_threats.empty())
+		{
+			auto* target = utils::GetClosestUnitTo(m_defenseTarget[baseLocation], high_priority_threats);
+			return target->pos;
+		}
 
 		if (!threats.empty())
 		{
