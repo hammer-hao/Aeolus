@@ -135,7 +135,7 @@
     "Ultralove AIE": [
       {
         "starting_point": [42, 46],
-        "natural_pylon": [71, 47],
+        "natural_pylon": [72, 47],
         "natural_three_by_threes": [
           [ 72, 51 ],
           [ 74, 47 ],
@@ -145,7 +145,7 @@
       },
       {
         "starting_point": [141, 137],
-        "natural_pylon": [113, 137],
+        "natural_pylon": [112, 137],
         "natural_three_by_threes": [
           [ 111, 132 ],
           [ 106, 137 ],
