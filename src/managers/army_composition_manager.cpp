@@ -28,7 +28,8 @@ namespace Aeolus
 	{
 		auto& mediator = ManagerMediator::getInstance();
 		auto all_enemy = mediator.GetAllSeenEnemyUnits(m_bot);
-		::std::map<::sc2::UNIT_TYPEID, float> stalkers_only({ { ::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.00f } });
+		::std::map<::sc2::UNIT_TYPEID, float> basic_army({ { ::sc2::UNIT_TYPEID::PROTOSS_STALKER, 1.00f } });
+		if (mediator.getOpponentRace(m_bot) == ::sc2::Zerg) basic_army = { {::sc2::UNIT_TYPEID::PROTOSS_ADEPT, 1.00f} };
 
 		auto& unitData = m_bot.Observation()->GetUnitTypeData();
 		int count_enemy_supply = 0;
@@ -46,7 +47,7 @@ namespace Aeolus
 		if (count_enemy_supply < 20 && own_town_halls.size() < 4)
 		{
 			// not enough enemy units to tell
-			m_best_army_composition = stalkers_only;
+			m_best_army_composition = basic_army;
 			return;
 		}
 
@@ -64,7 +65,7 @@ namespace Aeolus
 				CompositionWeights counterWeights = it->second;
 				int supplyCost = mediator.GetUnitSupplyCost(m_bot, enemy_unit->unit_type);
 				totalWeights.stalker += supplyCost * counterWeights.stalker;
-				totalWeights.archon += supplyCost * counterWeights.archon;
+				totalWeights.adept += supplyCost * counterWeights.adept;
 				totalWeights.immortal += supplyCost * counterWeights.immortal;
 				totalWeights.colossus += supplyCost * counterWeights.colossus;
 				totalWeights.tempest += supplyCost * counterWeights.tempest;
@@ -75,7 +76,7 @@ namespace Aeolus
 			{::sc2::UNIT_TYPEID::PROTOSS_IMMORTAL, totalWeights.immortal},
 			{::sc2::UNIT_TYPEID::PROTOSS_TEMPEST, totalWeights.tempest},
 			{::sc2::UNIT_TYPEID::PROTOSS_COLOSSUS, totalWeights.colossus},
-			{::sc2::UNIT_TYPEID::PROTOSS_ARCHON, totalWeights.archon}
+			{::sc2::UNIT_TYPEID::PROTOSS_ADEPT, totalWeights.adept}
 			};
 
 			std::sort(weights.begin(), weights.end(),

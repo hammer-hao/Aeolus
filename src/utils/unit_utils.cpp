@@ -168,8 +168,13 @@ namespace Aeolus
 
 		bool isAttackReady(AeolusBot& aeolusbot, const ::sc2::Unit* unit, const ::sc2::Unit* target)
 		{
-			bool can_attack_air = ManagerMediator::getInstance().CanAttackAir(aeolusbot, unit);
-			bool can_attack_ground = ManagerMediator::getInstance().CanAttackGround(aeolusbot, unit);
+			if (!unit || !target)
+				return false;
+
+			auto& mediator = ManagerMediator::getInstance();
+
+			bool can_attack_air = mediator.CanAttackAir(aeolusbot, unit);
+			bool can_attack_ground = mediator.CanAttackGround(aeolusbot, unit);
 
 			if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_VOIDRAY)
 			{
@@ -177,12 +182,14 @@ namespace Aeolus
 				can_attack_ground = true;
 			}
 
-			if (!can_attack_air
-				&& !can_attack_ground
-				&& !(unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ORACLE))
+			// This does not itself verify that Pulsar Beam is active.
+			if (unit->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ORACLE)
 			{
-				return false;
+				can_attack_ground = true;
 			}
+
+			if (target->is_flying ? !can_attack_air : !can_attack_ground)
+				return false;
 
 			constexpr float step_time = 1.0f / 22.4f;
 

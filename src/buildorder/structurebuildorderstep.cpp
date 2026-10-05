@@ -30,7 +30,17 @@ namespace Aeolus
 			{
 				if (structure->unit_type == m_to_build) m_num_before++;
 			}
-			if (!std::make_unique<BuildStructure>(m_to_build, m_base_location, m_is_wall).get()->execute(aeolusbot))
+
+			bool success = false;
+			if (m_to_build == ::sc2::UNIT_TYPEID::PROTOSS_SHIELDBATTERY)
+			{
+				success = std::make_unique<BuildStructure>(m_to_build, m_base_location, ManagerMediator::getInstance().GetDefenseTarget(aeolusbot, 1)).get()->execute(aeolusbot);
+			}
+			else
+			{
+				success = std::make_unique<BuildStructure>(m_to_build, m_base_location, m_is_wall).get()->execute(aeolusbot);
+			}
+			if (!success)
 			{
 				// if what we are trying to build was not a nexus / assimilator / pylon, then it means
 				// no available position at the base we are in

@@ -287,19 +287,34 @@ namespace Aeolus
 	::sc2::Units UnitPropertyManager::InAttackRange(const ::sc2::Unit* unit, ::sc2::Units targets)
 	{
 		::sc2::Units units_in_range;
-		if (CanAttackGround(unit))
+		if (!unit) return units_in_range;
+
+		const bool can_ground = CanAttackGround(unit);
+		const bool can_air = CanAttackAir(unit);
+
+		for (const auto* target : targets)
 		{
-			double ground_range = GroundRange(unit);
-			for (const auto& target : targets)
+			if (!target) continue;
+
+			if (target->is_flying ? !can_air : !can_ground)
+				continue;
+
+			const double weapon_range = target->is_flying
+				? AirRange(unit)
+				: GroundRange(unit);
+
+			const double total_range =
+				weapon_range + unit->radius + target->radius;
+
+			if (::sc2::DistanceSquared2D(
+				::sc2::Point2D(unit->pos),
+				::sc2::Point2D(target->pos))
+				<= total_range * total_range)
 			{
-				float total_range = ground_range + static_cast<double>(unit->radius) + static_cast<double>(target->radius);
-				if (::sc2::Distance2D(::sc2::Point2D(unit->pos), ::sc2::Point2D(target->pos))
-					<= total_range)
-				{
-					units_in_range.push_back(target);
-				}
+				units_in_range.push_back(target);
 			}
 		}
+
 		return units_in_range;
 	}
 

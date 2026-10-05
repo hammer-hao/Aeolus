@@ -112,7 +112,7 @@ namespace Aeolus
 		float immortal;
 		float tempest;
 		float colossus;
-		float archon;
+		float adept;
 	};
 }
 

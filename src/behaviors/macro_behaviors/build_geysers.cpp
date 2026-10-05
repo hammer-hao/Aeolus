@@ -4,6 +4,7 @@
 #include "../../utils/unit_utils.h"
 #include <sc2api/sc2_unit.h>
 #include <sc2api/sc2_common.h>
+#include <sc2api/sc2_score.h>
 #include <vector>
 
 namespace Aeolus
@@ -27,9 +28,34 @@ namespace Aeolus
 				structure->unit_type == ::sc2::UNIT_TYPEID::PROTOSS_ASSIMILATORRICH)
 			{
 				existing_geysers.push_back(structure);
-				if (structure->vespene_contents > 0) active_geysers++;
-				if (structure->build_progress < 1.0f) pending_geysers++;
+				if (structure->build_progress < 1.0f)
+				{
+					pending_geysers++;
+				}
+				else if (structure->vespene_contents > 0)
+				{
+					active_geysers++;
+				}
 			}
+		}
+
+		if (m_smart_gas)
+		{
+			auto mineralCollectionRate = aeolusbot.Observation()->GetScore().score_details.collection_rate_minerals;
+			auto armyComp = mediator.getOptimalArmyComp(aeolusbot);
+			auto& unitData = aeolusbot.Observation()->GetUnitTypeData();
+			float minerals_tot = 0;
+			float vespenene_tot = 0;
+
+			for (const auto& [unitType, proportion] : armyComp)
+			{
+				minerals_tot += unitData[(int)unitType].mineral_cost * proportion;
+				vespenene_tot += unitData[(int)unitType].vespene_cost * proportion;
+			}
+			float vespeneCollectionRateRequired = mineralCollectionRate * (vespenene_tot / minerals_tot);
+			int numNeeded = std::floor(vespeneCollectionRateRequired / 163.0f); // conservative estimate since minerals are also needed for workers, expansions, etc
+
+			if (active_geysers + pending_geysers >= numNeeded) return false;
 		}
 
 		if (active_geysers > m_to_active_count || pending_geysers > m_max_pending) return false;
